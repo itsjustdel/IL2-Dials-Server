@@ -19,7 +19,7 @@ namespace ServerApp {
 		{
 			InitializeComponent();
 			//apply icon after initialised - have to do here or winforms constanstly overwrites it
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\app.ico");
+			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\starRed.ico");
 		}
 
 	protected:		
@@ -40,6 +40,12 @@ namespace ServerApp {
 	private: System::Windows::Forms::Label^ label2;
 	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::Label^ label4;
+	private: System::Windows::Forms::ToolStripMenuItem^ toolStripMenuItem2;
+	private: System::Windows::Forms::Label^ label5;
+	private: System::Windows::Forms::Label^ label6;
+	private: System::Windows::Forms::PictureBox^ pictureBox1;
+	private: System::Windows::Forms::PictureBox^ pictureBox2;
+
 	private: System::ComponentModel::IContainer^ components;
 
 
@@ -61,12 +67,19 @@ namespace ServerApp {
 			this->serverWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->notifyIcon1 = (gcnew System::Windows::Forms::NotifyIcon(this->components));
 			this->contextMenuStrip1 = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->toolStripMenuItem2 = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripMenuItem1 = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
+			this->pictureBox2 = (gcnew System::Windows::Forms::PictureBox());
 			this->contextMenuStrip1->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// gameWorker
@@ -86,15 +99,26 @@ namespace ServerApp {
 			// 
 			// contextMenuStrip1
 			// 
-			this->contextMenuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripMenuItem1 });
+			this->contextMenuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->toolStripMenuItem2,
+					this->toolStripMenuItem1
+			});
 			this->contextMenuStrip1->Name = L"contextMenuStrip1";
-			this->contextMenuStrip1->Size = System::Drawing::Size(94, 26);
+			this->contextMenuStrip1->Size = System::Drawing::Size(114, 48);
+			// 
+			// toolStripMenuItem2
+			// 
+			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
+			this->toolStripMenuItem2->Size = System::Drawing::Size(113, 22);
+			this->toolStripMenuItem2->Text = L"Restore";
+			this->toolStripMenuItem2->Click += gcnew System::EventHandler(this, &Form1::toolStripMenuItem2_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this->toolStripMenuItem1->Name = L"toolStripMenuItem1";
-			this->toolStripMenuItem1->Size = System::Drawing::Size(93, 22);
+			this->toolStripMenuItem1->Size = System::Drawing::Size(113, 22);
 			this->toolStripMenuItem1->Text = L"Exit";
+			this->toolStripMenuItem1->Click += gcnew System::EventHandler(this, &Form1::toolStripMenuItem1_Click);
 			// 
 			// label1
 			// 
@@ -123,7 +147,6 @@ namespace ServerApp {
 			this->label2->Size = System::Drawing::Size(43, 42);
 			this->label2->TabIndex = 4;
 			this->label2->Text = L"★";
-			this->label2->Click += gcnew System::EventHandler(this, &Form1::label2_Click);
 			// 
 			// label3
 			// 
@@ -144,7 +167,7 @@ namespace ServerApp {
 			this->label4->AutoSize = true;
 			this->label4->Font = (gcnew System::Drawing::Font(L"Century Gothic", 32));
 			this->label4->ForeColor = System::Drawing::Color::CadetBlue;
-			this->label4->Location = System::Drawing::Point(170, 280);
+			this->label4->Location = System::Drawing::Point(180, 270);
 			this->label4->Margin = System::Windows::Forms::Padding(0);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(51, 52);
@@ -152,14 +175,64 @@ namespace ServerApp {
 			this->label4->Text = L"⇲";
 			this->label4->Click += gcnew System::EventHandler(this, &Form1::label4_Click);
 			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Font = (gcnew System::Drawing::Font(L"Century Gothic", 9));
+			this->label5->ForeColor = System::Drawing::Color::CadetBlue;
+			this->label5->Location = System::Drawing::Point(44, 198);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(102, 17);
+			this->label5->TabIndex = 6;
+			this->label5->Text = L"GAME DETECTED";
+			this->label5->Click += gcnew System::EventHandler(this, &Form1::label5_Click);
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Font = (gcnew System::Drawing::Font(L"Century Gothic", 9));
+			this->label6->ForeColor = System::Drawing::Color::CadetBlue;
+			this->label6->Location = System::Drawing::Point(44, 235);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(121, 17);
+			this->label6->TabIndex = 6;
+			this->label6->Text = L"CLIENT CONNECTED";
+			this->label6->Click += gcnew System::EventHandler(this, &Form1::label6_Click);
+			// 
+			// pictureBox1
+			// 
+			this->pictureBox1->ImageLocation = L"RedLight.png";
+			this->pictureBox1->Location = System::Drawing::Point(189, 198);
+			this->pictureBox1->Name = L"pictureBox1";
+			this->pictureBox1->Size = System::Drawing::Size(18, 18);
+			this->pictureBox1->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
+			this->pictureBox1->TabIndex = 7;
+			this->pictureBox1->TabStop = false;
+			this->pictureBox1->Click += gcnew System::EventHandler(this, &Form1::pictureBox1_Click);
+			// 
+			// pictureBox2
+			// 
+			this->pictureBox2->ImageLocation = L"GreenLight.png";
+			this->pictureBox2->Location = System::Drawing::Point(189, 235);
+			this->pictureBox2->Name = L"pictureBox2";
+			this->pictureBox2->Size = System::Drawing::Size(18, 18);
+			this->pictureBox2->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
+			this->pictureBox2->TabIndex = 7;
+			this->pictureBox2->TabStop = false;
+			this->pictureBox2->Click += gcnew System::EventHandler(this, &Form1::pictureBox2_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
-			this->ClientSize = System::Drawing::Size(240, 356);
+			this->ClientSize = System::Drawing::Size(240, 341);
 			this->ControlBox = false;
+			this->Controls->Add(this->pictureBox2);
+			this->Controls->Add(this->pictureBox1);
+			this->Controls->Add(this->label6);
+			this->Controls->Add(this->label5);
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
@@ -175,6 +248,8 @@ namespace ServerApp {
 			this->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseMove);
 			this->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseUp);
 			this->contextMenuStrip1->ResumeLayout(false);
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -208,6 +283,7 @@ namespace ServerApp {
 	private: System::Void toolStripMenuItem1_Click(System::Object^ sender, System::EventArgs^ e)
 	{
 		//systray menu
+		Application::Exit();
 		//exit
 	}
 	
@@ -217,16 +293,30 @@ namespace ServerApp {
 		//restore
 		this->Show();
 	}
-	private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	}
-	private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
-	}
+	
 	private: System::Void label4_Click(System::Object^ sender, System::EventArgs^ e) 
 	{
 		// main form
 		//minimise
 		this->Hide();
 	}
+
+	private: System::Void toolStripMenuItem2_Click(System::Object^ sender, System::EventArgs^ e) 
+	{
+		//systray
+			//restore
+		this->Show();
+	}
+	   
+
+private: System::Void label5_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void pictureBox1_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void label6_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void pictureBox2_Click(System::Object^ sender, System::EventArgs^ e) {
+}
 };
 
 	
