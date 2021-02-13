@@ -68,4 +68,7 @@
   <ItemGroup>
     <Image Include="toSysTray.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
 </Project>

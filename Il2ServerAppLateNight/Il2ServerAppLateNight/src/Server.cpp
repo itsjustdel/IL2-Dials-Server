@@ -33,6 +33,11 @@ bool InitWinSock2_0();
 BOOL WINAPI ClientThread(LPVOID lpData);
 std::vector<CLIENT_INFO> clientThreads;
 
+void SetPortNumber(int t)
+{
+    nServerPort = t;
+}
+
 int StartServer(System::ComponentModel::BackgroundWorker^ worker)
 {
    // std::async(ClientConnectionChecker); -- new backgorund worker to be made after client connect

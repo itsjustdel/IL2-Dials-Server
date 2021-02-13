@@ -1,6 +1,6 @@
 #pragma once
-#include <Windows.h>
-#include <vector>
+//nclude <Windows.h>
+//#include <vector>
 //for external access
 
 
