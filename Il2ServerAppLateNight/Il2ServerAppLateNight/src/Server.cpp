@@ -38,6 +38,21 @@ void SetPortNumber(int t)
     nServerPort = t;
 }
 
+bool ClientInList(CLIENT_INFO clientInfo)
+{
+    bool inList = false;
+
+    for (size_t i = 0; i < clientThreads.size(); i++)
+    {
+        if (clientInfo.hClientSocket == clientThreads[i].hClientSocket)
+        {
+            inList = true;
+        }
+    }
+
+    return inList;
+}
+
 int StartServer(System::ComponentModel::BackgroundWorker^ worker)
 {
    // std::async(ClientConnectionChecker); -- new backgorund worker to be made after client connect
@@ -169,7 +184,14 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker)
             clientInfo.clientAddr = clientAddr;
             clientInfo.hClientSocket = hClientSocket;
             clientInfo.worker = &worker;
-           
+            //check we don't already have this client in our list
+            if (ClientInList(clientInfo))
+            {
+                OutputDebugString(L"Client connected");
+                OutputDebugStringW(L"\n");
+                continue;
+            }
+
             
             OutputDebugString(L"Client connected");
             OutputDebugStringW(L"\n");
@@ -212,6 +234,7 @@ bool InitWinSock2_0()
 
 void RemoveClient(CLIENT_INFO clientInfo)
 {
+    //rebuild managed
     //rebuild managed
     System::ComponentModel::BackgroundWorker^* pWorker = (System::ComponentModel::BackgroundWorker^*)clientInfo.worker;
     System::ComponentModel::BackgroundWorker^ worker = *pWorker;

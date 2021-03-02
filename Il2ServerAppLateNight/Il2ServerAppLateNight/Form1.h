@@ -312,10 +312,10 @@ namespace ServerApp {
 			this->DebugTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->DebugTextBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->DebugTextBox->Location = System::Drawing::Point(28, 197);
+			this->DebugTextBox->Location = System::Drawing::Point(28, 244);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
-			this->DebugTextBox->Size = System::Drawing::Size(181, 67);
+			this->DebugTextBox->Size = System::Drawing::Size(181, 36);
 			this->DebugTextBox->TabIndex = 9;
 			this->DebugTextBox->Text = L"bla bla bla ...";
 			this->DebugTextBox->Visible = false;
