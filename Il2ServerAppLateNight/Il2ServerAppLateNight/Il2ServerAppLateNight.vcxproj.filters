@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Resource.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Form1.h">
       <Filter>Headers</Filter>
     </ClInclude>
@@ -66,9 +63,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="toSysTray.ico" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <Image Include="Icon.ico" />
+    <Image Include="setting-gears.png" />
+    <Image Include="circle-64.ico" />
+    <Image Include="Icons\blueStar.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Il-2 Dials Server.rc" />
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
 </Project>

@@ -25,6 +25,7 @@
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>Il2ServerAppLateNight</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Il-2 Dials Server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,7 +144,6 @@
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="src\Injector.h" />
     <ClInclude Include="src\IPHelper.h" />
     <ClInclude Include="src\Main.h" />
@@ -175,10 +175,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="toSysTray.ico" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <Image Include="circle-64.ico" />
+    <Image Include="Icon.ico" />
+    <Image Include="Icons\blueStar.ico" />
+    <Image Include="setting-gears.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Il-2 Dials Server.rc" />
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

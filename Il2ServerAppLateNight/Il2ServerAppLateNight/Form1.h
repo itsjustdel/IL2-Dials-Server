@@ -43,6 +43,7 @@ namespace ServerApp {
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
 
+
 		System::Drawing::Color blue = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(18)), static_cast<System::Int32>(static_cast<System::Byte>(60
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(157)));
@@ -51,6 +52,8 @@ namespace ServerApp {
 
 		Form1(void)
 		{
+			
+
 			InitializeComponent();
 
 			//config
@@ -78,6 +81,8 @@ namespace ServerApp {
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
 			//apply icon after initialised - have to do here or winforms constanstly overwrites it
 			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+
+			
 
 			starLabel->ForeColor = cadetBlue;//
 
@@ -139,6 +144,7 @@ namespace ServerApp {
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
+			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(Form1::typeid));
 			this->gameWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->serverWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->notifyIcon1 = (gcnew System::Windows::Forms::NotifyIcon(this->components));
@@ -273,14 +279,14 @@ namespace ServerApp {
 			this->portTextBox->BackColor = System::Drawing::Color::CadetBlue;
 			this->portTextBox->BorderStyle = System::Windows::Forms::BorderStyle::None;
 			this->portTextBox->Cursor = System::Windows::Forms::Cursors::IBeam;
-			this->portTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->portTextBox->Font = (gcnew System::Drawing::Font(L"Century Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->portTextBox->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->portTextBox->Location = System::Drawing::Point(101, 292);
 			this->portTextBox->Name = L"portTextBox";
 			this->portTextBox->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			this->portTextBox->Size = System::Drawing::Size(119, 19);
+			this->portTextBox->Size = System::Drawing::Size(98, 20);
 			this->portTextBox->TabIndex = 7;
 			this->portTextBox->Text = L"11200";
 			this->portTextBox->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
@@ -292,13 +298,13 @@ namespace ServerApp {
 			// 
 			this->portLabel->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
 			this->portLabel->AutoSize = true;
-			this->portLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->portLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->portLabel->ForeColor = System::Drawing::Color::CadetBlue;
 			this->portLabel->Location = System::Drawing::Point(53, 291);
 			this->portLabel->Margin = System::Windows::Forms::Padding(0);
 			this->portLabel->Name = L"portLabel";
-			this->portLabel->Size = System::Drawing::Size(42, 20);
+			this->portLabel->Size = System::Drawing::Size(45, 21);
 			this->portLabel->TabIndex = 8;
 			this->portLabel->Text = L"Port:";
 			this->portLabel->Visible = false;
@@ -342,10 +348,12 @@ namespace ServerApp {
 			this->Controls->Add(this->label1);
 			this->Cursor = System::Windows::Forms::Cursors::Default;
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
 			this->MaximizeBox = false;
 			this->Name = L"Form1";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
-			this->Text = L"Form1";
+			this->Text = L"IL-2 Dials Server";
+			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &Form1::Form1_FormClosing);
 			this->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseDown);
 			this->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseMove);
 			this->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseUp);
@@ -527,10 +535,15 @@ private: void UpdateReports()
 
 			//remmember in file format
 			System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter("config.txt"); //open the file for writing.
-		std:String^ portNumber = portTextBox->Text->ToString();
+			std:String^ portNumber = portTextBox->Text->ToString();
 			writer->Write(portNumber); //write the current date to the file. change this with your date or something.
 			writer->Close(); //remember to close the file again.
 			delete writer;// writer->Dispose(); //remember to dispose it from the memory.
+
+
+			//get rid of the icon in the systray
+			NotifyIcon^ thisIcon = (NotifyIcon^)notifyIcon1;
+			thisIcon->Visible = false;
 
 			Application::Restart();
 			Environment::Exit(0);
@@ -548,7 +561,7 @@ private: void UpdateReports()
 
 		//restart app on port change, blocking call in async worker complicates things, this is simpler	
 		System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter("config.txt"); //open the file for writing.
-	std:String^ portNumber = portTextBox->Text->ToString();
+		std:String^ portNumber = portTextBox->Text->ToString();
 		writer->Write(portNumber); //write the current date to the file. change this with your date or something.
 		writer->Close(); //remember to close the file again.
 		delete writer;// writer->Dispose(); //remember to dispose it from the memory.
@@ -558,7 +571,15 @@ private: void UpdateReports()
 	}
 
 
-	};
+	private: System::Void Form1_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) 
+	{
+		//get rid of the icon in the systray
+		NotifyIcon^ thisIcon = (NotifyIcon^)notifyIcon1;
+		thisIcon->Visible = false;
+	}
+private: System::Void contextMenuStrip2_Opening(System::Object^ sender, System::ComponentModel::CancelEventArgs^ e) {
+}
+};
 
 	
 
