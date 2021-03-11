@@ -1,10 +1,17 @@
 #pragma once
 #include <Windows.h>
 #include <TlHelp32.h>
+char originalLine[8];//7 for mov inst, 1 for ret
 bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	//for debug
+	//overwrite cockpit function
+	//move the "mov" instruction down so we can read rbx and rax before it changes it
+	
+
 	size_t bytesWritten = 0;
+	//char originalLine[8];//7 for mov inst, 1 for ret
+	//read line
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLine, 0x08, &bytesWritten);
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -16,7 +23,12 @@ bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//Relative address. Using 32bit data type due to close nature of jump
 	uintptr_t relativeAddress = (uintptr_t)toCave - src - 5;
 	LPVOID rA = (LPVOID)relativeAddress;
-	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);//note sizeof(dword) to force 32bit
+
+	BYTE nops[2] = { 0x90, 0x90 };
+	//add a nop
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);//note sizeof(dword) to force 32bit
+	
 
 	return 1;
 }
@@ -49,47 +61,82 @@ bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	//cave - where we put our own code alongside the original
+	//cave - where we put our own code 
 	size_t bytesWritten = 0;
 	//NOTE: If using the aob scan with the qword ptr jump, perhaps look up "symbols" and find path to function being called FF 15 4A60B500 (first two bytes are call/jmp opcodes,last part is a variable/symbol lookup?)
-	//Using what seems to be static additions for aob for now (2nd Aob scan in CE)
+	
+	/*
+	* 
+	asm:
+	//if else statement,
+	if not zero, copy rbx to memeroy location
+	code:
+     test rbx, 0
+     jne RBX_NOT_ZERO
+     jmp return
 
-	//copy rbx to our memory location - rbs holds the pointer address to the cockpit struct
-	//these are the opcodes for that when doping it with cheat engine
-	//7FF6AFB10000 - mov [7FF6AFB10018],rbx =  48 89 1D 11000000    (relative)
-	//so, 0x48, 0x89, 0x1d, 0x11, 0x00, 0x00, 0x00
+	RBX_NOT_ZERO:
+		//if rbx NOT zero, compare with rax
+		test rax, rbx
+		je RBX_AND_RAX_EQUAL
+		jmp return
 
-	//enter opcodes that we ripped out to do the jump
-	//original function = 0x48, 0x89, 0x6C, 0x24, 0x68
+	RBX_AND_RAX_EQUAL:
+		mov [newmem+30],rbx
+		jmp return
 
-	//join together (put all writes together?)
-	BYTE partialFunction[] = { 0x48, 0x89, 0x1d, 0x11, 0x00, 0x00, 0x00, 0x48, 0x89, 0x6C, 0x24, 0x68 };
-	WriteProcessMemory(hProcess, toCave, partialFunction, sizeof(partialFunction), &bytesWritten);
+	RET_EQUAL:
+    mov [newmem+20],rbx
+    
 
-	//now jump it back to the end of the original function
-	//where we got to, writing bytes
-	//casting to uintptr so we can do maths
-	LPVOID whereWeGotTo = (LPVOID)((uintptr_t)toCave + sizeof(partialFunction));
+	2782BC10000 - 48 F7 C3 00000000     - test rbx,00000000 { 0 }
+	2782BC10007 - 0F85 05000000         - jne 2782BC10012
+	2782BC1000D - E9 B461E202           - jmp RSE.RSE::CAeroplane::getPointerToCockpitInstruments+6
+	2782BC10012 - 48 85 D8              - test rax,rbx
+	2782BC10015 - 0F84 05000000         - je 2782BC10020
+	2782BC1001B - E9 A661E202           - jmp RSE.RSE::CAeroplane::getPointerToCockpitInstruments+6
+	2782BC10020 - 48 89 1D 09000000     - mov [2782BC10030],rbx { (0) }
+	2782BC10027 - E9 9A61E202           - jmp RSE.RSE::CAeroplane::getPointerToCockpitInstruments+6
+     
+	 48 F7 C3 00 00 00 00 
+	 0F 85 05 00 00 00 
+	 E9 B4 61 E2 02 
+	 48 85 D8 
+	 0F 84 05 00 00 00 
+	 E9 A6 61 E2 02 
+	 48 89 1D 09 00 00 00 
+	 E9 9A 61 E2 02
+	*/
 
-	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
+	BYTE ifEqualRbxToMem[35] = { 0x48, 0x85, 0xDB, //test rbx, rbx) - is zero)
+								 0x0F, 0x85, 0x05, 0x00, 0x00, 0x00, //jump if not equal
+								 0xE9, //jmp to..								 
+								 0x15, 0x00,0x00,0x00,//26 byte (+1) jump to end of this instruction block (note 0x21 is hex) (relative address)
+								 0x48, 0x39, 0xD8, //compare rax with rbx
+								 0x0F, 0x84, 0x05, 0x00, 0x00, 0x00,// jump if equal (je is 0x84) / if not equal we jump to end
+								 0xE9, //jmp to..
+								 0x07, 0x00, 0x00, 0x00,//2 line jump -1
+								 0x48, 0x89, 0x1D, 0x60, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] //TODO, TIDY THIS AT NICE ADDRESS TO READ FROM AND CHANGE FUNCTION IN MAIN(?)
+																										//THEN WRITE DELLYWELLY SIG AT NICE ADDRESS
+								 
+	
+	WriteProcessMemory(hProcess, toCave, ifEqualRbxToMem, sizeof(ifEqualRbxToMem), &bytesWritten);
+
+	//and write orignal back in after our code - 0x05 is how many bytes we wrote - this needs to be done after we read rbx as it changes it
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem)), &originalLine, 7, &bytesWritten);//7 is without ret
+
 	BYTE jump = 0xE9;
 	//write 0x09 (jmp) 
-	WriteProcessMemory(hProcess, whereWeGotTo, &jump, sizeof(jump), &bytesWritten);
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + 0x1);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem) + 7) , &jump, sizeof(jump), &bytesWritten);
 
-	//write address to jump back to	(just starting at one after jmp instruction) jmp 32 bit
-	//truncate 64bit to 32 bit - could write a check for non zero in upper register
-	DWORD returnAddress = (uintptr_t)(src - (uintptr_t)toCave) - 5 - 7;//jump call plus move rbx to mem	
-	WriteProcessMemory(hProcess, whereWeGotTo, &returnAddress, sizeof(returnAddress), &bytesWritten);
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + sizeof(DWORD));
-	//leave space in memory for data struct pointer value to be written, add enough on so signature starts nicely at next block
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + 15);
-
+	DWORD returnAddress = (uintptr_t)(src - (uintptr_t)toCave - sizeof(ifEqualRbxToMem) - 5);//jump call plus ... initial overwrite?
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem) + 7 + 1), &returnAddress, sizeof(returnAddress), &bytesWritten);
 
 	//now we need to write a signature in so we can check if code cave exists - Happens on server restart but game stays active
-	//"DellyWellyAltimeter" in Hex = 44656c6c7957656c6c79416c74696d65746572 + 0x00 to pad it so next line starts on a new line of memory
-	BYTE mySig[20] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x41, 0x6c, 0x74, 0x69, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x00 }; //PUT AFTYER JUMP BACK
-	WriteProcessMemory(hProcess, whereWeGotTo, mySig, 19, &bytesWritten);
+
+	//DellyWellyCockpit in Hex
+	BYTE mySig[17] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x43, 0x6f, 0x63, 0x6b, 0x70, 0x69, 0x74 };
+	//WriteProcessMemory(hProcess, whereWeGotTo, mySig, 17, &bytesWritten);
 
 	return 1;
 }

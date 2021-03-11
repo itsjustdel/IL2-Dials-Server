@@ -157,13 +157,21 @@ extern "C" __declspec(dllexport) intptr_t AOBScanCockpitInstruments()
 {
 	//aob scanner char arrays to search for address	
 
-	const char* szPattern = "\x48\x89\x6C\x24\x68\x8D\x68\x0C\x48\x89\x83\xFC\x02\x00\x00";
-	const char* szMask = "?xxxxxxx?xxxxxx";//? tests
+	//const char* szPattern = "\x48\x89\x6C\x24\x68\x8D\x68\x0C\x48\x89\x83\xFC\x02\x00\x00";
+	//48 8B 81 00 09 00 00 C3 CC CC CC CC CC CC CC CC
+	const char* szPattern = "\x48\x8B\x81\x00\x09\x00\x00\xC3\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC";
+	const char* szMask = "?xxxxxxxxxxxxxxx";
 
+	/*
 	//set scanner to look at the start of il-2.exe
 	char* pStart = (char*)moduleIL2.modBaseAddr;
 	//only search withing this region
 	UINT_PTR regionSize = moduleIL2.modBaseSize;//dwsize
+	*/
+	//rse.dll
+	char* pStart = (char*)moduleRSE.modBaseAddr;
+	//only search withing this region
+	UINT_PTR regionSize = moduleRSE.modBaseSize;
 
 	
 	//scan and return address where we want to inject
@@ -192,7 +200,7 @@ bool AOBScanAltimeter()
 	const char* szMask = "?xxxxx?xxxx";
 
 
-	//set scanner to look at the start of il-2.exe
+	//set scanner to look at the start of rse
 	char* pStart = (char*)moduleRSE.modBaseAddr;
 	//only search withing this region
 	UINT_PTR regionSize = moduleRSE.modBaseSize;
@@ -223,11 +231,9 @@ bool AOBScanMySignatureCockpitInstruments()
 	//if server is quit, hook is unwritten (still to do)
 	//this function is very slow, around a second for a successful match, and a few more for an failure, but it will happen so rarely I'm not looking to improve on it
 
-	//"DellyWellyAltimeter " + 0x90
-	//BYTE mySig[20] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x41, 0x6c, 0x74, 0x69, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x90 };
-						//44     65    6C    6C    79    57    65    6C    6C    79    41    6C    74    69    6D    65    74    65    72    00
-	const char* szPattern = "\x44\x65\x6c\x6c\x79\x57\x65\x6c\x6c\x79\x41\x6c\x74\x69\x6d\x65\x74\x65\x72\x00";
-	const char* szMask = "xxxxxxxxxxxxxxxxxxxx";
+	//"DellyWellyCockpit in hex [17]	
+	const char* szPattern = "\x44\x65\x6c\x6c\x79\x57\x65\x6c\x6c\x79\x43\x6f\x63\x6b\x70\x69\x74";
+	const char* szMask = "xxxxxxxxxxxxxxxxx";
 
 
 	//allocate memory for code cave looks BEFORE the modules so we need to start looking for our code cave before
@@ -629,11 +635,11 @@ int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 		//Main method general instrument panel
 		int progressCockpit = CockpitInstruments();
 		//add ten to altimiter result so we can work out a cominbed report
-		int progressAltimeter = Altimeter();
+		//int progressAltimeter = Altimeter();
 
-		int combinedProgress = progressCockpit + progressAltimeter;
+		//int combinedProgress = progressCockpit + progressAltimeter;
 
-		worker->ReportProgress(combinedProgress);
+		//worker->ReportProgress(combinedProgress);
 
 
 		Sleep(100);
