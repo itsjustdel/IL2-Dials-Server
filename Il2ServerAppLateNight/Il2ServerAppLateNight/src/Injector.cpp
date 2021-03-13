@@ -1,7 +1,11 @@
 #pragma once
 #include <Windows.h>
 #include <TlHelp32.h>
-char originalLine[8];//7 for mov inst, 1 for ret
+
+//original instructions in function will be put here - how long are these? Do they change on updates?
+//could need to write a parser in future
+char originalLineCockpit[8];//7 for mov inst, 1 for ret
+char originalLineAltimeter[8];
 bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//overwrite cockpit function
@@ -11,7 +15,7 @@ bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	size_t bytesWritten = 0;
 	//char originalLine[8];//7 for mov inst, 1 for ret
 	//read line
-	ReadProcessMemory(hProcess, (LPVOID)src, &originalLine, 0x08, &bytesWritten);
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineCockpit, 0x08, &bytesWritten);
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -35,8 +39,11 @@ bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	//for debug
+	//note, replicated in cave code
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x2F);//0x38 is after other code stops
+
 	size_t bytesWritten = 0;
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineAltimeter, 0x08, &bytesWritten);
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -50,9 +57,9 @@ bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	LPVOID rA = (LPVOID)relativeAddress;
 	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
 	//we need to add a nope to pad out memory so we jump back at same point we left
-	BYTE nop = 0x90;
-	//note we add the size of our relative address to the write address so we keep moving forward when writing
-	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nop, sizeof(nop), &bytesWritten);
+	BYTE nops[2] = { 0x90, 0x90 };
+	//add a nop
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);
 
 
 
@@ -116,14 +123,14 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 								 0x0F, 0x84, 0x05, 0x00, 0x00, 0x00,// jump if equal (je is 0x84) / if not equal we jump to end
 								 0xE9, //jmp to..
 								 0x07, 0x00, 0x00, 0x00,//2 line jump -1
-								 0x48, 0x89, 0x1D, 0x15, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] (48 89 1D is move rbx to.. the last four is the relative jump
+								 0x48, 0x89, 0x1D, 0x3D, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] (48 89 1D is move rbx to.. the last four is the relative jump
 																										
 								 
 	//write above array
 	WriteProcessMemory(hProcess, toCave, ifEqualRbxToMem, sizeof(ifEqualRbxToMem), &bytesWritten);
 
 	//and write orignal back in after our code
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem)), &originalLine, 7, &bytesWritten);//7 is without ret
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem)), &originalLineCockpit, 7, &bytesWritten);//7 is without ret
 
 	BYTE jump = 0xE9;
 	//write 0x09 (jmp) 
@@ -135,56 +142,46 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//now we need to write a signature in so we can check if code cave exists - Happens on server restart but game stays active
 
 	//DellyWellyCockpit in Hex
-	BYTE mySig[17] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x43, 0x6f, 0x63, 0x6b, 0x70, 0x69, 0x74 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 0x40), mySig, 17, &bytesWritten);
+	//BYTE mySig[17] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x43, 0x6f, 0x63, 0x6b, 0x70, 0x69, 0x74 };
+	//WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 0x40), mySig, 17, &bytesWritten);
 
 	return 1;
 }
 
-bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave, MODULEENTRY32 moduleRSE)
 {
-	//new cave in RSE dll
+	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
+	//add to cave,( uintptr_t for addition)
+	toCave =(LPVOID)( (uintptr_t)(toCave) + 0x2F);//0x38 is after other code stops
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
 	
+	//first of all write the original function back in
+	//and write orignal back in after our code
+	WriteProcessMemory(hProcess, toCave, &originalLineAltimeter, 7, &bytesWritten);//7 is without ret
 
-	
-	//track where we got o
-	LPVOID whereWeGotTo = (LPVOID)((uintptr_t)toCave);
-	//opcodes to write rbx to our memory at 0x18 offset
-	//24A3B6D0000 - 48 89 1D 11000000 - mov[24A3B6D0018], rbx{ (0) }
+	//the pointer value we want is stored in rax, so move rax to point in our cave for later retrieval
+	BYTE raxToMem[2] = { 0x48, 0xA3 };	
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 ), raxToMem, sizeof(raxToMem), &bytesWritten);
 
-	//afterwards enter opcodes that we ripped out to do the jump
-	//original function = F2 0F10 44 24 60
+	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x2f +0x80);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 + sizeof(raxToMem)), &targetAddress, sizeof(LPVOID), &bytesWritten);	
 
-	//join together with opcodes that move register value to our memory
-	BYTE partialFunction[] = { 0x48, 0x89, 0x1d, 0x11, 0x00, 0x00, 0x00, 0xF2, 0x0F, 0x10, 0X44, 0x24, 0x60 };
-
-	WriteProcessMemory(hProcess, whereWeGotTo, partialFunction, sizeof(partialFunction), &bytesWritten);
-
-	//now jump it back to the end of the original function
-	//where we got to, writing bytes
-	//casting to uintptr so we can do maths
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + sizeof(partialFunction));
-
-	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
+	//jump to return address
 	BYTE jump = 0xE9;
 	//write 0x09 (jmp) 
-	WriteProcessMemory(hProcess, whereWeGotTo, &jump, sizeof(jump), &bytesWritten);
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + 0x1);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+ 7 + sizeof(raxToMem) + sizeof(LPVOID)), &jump, sizeof(jump), &bytesWritten);//HERE JUMP GOIONG IN WRONG PLACE?
 
-	//write address to jump back to	(just starting at one after jmp instruction) jmp 32 bit
-	DWORD returnAddress = (uintptr_t)(src - (uintptr_t)toCave) - 5 - 7 ;//jump call plus move rbx to mem -
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + 7 + 2 + 4 +1 + 1));//jump call plus ... initial overwrite? (plus padding)
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 + sizeof(raxToMem) + sizeof(LPVOID) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
 
-	//truncate 64bit to 32 bit
-	WriteProcessMemory(hProcess, whereWeGotTo, &returnAddress, sizeof(returnAddress), &bytesWritten);
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + sizeof(DWORD));
-	//leave space in memory for data struct pointer value to be written, add enough on so signature starts nicely at next block
-	whereWeGotTo = (LPVOID)((uintptr_t)whereWeGotTo + 14);
+	
+	
+
 	//now we need to write a signature in so we can check if code cave exists - Happens on server restart but game stays active
 	//"DellyWellyAltimeter" in Hex = 44656c6c7957656c6c79416c74696d65746572 + 0x00 to pad it so next line starts on a new line of memory
-	BYTE mySig[20] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x41, 0x6c, 0x74, 0x69, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x00 }; //PUT AFTYER JUMP BACK
-	WriteProcessMemory(hProcess, whereWeGotTo, mySig, 19, &bytesWritten);
+	//BYTE mySig[20] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x41, 0x6c, 0x74, 0x69, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x00 }; //PUT AFTYER JUMP BACK
+	//WriteProcessMemory(hProcess, whereWeGotTo, mySig, 19, &bytesWritten);
 
 	return 1;
 }
@@ -272,7 +269,7 @@ bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toC
 	return 1;
 }
 
-bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave)
+bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave,MODULEENTRY32 moduleRSE)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;
@@ -285,7 +282,7 @@ bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave)
 	InjectionAltimeter(hProcess, src, toCave);
 
 	//write out own process in our own allocated memory - 
-	CaveAltimeter(hProcess, src, toCave);
+	CaveAltimeter(hProcess, src, toCave, moduleRSE);
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);
@@ -340,7 +337,7 @@ bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult,SIZE_T size, char * ou
 	return 0;
 }
 
-LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID caveStart)
+LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID readAddress)
 {
 	//read only possible after injection? allocate mem at read only?
 	//DWORD dwOld;
@@ -348,17 +345,15 @@ LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID caveStart)
 		//return 0;
 
 	//read process memory returns to this
-	LPVOID pointerToCockpitInstruments = 0;
-	//uintptr_t lets us do pointer arithmetic
-	uintptr_t readAddress = (uintptr_t)caveStart + 0x38; //0x38 is our offset set by ourselves in cave	
-
+	LPVOID pointer= 0;
+	
 	size_t bytesRead = 0;
 	//attempt to read from address passed by Inject function	
-	ReadProcessMemory(hProcess, (LPCVOID)readAddress, &pointerToCockpitInstruments, sizeof(LPCVOID), &bytesRead);
+	ReadProcessMemory(hProcess, readAddress, &pointer, sizeof(LPCVOID), &bytesRead);
 
 	////put write protections back to what they were before we injected
 	//VirtualProtectEx(hProcess, (LPVOID)AOBresult, size, dwOld, &dwOld);
 
 
-	return pointerToCockpitInstruments;
+	return pointer;
 }

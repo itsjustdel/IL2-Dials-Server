@@ -15,7 +15,7 @@ LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src);
 
 bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave);
 
-bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave);
+bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave,MODULEENTRY32 moduleRSE);
 
 bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult, LPVOID caveStart, SIZE_T size, char *originalMemory);
 

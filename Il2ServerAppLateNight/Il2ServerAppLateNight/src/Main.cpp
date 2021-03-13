@@ -50,6 +50,7 @@ LPCVOID altimeterAddress;
 //address of our memory we create
 LPVOID cockpitInstrumentsCaveStart = 0;
 LPVOID altimeterCaveStart = 0;
+LPVOID codeCaveAddress = 0;
 
 //process stuff
 wchar_t* exeName = (wchar_t*)L"Il-2.exe";
@@ -318,21 +319,31 @@ bool AOBScanMySignatureAltimeter()
 	return 1;
 }
 
+bool AllocateMemoryForCave()
+{
+	//create cave in RSE module, both cockpit and altimter are in this dll
+	codeCaveAddress = AllocateMemoryUp(hProcessIL2, (uintptr_t)moduleRSE.modBaseAddr);
+
+	if (codeCaveAddress == 0)
+		return 0;
+	else
+		return 1;
+}
+
 int InjectCockpitInstruments()
 {
-	//Find some unused memory within the target module/exe and allocate for ourselves
 
-	cockpitInstrumentsCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(cockpitInstrumentsAddress));
-	
-	if (cockpitInstrumentsCaveStart == 0)
+	//create cave if not created
+	if (codeCaveAddress == 0)
 	{
-		injectReport = 0;
-		return 0;
+		if (AllocateMemoryForCave() == 0)
+		{
+			return 0;
+		}
 	}
 
-
 	//	//Hook function overwrites original code and writes to our code cave
-	if (!HookCockpitInstruments(hProcessIL2, (void*)(cockpitInstrumentsAddress), size, cockpitInstrumentsCaveStart))//100? size of read memory
+	if (!HookCockpitInstruments(hProcessIL2, (void*)(cockpitInstrumentsAddress), size, codeCaveAddress))//100? size of read memory
 	{
 		injectReport = 1;
 		return 1;
@@ -354,13 +365,18 @@ int InjectCockpitInstruments()
 
 bool InjectAltimeter()
 {
-	//Find some unused memory within the target module/exe and allocate for ourselves
-	altimeterCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(altimeterAddress));
-	if (altimeterCaveStart == 0)
-		return 0;
+
+	//create cave if not created - if no code cave here, major problem, should already be created for cockpit inst
+	if (codeCaveAddress == 0)
+	{
+		if (AllocateMemoryForCave() == 0)
+		{
+			return 0;
+		}
+	}
 
 	//Hook function overwrites original code and writes to our code cave
-	if (!HookAltimeter(hProcessIL2, (void*)(altimeterAddress), size, altimeterCaveStart))//100? size of read memory
+	if (!HookAltimeter(hProcessIL2, (void*)(altimeterAddress), size, codeCaveAddress, moduleRSE))//100? size of read memory
 		return 0;
 
 	if (!injectionReportedAltimeter)
@@ -435,7 +451,9 @@ bool ReadCockpitInstruments()
 {
 
 	//keep reading this value as if we change plane it can change
-	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2,  cockpitInstrumentsCaveStart);
+	//injection saves cockpit pointer at code cave's address + 0x60
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x60);
+	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, addressToRead );
 
 	if (toCockpitInstruments != 0)
 	{
@@ -459,7 +477,9 @@ bool ReadAltimeter()
 {
 
 	//keep reading this value as if we change plane it can change
-	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, altimeterCaveStart);
+	//injection saves alt. pointer at code cave's address + 0x80
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x80);
+	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
 
 	//we only find altimeter on reference pressure toggle
 	if (toAltimeter != 0)
@@ -490,6 +510,10 @@ int CockpitInstruments()
 
 		if (cockpitInstrumentsAddress != 0)
 		{	
+
+			//check if we haven't recovered patched code - happens if game is kept running and server restarts
+			//TODO
+
 			//write our own instruction to read register
 			injectedCockpit = InjectCockpitInstruments();
 
@@ -598,7 +622,7 @@ int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 
 			//std::cout << "Waiting for exe" << std::endl;
 			continue;
-		}
+		}	
 
 		//Main method general instrument panel
 		int progressCockpit = CockpitInstruments();
@@ -608,7 +632,7 @@ int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 		int combinedProgress = progressCockpit + progressAltimeter;
 
 		worker->ReportProgress(combinedProgress);
-
+		
 
 		Sleep(100);
 	}
