@@ -4,17 +4,15 @@
 //for external access
 
 
-extern "C" __declspec(dllexport) int InjectCockpitInstruments();
+int InjectCockpitInstruments();
 
-extern "C" __declspec(dllexport) bool GetInjectedCockpit();
+bool GetInjectedCockpit();
 
-extern "C" __declspec(dllexport) intptr_t AOBScanCockpitInstruments();
+intptr_t AOBScanCockpitInstruments();
 
-extern "C" __declspec(dllexport) void GetProcessData();
+void GetProcessData();
 
-extern "C" __declspec(dllexport) intptr_t GetAOBResultCockpitInstruments();
-
-extern "C" __declspec(dllexport) void Instruments();
+intptr_t GetAOBResultCockpitInstruments();
 
 int ReadData(System::ComponentModel::BackgroundWorker^);
 

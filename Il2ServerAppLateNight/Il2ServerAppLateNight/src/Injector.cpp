@@ -116,13 +116,13 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 								 0x0F, 0x84, 0x05, 0x00, 0x00, 0x00,// jump if equal (je is 0x84) / if not equal we jump to end
 								 0xE9, //jmp to..
 								 0x07, 0x00, 0x00, 0x00,//2 line jump -1
-								 0x48, 0x89, 0x1D, 0x60, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] //TODO, TIDY THIS AT NICE ADDRESS TO READ FROM AND CHANGE FUNCTION IN MAIN(?)
-																										//THEN WRITE DELLYWELLY SIG AT NICE ADDRESS
+								 0x48, 0x89, 0x1D, 0x15, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] (48 89 1D is move rbx to.. the last four is the relative jump
+																										
 								 
-	
+	//write above array
 	WriteProcessMemory(hProcess, toCave, ifEqualRbxToMem, sizeof(ifEqualRbxToMem), &bytesWritten);
 
-	//and write orignal back in after our code - 0x05 is how many bytes we wrote - this needs to be done after we read rbx as it changes it
+	//and write orignal back in after our code
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem)), &originalLine, 7, &bytesWritten);//7 is without ret
 
 	BYTE jump = 0xE9;
@@ -136,7 +136,7 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	//DellyWellyCockpit in Hex
 	BYTE mySig[17] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x43, 0x6f, 0x63, 0x6b, 0x70, 0x69, 0x74 };
-	//WriteProcessMemory(hProcess, whereWeGotTo, mySig, 17, &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 0x40), mySig, 17, &bytesWritten);
 
 	return 1;
 }
@@ -350,7 +350,7 @@ LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID caveStart)
 	//read process memory returns to this
 	LPVOID pointerToCockpitInstruments = 0;
 	//uintptr_t lets us do pointer arithmetic
-	uintptr_t readAddress = (uintptr_t)caveStart + 0x18; //18 is our offset set by ourselves
+	uintptr_t readAddress = (uintptr_t)caveStart + 0x38; //0x38 is our offset set by ourselves in cave	
 
 	size_t bytesRead = 0;
 	//attempt to read from address passed by Inject function	

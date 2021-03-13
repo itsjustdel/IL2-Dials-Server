@@ -32,6 +32,9 @@
     <ClInclude Include="src\Main.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\PointerToFunction.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -59,6 +62,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PointerToFunction.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

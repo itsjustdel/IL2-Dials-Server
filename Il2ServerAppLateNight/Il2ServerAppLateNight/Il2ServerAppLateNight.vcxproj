@@ -109,7 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>dbghelp.lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
@@ -135,7 +135,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>dbghelp.lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
@@ -147,6 +147,7 @@
     <ClInclude Include="src\Injector.h" />
     <ClInclude Include="src\IPHelper.h" />
     <ClInclude Include="src\Main.h" />
+    <ClInclude Include="src\PointerToFunction.h" />
     <ClInclude Include="src\ProcessTools.h" />
     <ClInclude Include="src\Scan.h" />
     <ClInclude Include="src\Server.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="src\Injector.cpp" />
     <ClCompile Include="src\IPHelper.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\PointerToFunction.cpp" />
     <ClCompile Include="src\ProcessTools.cpp" />
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Server.cpp" />

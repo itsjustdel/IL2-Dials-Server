@@ -95,3 +95,4 @@ char * PatternScanEx(HANDLE hProc, char * pStart, UINT_PTR RegionSize, const cha
 
 	return nullptr;
 }
+

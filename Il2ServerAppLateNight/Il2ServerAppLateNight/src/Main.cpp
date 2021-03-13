@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <dbghelp.h>
 #include <tchar.h>
 #include <iostream>
 #include <Windows.h>
@@ -8,17 +9,17 @@
 #include <Psapi.h>
 #include <cstdlib>
 #include <chrono>
-//#include <future>
 #include <Iphlpapi.h>
 #include <vector>
 #include <string>
+
 
 #include "Scan.h"
 #include "ProcessTools.h"
 #include "Injector.h"
 #include "Server.h"
 #include "IPHelper.h"
-//#include "../Form1.h"
+#include "PointerToFunction.h"
 
 
 //how much memory to change permissions on in original code
@@ -41,6 +42,10 @@ int injectReport = -1;
 //aob results
 char* AOBResultCockpitInstruments;
 char* AOBResultAltimeter;
+
+//functionAddresses
+LPCVOID cockpitInstrumentsAddress;
+LPCVOID altimeterAddress;
 
 //address of our memory we create
 LPVOID cockpitInstrumentsCaveStart = 0;
@@ -65,12 +70,12 @@ bool toCockpitReported;
 bool toAltimeterReported;
 
 
-extern "C" __declspec(dllexport) int GetInjectedCockpit()
+int GetInjectedCockpit()
 {
 	return injectReport;
 }
 
-extern "C" __declspec(dllexport) intptr_t GetAOBResultCockpitInstruments()
+intptr_t GetAOBResultCockpitInstruments()
 {
 	return (intptr_t)AOBResultCockpitInstruments;
 }
@@ -113,7 +118,7 @@ void ResetFlags()
 	toAltimeterReported = false;
 }
 
-extern "C" __declspec(dllexport) bool GetProcessData()
+ bool GetProcessData()
 {
 	//track changes for debug
 	processFoundPrevious = processFoundCurrent;
@@ -153,7 +158,8 @@ extern "C" __declspec(dllexport) bool GetProcessData()
 	return true;
 }
 
-extern "C" __declspec(dllexport) intptr_t AOBScanCockpitInstruments()
+ //UNUSED
+intptr_t AOBScanCockpitInstruments()
 {
 	//aob scanner char arrays to search for address	
 
@@ -192,10 +198,13 @@ extern "C" __declspec(dllexport) intptr_t AOBScanCockpitInstruments()
 	return (intptr_t)AOBResultCockpitInstruments;
 }
 
+//UNUSED
 bool AOBScanAltimeter()
 {
+
+
 	//aob scanner char arrays to search for address	
-	
+
 	const char* szPattern = "\xF2\x0F\x10\x44\x24\x60\xE8\xF4\x78\xF2\xFF";
 	const char* szMask = "?xxxxx?xxxx";
 
@@ -223,6 +232,9 @@ bool AOBScanAltimeter()
 
 	return 1;
 }
+
+
+
 
 bool AOBScanMySignatureCockpitInstruments()
 {
@@ -254,7 +266,7 @@ bool AOBScanMySignatureCockpitInstruments()
 		std::cout << "Cockpit instruments code cave recovered" << std::endl;
 
 		//we recovered our lost cave address but must move address back x to get to the start
-		cockpitInstrumentsCaveStart = (LPVOID(uintptr_t(sigResult) - 0x20)); //note 0x20 is the same as 32 (no 0x"")
+		cockpitInstrumentsCaveStart = (LPVOID(uintptr_t(sigResult) - 0x40)); //0x40 after cavestart is where we hold the sig
 
 		//we can set flags as if we wrote the injection
 		injectedCockpit= true;
@@ -306,40 +318,11 @@ bool AOBScanMySignatureAltimeter()
 	return 1;
 }
 
-LPVOID AllocateMemoryL(HANDLE hProcess, uintptr_t src)
-{
-	//to return, the address where we found the memory
-	LPVOID toCave = 0;
-
-	//find unallocated memory
-	MEMORY_BASIC_INFORMATION mbi;
-
-	for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
-	{
-		if (!VirtualQueryEx(hProcess, (LPCVOID)addr, &mbi, sizeof(mbi)))
-		{
-			break;
-		}
-		//scan through until FREE block is discovered
-		if (mbi.State == MEM_FREE)
-		{
-			if (toCave = VirtualAllocEx(hProcess, mbi.BaseAddress, 0x1000, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))//64kb size, smallest granulation/and write privelages need to be kept open
-			{
-
-				return toCave;// break;
-			}
-		}
-	}
-
-	return 0;
-}
-
-
-extern "C" __declspec(dllexport) int InjectCockpitInstruments()
+int InjectCockpitInstruments()
 {
 	//Find some unused memory within the target module/exe and allocate for ourselves
 
-	cockpitInstrumentsCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(AOBResultCockpitInstruments));
+	cockpitInstrumentsCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(cockpitInstrumentsAddress));
 	
 	if (cockpitInstrumentsCaveStart == 0)
 	{
@@ -349,7 +332,7 @@ extern "C" __declspec(dllexport) int InjectCockpitInstruments()
 
 
 	//	//Hook function overwrites original code and writes to our code cave
-	if (!HookCockpitInstruments(hProcessIL2, (void*)(AOBResultCockpitInstruments), size, cockpitInstrumentsCaveStart))//100? size of read memory
+	if (!HookCockpitInstruments(hProcessIL2, (void*)(cockpitInstrumentsAddress), size, cockpitInstrumentsCaveStart))//100? size of read memory
 	{
 		injectReport = 1;
 		return 1;
@@ -372,12 +355,12 @@ extern "C" __declspec(dllexport) int InjectCockpitInstruments()
 bool InjectAltimeter()
 {
 	//Find some unused memory within the target module/exe and allocate for ourselves
-	altimeterCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(moduleRSE.modBaseAddr));
+	altimeterCaveStart = AllocateMemoryUp(hProcessIL2, (uintptr_t)(altimeterAddress));
 	if (altimeterCaveStart == 0)
 		return 0;
 
 	//Hook function overwrites original code and writes to our code cave
-	if (!HookAltimeter(hProcessIL2, (void*)(AOBResultAltimeter), size, altimeterCaveStart))//100? size of read memory
+	if (!HookAltimeter(hProcessIL2, (void*)(altimeterAddress), size, altimeterCaveStart))//100? size of read memory
 		return 0;
 
 	if (!injectionReportedAltimeter)
@@ -428,8 +411,6 @@ bool AltimeterDataStruct(LPVOID structStart)
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, structStart, &rawData, sizeOfData, NULL);
 
-		
-
 	//step through data read 8 bytes at a time and grab doubles -- could go directly to [7] if i work out the maths
 	size_t dCount = 0;
 	for (size_t i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
@@ -473,6 +454,7 @@ bool ReadCockpitInstruments()
 
 }
 
+
 bool ReadAltimeter()
 {
 
@@ -501,25 +483,20 @@ bool ReadAltimeter()
 int CockpitInstruments()
 {
 	//find the area of code to patch and patch
-		//what if INJECTION  already there? would happen on app restart but game continue/NEEDED**********
-	if (AOBResultCockpitInstruments == 0)
+		
+	if (cockpitInstrumentsAddress == 0)
 	{
-		if (AOBScanCockpitInstruments())
-		{
-			//Let's save original memory at aobscan result location if we find anything
-			if (AOBResultCockpitInstruments != nullptr)
-			{
-				//saving memory at aob scan result address
-				//SaveOriginalMemory(hProcessIL2, (LPVOID)AOBResultCockpitInstruments, size, originalMemoryCI);
+		cockpitInstrumentsAddress = PointerToFunction("getPointerToCockpitInstruments",hProcessIL2,moduleRSE);
 
-				//write our own instruction to read register
-				injectedCockpit = InjectCockpitInstruments();
+		if (cockpitInstrumentsAddress != 0)
+		{	
+			//write our own instruction to read register
+			injectedCockpit = InjectCockpitInstruments();
 
-				return 1;
-			}
-			else
-				return 2;
+			return 1;
+			
 		}
+		//if not, then look for a previous cave (could save last cave in file instead of this)
 		else
 		{
 			//if aob scan doesn't find the original pattern, perhaps we already injected and user restarted server
@@ -546,23 +523,20 @@ int CockpitInstruments()
 
 int Altimeter()
 {
-
-	if (AOBResultAltimeter == 0)
+	//have we looked ?
+	if (altimeterAddress == 0)
 	{
-		if (AOBScanAltimeter())
+		altimeterAddress = PointerToFunction("getPointerToAltimeter",hProcessIL2,moduleRSE);
+
+		//if we found
+		if (altimeterAddress != 0)
 		{
-			if (AOBScanAltimeter != nullptr)
-			{
-				//SaveOriginalMemory(hProcessIL2, (LPVOID)AOBResultAltimeter, size, originalMemoryA);
-
-				injectedAltimeter = InjectAltimeter();
-
-				return 1 + 10;
-			}
-			else
-				return 2 + 10;
+			//inject
+			injectedAltimeter = InjectAltimeter();
+			return 1 + 10;
 		}
-		else
+		//if not, then look for a previous cave (could save last cave in file instead of this)
+		else			
 		{
 			//if aob scan doesn't find the original pattern, perhaps we already injected and user restarted server
 			//so let's look for our own hook
@@ -586,13 +560,7 @@ int Altimeter()
 
 }
 
-/*
-int cantorFunction(int k1, int k2) {
-	int sum = k1 + k2;
-	int triangularNumberOfSum = triangularNumber(sum);
-	return (tringularNumberOfSum + k2);
-}
-*/
+
 
 int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 {
@@ -635,11 +603,11 @@ int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 		//Main method general instrument panel
 		int progressCockpit = CockpitInstruments();
 		//add ten to altimiter result so we can work out a cominbed report
-		//int progressAltimeter = Altimeter();
+		int progressAltimeter = Altimeter();
 
-		//int combinedProgress = progressCockpit + progressAltimeter;
+		int combinedProgress = progressCockpit + progressAltimeter;
 
-		//worker->ReportProgress(combinedProgress);
+		worker->ReportProgress(combinedProgress);
 
 
 		Sleep(100);
@@ -648,11 +616,5 @@ int ReadData(System::ComponentModel::BackgroundWorker^ worker)
 	return 0;
 }
 
-extern "C" __declspec(dllexport) void Instruments() 
-{	
-	// methods to read data //called externally 
-	CockpitInstruments();
-	Altimeter();
-}
 
 
