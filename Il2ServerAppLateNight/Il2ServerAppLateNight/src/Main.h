@@ -3,6 +3,7 @@
 //#include <vector>
 //for external access
 
+void CaveRecovered();
 
 int InjectCockpitInstruments();
 
@@ -14,7 +15,7 @@ void GetProcessData();
 
 intptr_t GetAOBResultCockpitInstruments();
 
-int ReadData(System::ComponentModel::BackgroundWorker^);
+int Injector(System::ComponentModel::BackgroundWorker^);
 
 double GetAltitude();
 

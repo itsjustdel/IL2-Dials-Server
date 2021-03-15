@@ -382,7 +382,7 @@ namespace ServerApp {
 
 	private: System::Void GameWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
-		ReadData(gameWorker);
+		Injector(gameWorker);
 	}
 
 	private: System::Void GameWorker_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
@@ -400,7 +400,7 @@ private: void UpdateReports()
 
 	if (clients > 0)
 	{
-		if (gameWorkerProgressReport == 0)
+		if (gameWorkerProgressReport < 6)
 		{
 			starLabel->ForeColor = blue;
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
@@ -409,7 +409,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, client connected...";
 		}
 
-		if (gameWorkerProgressReport == 20)
+		if (gameWorkerProgressReport == 6)
 		{
 			//all go, set star to red
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
@@ -421,7 +421,7 @@ private: void UpdateReports()
 	}
 	else if (clients == 0)
 	{
-		if (gameWorkerProgressReport == 0)
+		if (gameWorkerProgressReport < 6)
 		{
 			//default cadet blue
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
@@ -431,7 +431,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
 		}
 
-		if (gameWorkerProgressReport == 20)
+		if (gameWorkerProgressReport == 6)
 		{
 			//yellow
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");

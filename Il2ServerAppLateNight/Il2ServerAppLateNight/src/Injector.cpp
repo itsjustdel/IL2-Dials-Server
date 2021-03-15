@@ -1,11 +1,117 @@
 #pragma once
 #include <Windows.h>
 #include <TlHelp32.h>
+#include <string>
+#include <sstream>   
+
+#include "Main.h";
 
 //original instructions in function will be put here - how long are these? Do they change on updates?
 //could need to write a parser in future
 char originalLineCockpit[8];//7 for mov inst, 1 for ret
 char originalLineAltimeter[8];
+
+
+LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
+{
+	//to return, the address where we found the memory
+	LPVOID toCave = 0;
+
+	//find unallocated memory
+	MEMORY_BASIC_INFORMATION mbi;
+
+	for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
+	{
+		if (!VirtualQueryEx(hProcess, (LPCVOID)addr, &mbi, sizeof(mbi)))
+		{
+			break;
+		}
+		//scan through until FREE block is discovered
+		if (mbi.State == MEM_FREE)
+		{
+			if (toCave = VirtualAllocEx(hProcess, mbi.BaseAddress, 0x1000, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))//64kb size, smallest granulation/and write privelages need to be kept open
+			{
+
+				return toCave;// break;
+			}
+		}
+	}
+
+	return 0;
+}
+
+LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src)
+{
+	//to return, the address where we found the memory
+	LPVOID toCave = 0;
+
+	//find unallocated memory
+	MEMORY_BASIC_INFORMATION mbi;
+
+	size_t size = 0x1000;
+
+	for (SIZE_T addr = src; addr < src + 2147483648; addr += size)
+		//for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
+	{
+		if (!VirtualQueryEx(hProcess, (LPCVOID)addr, &mbi, sizeof(mbi)))
+		{
+			break;
+		}
+		//scan through until FREE block is discovered
+		if (mbi.State == MEM_FREE)
+		{
+			if (toCave = VirtualAllocEx(hProcess, mbi.BaseAddress, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))
+			{
+
+				return toCave;// break;
+			}
+		}
+	}
+
+	return 0;
+}
+
+bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& codeCaveAddress)
+{
+	size_t bytesWritten = 0;
+	//char originalLine[8];//7 for mov inst, 1 for ret
+	//read line
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineCockpit, 0x08, &bytesWritten);
+
+	//check if code at this point isn't our own- happens if server restarted but game kept running
+	//look for a jump code(the one we will write below if this fails)
+	char charJump = L'é';//jmp code in char - if we want to make this neater, read to LPVOIDS instead of char[] and check it writes correctly
+	if (originalLineCockpit[0] == charJump)
+	{
+		//This is the jump instruction, the one we already put in
+		//we need to find where its jumping to
+		//reading in to LPVOID mirrors the representation of bytes in the memory debugger
+		LPVOID address = NULL;
+		ReadProcessMemory(hProcess, (LPVOID)(src + 0x01), &address, 0x04, &bytesWritten);
+
+		//add the starting address of getPointerToCockpitInstruments to the address that was stored previously plus the length to the next instruction
+		codeCaveAddress = LPVOID(src + (uintptr_t)(address) + 0x05);
+
+		CaveRecovered();
+		
+		return 1;
+	}
+	else
+	{
+		//create cave
+		codeCaveAddress = AllocateMemoryUp(hProcess, (uintptr_t)moduleRSE.modBaseAddr);
+
+		if (codeCaveAddress == 0)
+			//fail
+			return 0;
+		
+
+	}
+
+	return 1;
+
+}
+
 bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//overwrite cockpit function
@@ -13,9 +119,7 @@ bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	
 
 	size_t bytesWritten = 0;
-	//char originalLine[8];//7 for mov inst, 1 for ret
-	//read line
-	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineCockpit, 0x08, &bytesWritten);
+	
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -148,7 +252,7 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave, MODULEENTRY32 moduleRSE)
+bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
@@ -186,68 +290,11 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave, MODULEENTRY32 
 	return 1;
 }
 
-LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
-{
-	//to return, the address where we found the memory
-	LPVOID toCave = 0;
-
-	//find unallocated memory
-	MEMORY_BASIC_INFORMATION mbi;
-
-	for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
-	{
-		if (!VirtualQueryEx(hProcess, (LPCVOID)addr, &mbi, sizeof(mbi)))
-		{
-			break;
-		}
-		//scan through until FREE block is discovered
-		if (mbi.State == MEM_FREE)
-		{
-			if (toCave = VirtualAllocEx(hProcess, mbi.BaseAddress, 0x1000, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))//64kb size, smallest granulation/and write privelages need to be kept open
-			{
-
-				return toCave;// break;
-			}
-		}
-	}
-
-	return 0;
-}
-
-LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src)
-{
-	//to return, the address where we found the memory
-	LPVOID toCave = 0;
-
-	//find unallocated memory
-	MEMORY_BASIC_INFORMATION mbi;
-
-	size_t size = 0x1000;
-
-	for (SIZE_T addr = src; addr < src + 2147483648; addr += size)
-	//for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
-	{
-		if (!VirtualQueryEx(hProcess, (LPCVOID)addr, &mbi, sizeof(mbi)))
-		{
-			break;
-		}
-		//scan through until FREE block is discovered
-		if (mbi.State == MEM_FREE)
-		{
-			if (toCave = VirtualAllocEx(hProcess, mbi.BaseAddress, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))
-			{
-
-				return toCave;// break;
-			}
-		}
-	}
-
-	return 0;
-}
 
 
 
-bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave)
+
+bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size,LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;	
@@ -256,11 +303,16 @@ bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toC
 		return 0;
 
 	uintptr_t src = (uintptr_t)pSrc;
+
+
 	//insert jump in to original code
-	Injection(hProcess, src, toCave);
+	if (!Injection(hProcess, src, codeCaveAddress))
+		return 0;
 
 	//write out own process in our own allocated memory
-	CaveCockpitInstruments(hProcess, src, toCave);
+	if (!CaveCockpitInstruments(hProcess, src, codeCaveAddress))
+		return 0;
+
 	
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);
@@ -269,7 +321,7 @@ bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toC
 	return 1;
 }
 
-bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave,MODULEENTRY32 moduleRSE)
+bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;
@@ -279,10 +331,10 @@ bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave,MODUL
 
 	uintptr_t src = (uintptr_t)pSrc;
 	//insert jump in to original code
-	InjectionAltimeter(hProcess, src, toCave);
+	InjectionAltimeter(hProcess, src, codeCaveAddress);
 
 	//write out own process in our own allocated memory - 
-	CaveAltimeter(hProcess, src, toCave, moduleRSE);
+	CaveAltimeter(hProcess, src, codeCaveAddress);
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);

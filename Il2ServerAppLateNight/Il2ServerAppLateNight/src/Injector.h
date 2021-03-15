@@ -3,7 +3,8 @@
 #include <TlHelp32.h>
 
 
-bool Injection(HANDLE hProcess, uintptr_t src, LPVOID toCave);
+
+bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& codeCaveAddress);
 
 bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave);
 
@@ -13,9 +14,9 @@ LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src);
 
 LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src);
 
-bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave);
+bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
 
-bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID toCave,MODULEENTRY32 moduleRSE);
+bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
 
 bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult, LPVOID caveStart, SIZE_T size, char *originalMemory);
 
