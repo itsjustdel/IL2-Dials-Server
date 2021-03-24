@@ -345,7 +345,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
         {
             //This is a request for cockpitData Values
 
-            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
+//            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
             float floatArray[3];            

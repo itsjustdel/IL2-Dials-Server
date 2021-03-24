@@ -46,6 +46,8 @@ HANDLE hProcessIL2;
 MODULEENTRY32 moduleRSE;
 bool processFoundCurrent;
 
+float testValues[3];
+
 void CaveRecovered()
 {
 	injectedCockpit = true;
@@ -227,6 +229,24 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 	
 	while (true)
 	{
+
+		bool test = true;
+		if (test)
+		{
+
+			altimeterValues[5] += 1;
+
+			altimeterValues[8] += 1;
+
+			cockpitValues[14] += 1;
+
+			ReadTest();
+
+			Sleep(1);
+			continue;
+		}
+
+
 		//check if game is running 
 		//after found once, only check this every so often, causes too much cpu usage
 		//if we haven't received anything, start a timout timer
@@ -240,6 +260,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			//reset last checked 
 			lastChecked = std::chrono::system_clock::now();
 		}
+
 
 		//if we don't find our target exe
 		if (!processFoundCurrent)
@@ -311,12 +332,14 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 				worker->ReportProgress(5);
 				continue;
 			}
-		}	
+		}
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(6);
 
-		ReadTest();
+
+		
+	
 
 
 
