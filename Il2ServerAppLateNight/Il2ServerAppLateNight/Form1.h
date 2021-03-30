@@ -81,9 +81,7 @@ namespace ServerApp {
 			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
 			//apply icon after initialised - have to do here or winforms constanstly overwrites it
 			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
- 
 
-			
 			
 
 			starLabel->ForeColor = cadetBlue;//
@@ -267,8 +265,7 @@ namespace ServerApp {
 			// pictureBox1
 			// 
 			this->pictureBox1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-//			this->pictureBox1->ImageLocation = "..//Icons//setting-gears3.png";
-			//this->pictureBox1->ImageLocation = "\\Icons\\setting-gears3.png";
+			this->pictureBox1->ImageLocation = L"setting-gears3.png";
 			this->pictureBox1->Location = System::Drawing::Point(12, 286);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(32, 32);
