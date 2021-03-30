@@ -230,7 +230,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 	while (true)
 	{
 
-		bool test = true;
+		bool test = false;
 		if (test)
 		{
 
