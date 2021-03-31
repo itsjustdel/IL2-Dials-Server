@@ -75,15 +75,20 @@ namespace ServerApp {
 				portTextBox->Text = portNumber.ToString();
 			}
 
-
-
-			//main icon - have to do here or winforms constanstly overwrites it
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-			//apply icon after initialised - have to do here or winforms constanstly overwrites it
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+			//paths are different on release
+			#if defined _DEBUG
+				this->Icon = gcnew System::Drawing::Icon("..\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+				this->pictureBox1->ImageLocation = "..\\Il2ServerAppLateNight\\Icons\\setting-gears3.png";
+			#else
+				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
+				this->pictureBox1->ImageLocation = "..\\Release\\Icons\\setting-gears3.png";
+			#endif
 
 			
-
+			
+			
 			starLabel->ForeColor = cadetBlue;//
 
 			//start our backgroudn workers (asyncs)
@@ -144,7 +149,6 @@ namespace ServerApp {
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
-			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(Form1::typeid));
 			this->gameWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->serverWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->notifyIcon1 = (gcnew System::Windows::Forms::NotifyIcon(this->components));
@@ -265,7 +269,6 @@ namespace ServerApp {
 			// pictureBox1
 			// 
 			this->pictureBox1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->pictureBox1->ImageLocation = L"setting-gears3.png";
 			this->pictureBox1->Location = System::Drawing::Point(12, 286);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(32, 32);
@@ -323,7 +326,7 @@ namespace ServerApp {
 			this->DebugTextBox->ReadOnly = true;
 			this->DebugTextBox->Size = System::Drawing::Size(181, 36);
 			this->DebugTextBox->TabIndex = 9;
-			this->DebugTextBox->Text = L"bla bla bla ...";
+			this->DebugTextBox->Text = L"Initialising...";
 			this->DebugTextBox->Visible = false;
 			// 
 			// timer1
@@ -348,11 +351,10 @@ namespace ServerApp {
 			this->Controls->Add(this->label1);
 			this->Cursor = System::Windows::Forms::Cursors::Default;
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
 			this->MaximizeBox = false;
 			this->Name = L"Form1";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
-			this->Text = L"IL-2 Dials Server";
+			this->Text = L"Il-2 Dials";
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &Form1::Form1_FormClosing);
 			this->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseDown);
 			this->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseMove);
@@ -397,24 +399,62 @@ namespace ServerApp {
 	}
 private: void UpdateReports()
 {
+	if (clients < 0)
+	{
+		//errors
 
-	if (clients > 0)
+		if (clients == -4)
+		{
+			DebugTextBox->Text = "ERROR - Unable to bind port";
+		}
+		if (clients == -5)
+		{
+			DebugTextBox->Text = "ERROR - Unable to put server in listen state";
+		}
+		if (clients == -6)
+		{
+			DebugTextBox->Text = "ERROR - Invalid socket";
+		}
+		if (clients == -7)
+		{
+			DebugTextBox->Text = "ERROR - Unable to create client thread";
+		}
+	}
+
+	else if (clients > 0)
 	{
 		if (gameWorkerProgressReport < 6)
 		{
+			//font star
 			starLabel->ForeColor = blue;
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
+
+			#if defined _DEBUG
+				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
+			#else
+				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\blueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..Release\\Icons\\Icons\\blueStar.ico");
+			#endif
+			
 
 			DebugTextBox->Text = "Waiting for game, client connected...";
 		}
 
 		if (gameWorkerProgressReport == 6)
 		{
-			//all go, set star to red
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
+			//font star
 			starLabel->ForeColor = red;
+
+			//all go, set star to red
+			#if defined _DEBUG
+				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
+			#else
+				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\redStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\Icons\\redStar.ico");
+			#endif
+
+			
 
 			DebugTextBox->Text = "Reading data, client connected";
 		}
@@ -423,20 +463,36 @@ private: void UpdateReports()
 	{
 		if (gameWorkerProgressReport < 6)
 		{
-			//default cadet blue
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+			// font star
 			starLabel->ForeColor = cadetBlue;
+
+			//default cadet blue
+			#if defined _DEBUG
+				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
+			#else
+				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
+			#endif
+			
 
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
 		}
 
 		if (gameWorkerProgressReport == 6)
 		{
-			//yellow
-			this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
-			this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
+
+			//yellow font star			
 			starLabel->ForeColor = yellow;
+
+			#if defined _DEBUG
+				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
+			#else
+				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\yellowStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\yellowStar.ico");
+			#endif
+			
 
 			DebugTextBox->Text = "Reading data, waiting for client...";
 		}

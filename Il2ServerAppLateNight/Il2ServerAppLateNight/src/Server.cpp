@@ -203,6 +203,7 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker)
 
             if (hClientThread == NULL)
             {
+                worker->ReportProgress(-7);
                 OutputDebugString(L"Unable to create client thread");
                 OutputDebugString(L"\n");
                 std::cout << "Unable to create client thread" << std::endl;
