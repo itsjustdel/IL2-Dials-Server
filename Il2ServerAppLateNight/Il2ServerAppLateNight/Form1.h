@@ -44,6 +44,7 @@ namespace ServerApp {
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
 
 
+
 		System::Drawing::Color blue = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(18)), static_cast<System::Int32>(static_cast<System::Byte>(60
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(157)));
@@ -213,11 +214,10 @@ namespace ServerApp {
 			// 
 			// label1
 			// 
-			this->label1->Anchor = System::Windows::Forms::AnchorStyles::Top;
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26));
 			this->label1->ForeColor = System::Drawing::Color::CadetBlue;
-			this->label1->Location = System::Drawing::Point(21, 49);
+			this->label1->Location = System::Drawing::Point(10, 57);
 			this->label1->Margin = System::Windows::Forms::Padding(0);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(42, 42);
@@ -226,12 +226,11 @@ namespace ServerApp {
 			// 
 			// starLabel
 			// 
-			this->starLabel->Anchor = System::Windows::Forms::AnchorStyles::Top;
 			this->starLabel->AutoSize = true;
 			this->starLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->starLabel->ForeColor = System::Drawing::Color::CadetBlue;
-			this->starLabel->Location = System::Drawing::Point(49, 49);
+			this->starLabel->Location = System::Drawing::Point(38, 57);
 			this->starLabel->Margin = System::Windows::Forms::Padding(0);
 			this->starLabel->Name = L"starLabel";
 			this->starLabel->Size = System::Drawing::Size(43, 42);
@@ -240,11 +239,10 @@ namespace ServerApp {
 			// 
 			// label3
 			// 
-			this->label3->Anchor = System::Windows::Forms::AnchorStyles::Top;
 			this->label3->AutoSize = true;
 			this->label3->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26));
 			this->label3->ForeColor = System::Drawing::Color::CadetBlue;
-			this->label3->Location = System::Drawing::Point(81, 49);
+			this->label3->Location = System::Drawing::Point(70, 57);
 			this->label3->Margin = System::Windows::Forms::Padding(0);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(139, 42);
@@ -253,11 +251,10 @@ namespace ServerApp {
 			// 
 			// label4
 			// 
-			this->label4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
 			this->label4->AutoSize = true;
 			this->label4->Font = (gcnew System::Drawing::Font(L"Century Gothic", 24));
 			this->label4->ForeColor = System::Drawing::Color::CadetBlue;
-			this->label4->Location = System::Drawing::Point(203, 0);
+			this->label4->Location = System::Drawing::Point(171, 9);
 			this->label4->Margin = System::Windows::Forms::Padding(0);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(38, 39);
@@ -286,10 +283,10 @@ namespace ServerApp {
 				static_cast<System::Byte>(0)));
 			this->portTextBox->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
-			this->portTextBox->Location = System::Drawing::Point(101, 292);
+			this->portTextBox->Location = System::Drawing::Point(90, 290);
 			this->portTextBox->Name = L"portTextBox";
 			this->portTextBox->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			this->portTextBox->Size = System::Drawing::Size(98, 20);
+			this->portTextBox->Size = System::Drawing::Size(106, 20);
 			this->portTextBox->TabIndex = 7;
 			this->portTextBox->Text = L"11200";
 			this->portTextBox->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
@@ -304,7 +301,7 @@ namespace ServerApp {
 			this->portLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->portLabel->ForeColor = System::Drawing::Color::CadetBlue;
-			this->portLabel->Location = System::Drawing::Point(53, 291);
+			this->portLabel->Location = System::Drawing::Point(47, 290);
 			this->portLabel->Margin = System::Windows::Forms::Padding(0);
 			this->portLabel->Name = L"portLabel";
 			this->portLabel->Size = System::Drawing::Size(45, 21);
@@ -321,10 +318,10 @@ namespace ServerApp {
 			this->DebugTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->DebugTextBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->DebugTextBox->Location = System::Drawing::Point(28, 244);
+			this->DebugTextBox->Location = System::Drawing::Point(29, 244);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
-			this->DebugTextBox->Size = System::Drawing::Size(181, 36);
+			this->DebugTextBox->Size = System::Drawing::Size(167, 36);
 			this->DebugTextBox->TabIndex = 9;
 			this->DebugTextBox->Text = L"Initialising...";
 			this->DebugTextBox->Visible = false;
@@ -339,7 +336,7 @@ namespace ServerApp {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
-			this->ClientSize = System::Drawing::Size(241, 331);
+			this->ClientSize = System::Drawing::Size(218, 331);
 			this->ControlBox = false;
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
@@ -433,7 +430,7 @@ private: void UpdateReports()
 				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
 			#else
 				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\blueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..Release\\Icons\\Icons\\blueStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\blueStar.ico");
 			#endif
 			
 
@@ -451,7 +448,7 @@ private: void UpdateReports()
 				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
 			#else
 				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\redStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\Icons\\redStar.ico");
+				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\redStar.ico");
 			#endif
 
 			
@@ -634,6 +631,8 @@ private: void UpdateReports()
 		thisIcon->Visible = false;
 	}
 private: System::Void contextMenuStrip2_Opening(System::Object^ sender, System::ComponentModel::CancelEventArgs^ e) {
+}
+private: System::Void pictureBox2_Click_1(System::Object^ sender, System::EventArgs^ e) {
 }
 };
 

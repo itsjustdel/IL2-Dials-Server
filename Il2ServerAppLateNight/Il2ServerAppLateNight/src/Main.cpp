@@ -75,6 +75,8 @@ void ResetFlags()
 {
 	//addresses of cave
 	codeCaveAddress = 0;
+	cockpitInstrumentsAddress = 0;
+	altimeterAddress = 0;
 
 	//reports
 	injectedCockpit = false;
@@ -252,7 +254,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		//if we haven't received anything, start a timout timer
 		//check for 5 seconds no receive
 		auto timeInSeconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - lastChecked).count();
-		if (timeInSeconds > 5)
+		//have a seperate timer for process ID check, in case we want to check slower than the Sleep function at the bottom of the while loop
+		if (timeInSeconds > .1f)
 		{
 			//look for game process
 			processFoundCurrent = GetProcessData();
@@ -336,12 +339,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(6);
-
-
-		
-	
-
-
 
 		//don't need a fast cycle on this loop
 		Sleep(100);
