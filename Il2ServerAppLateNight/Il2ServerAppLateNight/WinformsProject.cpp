@@ -14,6 +14,6 @@ using namespace System::Windows::Forms;
 int main() {	
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
-	Application::Run(gcnew ServerApp::Form1()); 
+	Application::Run(gcnew Il2Dials::Form1()); 
 	return 0;
 }

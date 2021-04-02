@@ -35,6 +35,9 @@
     <ClInclude Include="src\PointerToFunction.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -72,13 +75,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Icon.ico" />
-    <Image Include="setting-gears.png" />
-    <Image Include="circle-64.ico" />
-    <Image Include="Icons\blueStar.ico" />
+    <ResourceCompile Include="Il2Dials.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Il-2 Dials Server.rc" />
-    <ResourceCompile Include="Resource.rc" />
+    <Image Include="Icons\cadetBlueStar.ico" />
   </ItemGroup>
 </Project>

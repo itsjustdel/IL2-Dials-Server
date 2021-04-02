@@ -2,7 +2,8 @@
 #include "src/Server.h";
 #include "src/Main.h";
 #include <chrono>;
-namespace ServerApp {
+namespace Il2Dials
+{
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -10,6 +11,7 @@ namespace ServerApp {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::Resources;
 
 
 	
@@ -24,6 +26,13 @@ namespace ServerApp {
 		int portNumber = 11200;
 		int clients = 0;
 		int gameWorkerProgressReport;
+		//loading at launch
+		;
+		System::Drawing::Icon^ cadetBlueStarIcon;
+		System::Drawing::Icon^ redStarIcon;
+		System::Drawing::Icon^ yellowStarIcon;
+		System::Drawing::Icon^ blueStarIcon;
+		
 		
 
 		//colors
@@ -53,7 +62,18 @@ namespace ServerApp {
 
 		Form1(void)
 		{
-			
+			// Grab the assembly this is being called from		
+			auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
+			//use to get working directory
+			auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";// \\cadetBlueStar.ico";
+
+			//asign icons manually, c++/clr is missing support for resource file usage
+			cadetBlueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
+			redStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "redStar.ico");
+			yellowStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");
+			blueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "blueStar.ico");
+			//set to cadet blue to start - do before initialising components
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
 
 			InitializeComponent();
 
@@ -75,22 +95,12 @@ namespace ServerApp {
 			{
 				portTextBox->Text = portNumber.ToString();
 			}
+			
+			this->notifyIcon1->Icon = cadetBlueStarIcon;
+			this->pictureBox1->ImageLocation = iconsDirectory + "setting-gears3.png";
+			//set colour of font star
 
-			//paths are different on release
-			#if defined _DEBUG
-				this->Icon = gcnew System::Drawing::Icon("..\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-				this->pictureBox1->ImageLocation = "..\\Il2ServerAppLateNight\\Icons\\setting-gears3.png";
-			#else
-				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
-				this->pictureBox1->ImageLocation = "..\\Release\\Icons\\setting-gears3.png";
-			#endif
-
-			
-			
-			
-			starLabel->ForeColor = cadetBlue;//
+			starLabel->ForeColor = cadetBlue;
 
 			//start our backgroudn workers (asyncs)
 			serverWorker->RunWorkerAsync();
@@ -123,18 +133,7 @@ namespace ServerApp {
 	private: System::Windows::Forms::Label^ portLabel;
 	private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	private: System::Windows::Forms::Timer^ timer1;
-
-
-
-
-
-
-
-
-
-
 	private: System::ComponentModel::IContainer^ components;
-
 
 	private:
 		/// <summary>
@@ -337,7 +336,6 @@ namespace ServerApp {
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->ClientSize = System::Drawing::Size(218, 331);
-			this->ControlBox = false;
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
 			this->Controls->Add(this->portTextBox);
@@ -425,13 +423,8 @@ private: void UpdateReports()
 			//font star
 			starLabel->ForeColor = blue;
 
-			#if defined _DEBUG
-				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\blueStar.ico");
-			#else
-				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\blueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\blueStar.ico");
-			#endif
+			this->Icon = blueStarIcon;
+			this->notifyIcon1->Icon = blueStarIcon;
 			
 
 			DebugTextBox->Text = "Waiting for game, client connected...";
@@ -443,14 +436,9 @@ private: void UpdateReports()
 			starLabel->ForeColor = red;
 
 			//all go, set star to red
-			#if defined _DEBUG
-				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\redStar.ico");
-			#else
-				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\redStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\redStar.ico");
-			#endif
-
+			
+			this->Icon = redStarIcon;
+			this->notifyIcon1->Icon = redStarIcon;
 			
 
 			DebugTextBox->Text = "Reading data, client connected";
@@ -464,13 +452,10 @@ private: void UpdateReports()
 			starLabel->ForeColor = cadetBlue;
 
 			//default cadet blue
-			#if defined _DEBUG
-				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\cadetBlueStar.ico");
-			#else
-				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\cadetBlueStar.ico");
-			#endif
+			
+			this->Icon = cadetBlueStarIcon;
+			this->notifyIcon1->Icon = cadetBlueStarIcon;
+			
 			
 
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
@@ -482,13 +467,9 @@ private: void UpdateReports()
 			//yellow font star			
 			starLabel->ForeColor = yellow;
 
-			#if defined _DEBUG
-				this->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("C:\\Users\\itsju\\Documents\\Visual Studio Projects\\Il2ServerLateNight\\Il2ServerAppLateNight\\Il2ServerAppLateNight\\Icons\\yellowStar.ico");
-			#else
-				this->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\yellowStar.ico");
-				this->notifyIcon1->Icon = gcnew System::Drawing::Icon("..\\Release\\Icons\\yellowStar.ico");
-			#endif
+		
+			this->Icon = yellowStarIcon;
+			this->notifyIcon1->Icon = yellowStarIcon;
 			
 
 			DebugTextBox->Text = "Reading data, waiting for client...";
