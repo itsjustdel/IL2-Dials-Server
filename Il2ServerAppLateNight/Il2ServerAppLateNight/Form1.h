@@ -2,6 +2,9 @@
 #include "src/Server.h";
 #include "src/Main.h";
 #include <chrono>;
+#include <string>
+
+
 namespace Il2Dials
 {
 
@@ -52,8 +55,6 @@ namespace Il2Dials
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
 
-
-
 		System::Drawing::Color blue = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(18)), static_cast<System::Int32>(static_cast<System::Byte>(60
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(157)));
@@ -63,9 +64,9 @@ namespace Il2Dials
 		Form1(void)
 		{
 			// Grab the assembly this is being called from		
-			auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
+			//auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
 			//use to get working directory
-			auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";// \\cadetBlueStar.ico";
+			auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";
 
 			//asign icons manually, c++/clr is missing support for resource file usage
 			cadetBlueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
@@ -77,11 +78,17 @@ namespace Il2Dials
 
 			InitializeComponent();
 
-			//config
-			//(File.Exists(curFile)
-			if (System::IO::File::Exists("config.txt"))
+
+			
+			//config			
+			char* appDataPath = getenv("LOCALAPPDATA");
+			std::string pathString(appDataPath);
+			pathString.append("\\Il-2 Dials\\IL2DialsConfig.txt");			
+			String^ pathSystemString = gcnew String(pathString.c_str());
+			
+			if (System::IO::File::Exists(pathSystemString))
 			{
-				System::IO::StreamReader^ reader = gcnew System::IO::StreamReader("config.txt");
+				System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(pathSystemString);
 
 				//check text is legal
 
@@ -95,7 +102,11 @@ namespace Il2Dials
 			{
 				portTextBox->Text = portNumber.ToString();
 			}
-			
+
+			//send to server
+			int value = Convert::ToInt32(portTextBox->Text);
+			SetPortNumber(value);
+
 			this->notifyIcon1->Icon = cadetBlueStarIcon;
 			this->pictureBox1->ImageLocation = iconsDirectory + "setting-gears3.png";
 			//set colour of font star
@@ -327,7 +338,7 @@ namespace Il2Dials
 			// 
 			// timer1
 			// 
-			this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
+			//this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
 			// 
 			// Form1
 			// 
@@ -394,6 +405,11 @@ namespace Il2Dials
 	}
 private: void UpdateReports()
 {
+	//for icon loading
+	auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
+	//use to get working directory
+	auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";// \\cadetBlueStar.ico";
+
 	if (clients < 0)
 	{
 		//errors
@@ -418,12 +434,14 @@ private: void UpdateReports()
 
 	else if (clients > 0)
 	{
+		
+
 		if (gameWorkerProgressReport < 6)
 		{
 			//font star
 			starLabel->ForeColor = blue;
 
-			this->Icon = blueStarIcon;
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "blueStar.ico");
 			this->notifyIcon1->Icon = blueStarIcon;
 			
 
@@ -437,7 +455,7 @@ private: void UpdateReports()
 
 			//all go, set star to red
 			
-			this->Icon = redStarIcon;
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "redStar.ico");
 			this->notifyIcon1->Icon = redStarIcon;
 			
 
@@ -453,7 +471,7 @@ private: void UpdateReports()
 
 			//default cadet blue
 			
-			this->Icon = cadetBlueStarIcon;
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");;
 			this->notifyIcon1->Icon = cadetBlueStarIcon;
 			
 			
@@ -468,7 +486,7 @@ private: void UpdateReports()
 			starLabel->ForeColor = yellow;
 
 		
-			this->Icon = yellowStarIcon;
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");;
 			this->notifyIcon1->Icon = yellowStarIcon;
 			
 
@@ -567,12 +585,28 @@ private: void UpdateReports()
 			//stop form making noise
 			e->SuppressKeyPress = true;
 
+			
+			int value = Convert::ToInt32(portTextBox->Text);
+			//tell server 
+			SetPortNumber(value);
+
+			
 			//remmember in file format
-			System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter("config.txt"); //open the file for writing.
+			char* appDataPath = getenv("LOCALAPPDATA");
+			std::string pathString(appDataPath);
+			pathString.append("\\Il-2 Dials\\IL2DialsConfig.txt");
+			String^ pathSystemString = gcnew String(pathString.c_str());
+			System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter(pathSystemString); //open the file for writing.
+
 			std:String^ portNumber = portTextBox->Text->ToString();
 			writer->Write(portNumber); //write the current date to the file. change this with your date or something.
 			writer->Close(); //remember to close the file again.
 			delete writer;// writer->Dispose(); //remember to dispose it from the memory.
+			
+
+
+			
+
 
 
 			//get rid of the icon in the systray
@@ -584,24 +618,6 @@ private: void UpdateReports()
 
 		}
 
-	}
-
-	private: System::Void timer1_Tick(System::Object^ sender, System::EventArgs^ e)
-	{
-		return;
-		//fires after interval has passed
-		//stop that timer
-		timer1->Stop();
-
-		//restart app on port change, blocking call in async worker complicates things, this is simpler	
-		System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter("config.txt"); //open the file for writing.
-		std:String^ portNumber = portTextBox->Text->ToString();
-		writer->Write(portNumber); //write the current date to the file. change this with your date or something.
-		writer->Close(); //remember to close the file again.
-		delete writer;// writer->Dispose(); //remember to dispose it from the memory.
-
-		Application::Restart();
-		Environment::Exit(0);
 	}
 
 

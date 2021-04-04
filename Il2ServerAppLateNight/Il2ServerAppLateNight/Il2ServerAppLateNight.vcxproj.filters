@@ -72,12 +72,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="Il2Dials.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Icons\cadetBlueStar.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Il2DialsConfig.txt" />
   </ItemGroup>
 </Project>
