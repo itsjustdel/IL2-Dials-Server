@@ -32,9 +32,19 @@ void print_addr(PIP_ADAPTER_UNICAST_ADDRESS ua)
 	printf("%s\n", buf);
 }
 
-std::vector<std::string> IpAddresses()
+std::vector<std::string> IpAddresses()//this canr eturn more than 1, not using
 {
+
+
 	std::vector<std::string> ipv4Addresses;
+
+
+	WSAData d;
+	if (WSAStartup(MAKEWORD(2, 2), &d) != 0) {
+		return ipv4Addresses;
+	}
+
+
 	DWORD rv, size;
 	PIP_ADAPTER_ADDRESSES adapter_addresses, aa;
 	PIP_ADAPTER_UNICAST_ADDRESS ua;
@@ -72,7 +82,7 @@ std::vector<std::string> IpAddresses()
 				
 				//add to list if not loopback function ("127.0.0.1!)
 				if (socketAddress!= loopback)
-					ipv4Addresses.push_back((socketAddress));
+					ipv4Addresses.push_back(socketAddress);
 				
 			}
 				
@@ -82,23 +92,67 @@ std::vector<std::string> IpAddresses()
 
 	free(adapter_addresses);
 
+	WSACleanup();
+	return ipv4Addresses;
+}
+
+std::vector<std::string> GetMyIPAddress()
+{
+	std::vector<std::string> ipv4Addresses;
+	WSADATA WSAData;
+
+	// Initialize winsock dll
+	if (::WSAStartup(MAKEWORD(1, 0), &WSAData))
+	{
+		//AfxMessageBox(_T("Failed to find the WinSock DLL"));
+		return ipv4Addresses;
+	}
+
+	char szHostName[128] = "";
+
+	//get the standard host name of the machine
+	if (::gethostname(szHostName, sizeof(szHostName)))
+	{
+		//AfxMessageBox(_T("Failed to get the host name"));
+	}
+
+
+	struct sockaddr_in SocketAddress;
+	struct hostent* pHost = 0;
+
+	// Get local IP addresses
+	pHost = ::gethostbyname(szHostName);
+
+	if (!pHost)
+	{
+		//AfxMessageBox(_T("Failed to get the host information."));
+		return ipv4Addresses;
+	}
+
+	char aszIPAddresses[10][16]; // maximum of ten IP addresses
+
+	for (int nCount = 0; ((pHost->h_addr_list[nCount]) && (nCount < 10)); ++nCount)
+	{
+		memcpy(&SocketAddress.sin_addr, pHost->h_addr_list[nCount], pHost->h_length);
+		strcpy(aszIPAddresses[nCount], inet_ntoa(SocketAddress.sin_addr));
+	}
+
+	//convert to readable format with inte-ntop (specialised function for this purpose)
+	char str[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(SocketAddress.sin_addr), str, INET_ADDRSTRLEN);
+	
+	ipv4Addresses.push_back(str);
+
+	// Cleanup
+	WSACleanup();
+
 	return ipv4Addresses;
 }
 
 std::vector<std::string> GetLocalIPAddresses()
 {
-
 	std::vector<std::string> ipv4Addresses;
-
-	
-	WSAData d;
-	if (WSAStartup(MAKEWORD(2, 2), &d) != 0) {
-		return ipv4Addresses;
-	}
-
-	ipv4Addresses = IpAddresses();
-
-	WSACleanup();
+	ipv4Addresses = GetMyIPAddress();
 
 	return ipv4Addresses;
 }

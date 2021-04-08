@@ -413,7 +413,18 @@ private: void UpdateReports()
 	if (clients < 0)
 	{
 		//errors
-
+		if (clients == -1)
+		{
+			DebugTextBox->Text = "ERROR - Unable to find local IP";
+		}
+		if (clients == -2)
+		{
+			DebugTextBox->Text = "ERROR - Unable to initialise socket";
+		}
+		if (clients == -3)
+		{
+			DebugTextBox->Text = "ERROR - Unable to create server socket";
+		}
 		if (clients == -4)
 		{
 			DebugTextBox->Text = "ERROR - Unable to bind port";
@@ -434,8 +445,6 @@ private: void UpdateReports()
 
 	else if (clients > 0)
 	{
-		
-
 		if (gameWorkerProgressReport < 6)
 		{
 			//font star

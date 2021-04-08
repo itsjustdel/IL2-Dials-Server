@@ -55,8 +55,6 @@ bool ClientInList(CLIENT_INFO clientInfo)
 
 int StartServer(System::ComponentModel::BackgroundWorker^ worker)
 {
-   // std::async(ClientConnectionChecker); -- new backgorund worker to be made after client connect
-
     OutputDebugString(L"Starting Server");
     OutputDebugString(L"\n");
 
