@@ -27,7 +27,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_6518B53775A1401C90D5177F9CE26B4B"
+        "MsmKey" = "8:_C17C4B234A8347258128DC09DDDCB3A1"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -64,7 +64,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6518B53775A1401C90D5177F9CE26B4B"
+        "OwnerKey" = "8:_C17C4B234A8347258128DC09DDDCB3A1"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -92,6 +92,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -174,14 +182,14 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6518B53775A1401C90D5177F9CE26B4B"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C17C4B234A8347258128DC09DDDCB3A1"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.7764.20746, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.7768.24439, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
-                    "_6518B53775A1401C90D5177F9CE26B4B"
+                    "_C17C4B234A8347258128DC09DDDCB3A1"
                     {
                     "Name" = "8:IL-2 Dials Server.exe"
                     "Attributes" = "3:512"
