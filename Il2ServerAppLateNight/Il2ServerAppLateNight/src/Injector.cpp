@@ -10,7 +10,7 @@
 //could need to write a parser in future
 char originalLineCockpit[8];//7 for mov inst, 1 for ret
 char originalLineAltimeter[8];
-
+char originalLinePlaneType[8];
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
 {
@@ -170,6 +170,39 @@ bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
+bool InjectionPlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+
+	//src is beginning of function but we will inject at the end
+	
+	src += 0x454;
+	//note, replicated in cave code
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x45);//0x38 is after the other code in the cave stops
+
+	size_t bytesWritten = 0;
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLinePlaneType, 0x08, &bytesWritten);
+
+	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
+	BYTE jump = 0xE9;
+
+	//write jump opcode
+	WriteProcessMemory(hProcess, (LPVOID)src, &jump, sizeof(jump), &bytesWritten);
+	//work out relative address
+	//cave - hook - 5 (jmp)
+	//Relative address. Using 32bit data type due to close nature of jump
+	uintptr_t relativeAddress = (uintptr_t)toCave - src - 5;
+	LPVOID rA = (LPVOID)relativeAddress;
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
+	//we need to add a nope to pad out memory so we jump back at same point we left
+	BYTE nops[2] = { 0x90, 0x90 };
+	//add a nop
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);
+
+
+
+	return 1;
+}
+
 bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//cave - where we put our own code 
@@ -290,6 +323,41 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
+bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
+	//add to cave,( uintptr_t for addition)
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x45);//0x?? is after other code stops
+	//cave - where we put our own code alongside the original
+	size_t bytesWritten = 0;
+
+	//first of all write the original function back in
+	//and write orignal back in after our code
+	WriteProcessMemory(hProcess, toCave, &originalLinePlaneType, 7, &bytesWritten);//7 is without ret
+
+	//the pointer value we want is stored in r11, so move r11 to point in our cave for later retrieval
+	//bytes ex. 4C 89 1D 29 00 00 00
+	BYTE r11ToMem[3] = { 0x4C, 0x89, 0x1D };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7), r11ToMem, sizeof(r11ToMem), &bytesWritten);
+
+	//relative address from inst, but we want to be "0xAO" after code cave start
+	//if we look at the debugger we know we are at line 0x45
+	// - 0xA0 - 0x4C is our relative jump
+	LPVOID targetAddress = (LPVOID)(0xA0 - 0x4C - 0x07); 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem)), &targetAddress, sizeof(LPVOID), &bytesWritten);
+
+	//jump to return address
+	BYTE jump = 0xE9;
+	//write 0x09 (jmp) 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(LPVOID)), &jump, sizeof(jump), &bytesWritten);//HERE JUMP GOIONG IN WRONG PLACE?
+
+	//0x17 takes us back to start of "GetPlaneType" function and 0x45B takes us where we need ot jump back to
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave +( 0x17 - 0x45B))); 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(LPVOID) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
+
+	return 1;
+}
+
 
 
 
@@ -335,6 +403,28 @@ bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddr
 
 	//write out own process in our own allocated memory - 
 	CaveAltimeter(hProcess, src, codeCaveAddress);
+
+	//put write protections back to what they were before we injected
+	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);
+
+	//return the start of our allocated memory struct
+	return 1;
+}
+
+bool HookPlaneType(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+{
+	//save old read/write access to put back to how it was later
+	DWORD dwOld;
+
+	if (!VirtualProtectEx(hProcess, pSrc, size, PAGE_EXECUTE_READWRITE, &dwOld))
+		return 0;
+
+	uintptr_t src = (uintptr_t)pSrc;
+	//insert jump in to original code
+	InjectionPlaneType(hProcess, src, codeCaveAddress);
+
+	//write out own process in our own allocated memory - 
+	CavePlaneType(hProcess, src, codeCaveAddress);
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);

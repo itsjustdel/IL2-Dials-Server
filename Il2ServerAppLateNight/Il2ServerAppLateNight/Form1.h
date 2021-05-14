@@ -445,7 +445,7 @@ private: void UpdateReports()
 
 	else if (clients > 0)
 	{
-		if (gameWorkerProgressReport < 6)
+		if (gameWorkerProgressReport < 8)
 		{
 			//font star
 			starLabel->ForeColor = blue;
@@ -457,7 +457,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, client connected...";
 		}
 
-		if (gameWorkerProgressReport == 6)
+		if (gameWorkerProgressReport == 8)
 		{
 			//font star
 			starLabel->ForeColor = red;
@@ -473,7 +473,7 @@ private: void UpdateReports()
 	}
 	else if (clients == 0)
 	{
-		if (gameWorkerProgressReport < 6)
+		if (gameWorkerProgressReport < 8)
 		{
 			// font star
 			starLabel->ForeColor = cadetBlue;
@@ -488,7 +488,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
 		}
 
-		if (gameWorkerProgressReport == 6)
+		if (gameWorkerProgressReport == 8)
 		{
 
 			//yellow font star			

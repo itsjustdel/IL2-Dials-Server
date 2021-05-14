@@ -5,15 +5,11 @@
 
 void CaveRecovered();
 
-int InjectCockpitInstruments();
+//int InjectCockpitInstruments();
 
-bool GetInjectedCockpit();
-
-intptr_t AOBScanCockpitInstruments();
+//bool GetInjectedCockpit();
 
 void GetProcessData();
-
-intptr_t GetAOBResultCockpitInstruments();
 
 int Injector(System::ComponentModel::BackgroundWorker^);
 

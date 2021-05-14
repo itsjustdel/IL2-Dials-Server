@@ -31,10 +31,12 @@ double altimeterValues[altimeterValuesLength];
 //main process flags
 bool injectedCockpit;
 bool injectedAltimeter;
+bool injectedPlaneType;
 
 //functionAddresses
 LPCVOID cockpitInstrumentsAddress;
 LPCVOID altimeterAddress;
+LPCVOID planeTypeAddress;
 
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
@@ -77,7 +79,7 @@ void ResetFlags()
 	codeCaveAddress = 0;
 	cockpitInstrumentsAddress = 0;
 	altimeterAddress = 0;
-
+	planeTypeAddress = 0;
 	//reports
 	injectedCockpit = false;
 	injectedAltimeter = false;
@@ -278,13 +280,26 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		}
 
+		//get plane name - must be done at start of mission
+		if (planeTypeAddress == 0)
+		{
+			planeTypeAddress = PointerToFunction("getPlaneType", hProcessIL2, moduleRSE);
+			if (planeTypeAddress == 0)
+			{
+				worker->ReportProgress(1);
+
+				continue;
+			}
+		}
+
+
 		//find getPointerToCockpitinstruments location, if we haven't found already
 		if (cockpitInstrumentsAddress == 0)
 		{
 			cockpitInstrumentsAddress = PointerToFunction("getPointerToCockpitInstruments", hProcessIL2, moduleRSE);
 			if (cockpitInstrumentsAddress == 0)
 			{
-				worker->ReportProgress(1);
+				worker->ReportProgress(2);
 				continue;
 			}
 		}
@@ -296,7 +311,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			altimeterAddress = PointerToFunction("getPointerToAltimeter", hProcessIL2, moduleRSE);
 			if (altimeterAddress == 0)
 			{
-				worker->ReportProgress(2);
+				worker->ReportProgress(3);
 				continue;
 			}
 		}
@@ -306,9 +321,9 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		{
 			if (!CodeCave(hProcessIL2, (uintptr_t)cockpitInstrumentsAddress, moduleRSE, codeCaveAddress))
 			{
-				worker->ReportProgress(3);
+				worker->ReportProgress(4);
 				continue;
-			}
+			}			
 		}
 
 		//inject cockpit		
@@ -318,7 +333,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			if (!injectedCockpit)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(4);
+				worker->ReportProgress(5);
 				continue;
 			}
 
@@ -332,13 +347,25 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			if (!injectedAltimeter)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(5);
+				worker->ReportProgress(6);
+				continue;
+			}
+		}
+
+		//inject getplanetype
+		if (!injectedPlaneType)
+		{		
+			injectedPlaneType = HookPlaneType(hProcessIL2, (void*)(planeTypeAddress), size, codeCaveAddress);
+			if (!injectedPlaneType)
+			{
+				//Hook function overwrites original code and writes to our code cave
+				worker->ReportProgress(7);
 				continue;
 			}
 		}
 
 		//we got here, good, tell the interface
-		worker->ReportProgress(6);
+		worker->ReportProgress(8);
 
 		//don't need a fast cycle on this loop
 		Sleep(100);

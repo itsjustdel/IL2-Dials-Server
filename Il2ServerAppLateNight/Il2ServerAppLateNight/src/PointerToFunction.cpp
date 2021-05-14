@@ -148,6 +148,7 @@ LPCVOID PointerToFunction(std::string functionName, HANDLE hProcessIL2,MODULEENT
 			delete[] ExportOrdinalTable;
 
 			/* Success!!! */
+			
 			return functionAddress;
 		}
 		/* Wrong function let's try the next... */
