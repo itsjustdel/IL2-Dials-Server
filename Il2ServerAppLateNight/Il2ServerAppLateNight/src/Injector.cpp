@@ -301,7 +301,7 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	BYTE raxToMem[2] = { 0x48, 0xA3 };	
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 ), raxToMem, sizeof(raxToMem), &bytesWritten);
 
-	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x2f +0x80);
+	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x2f +0x80);//using DWORD now?
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 + sizeof(raxToMem)), &targetAddress, sizeof(LPVOID), &bytesWritten);	
 
 	//jump to return address
@@ -343,17 +343,17 @@ bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//relative address from inst, but we want to be "0xAO" after code cave start
 	//if we look at the debugger we know we are at line 0x45
 	// - 0xA0 - 0x4C is our relative jump
-	LPVOID targetAddress = (LPVOID)(0xA0 - 0x4C - 0x07); 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem)), &targetAddress, sizeof(LPVOID), &bytesWritten);
+	DWORD targetAddress = (DWORD)(0xA0 - 0x4C - 0x07); 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem)), &targetAddress, sizeof(DWORD), &bytesWritten);
 
 	//jump to return address
 	BYTE jump = 0xE9;
 	//write 0x09 (jmp) 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(LPVOID)), &jump, sizeof(jump), &bytesWritten);//HERE JUMP GOIONG IN WRONG PLACE?
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(DWORD)), &jump, sizeof(jump), &bytesWritten);
 
-	//0x17 takes us back to start of "GetPlaneType" function and 0x45B takes us where we need ot jump back to
-	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave +( 0x17 - 0x45B))); 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(LPVOID) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
+	//0x13 takes us back to start of "GetPlaneType" function and 0x45B takes us where we need ot jump back to
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave +(0x13 - 0x45B))); //+( 0x1 - 0x45B))
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(DWORD) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
 
 	return 1;
 }

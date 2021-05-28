@@ -19,6 +19,9 @@
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 
+
+float version = 0.2f;
+
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
 
@@ -27,6 +30,9 @@ const size_t cockpitValuesLength = 20;
 double cockpitValues[cockpitValuesLength];
 const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
+//where we hold planeTpye string
+std::string planeType;
+
 
 //main process flags
 bool injectedCockpit;
@@ -53,19 +59,30 @@ float testValues[3];
 void CaveRecovered()
 {
 	injectedCockpit = true;
-	injectedAltimeter = true;
-	
+	injectedAltimeter = true;	
 }
 
 //server uses Gets to grab data before sending it out
-double GetAltitude()
+
+
+float GetIL2DialsVersion()
 {
-	return altimeterValues[5];//check
+	return version;
+}
+
+std::string GetPlaneType()
+{
+	return planeType;
 }
 
 double GetMMHg()
 {
 	return altimeterValues[8];
+}
+
+double GetAltitude()
+{
+	return altimeterValues[5];
 }
 
 double GetAirspeedFromCockpitStruct()
@@ -171,12 +188,48 @@ bool AltimeterDataStruct(LPVOID structStart)
 	return 1;
 }
 
+bool PlaneTypeDataStruct(LPVOID structStart)
+{
+	//read string stored at "structStart"
+	char rawData[32];
+	ReadProcessMemory(hProcessIL2, structStart, &rawData, 32, NULL);
+	std::string planeName;
+
+	for (size_t i = 0; i < 32; i++)
+	{
+
+		
+		planeName.push_back(rawData[i]);
+	
+	}
+
+	planeType = planeName;
+
+	return 1;
+}
+
+
+bool ReadPlaneType()
+{
+
+	//injection saves alt. pointer at code cave's address + 0x80
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0xA0);
+	LPVOID toPlaneType = PointerToDataStruct(hProcessIL2, addressToRead);
+
+	if (toPlaneType != 0)
+	{
+		PlaneTypeDataStruct(toPlaneType);
+		return 1;
+	}
+
+	return 0;
+}
 
 
 bool ReadCockpitInstruments()
 {
 
-	//keep reading this value as if we change plane it can change
+	//keep reading this value as if we change plane it can change -- this functionality is redundant - get plane type can only be read at start of mission
 	//injection saves cockpit pointer at code cave's address + 0x60
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x60);
 	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, addressToRead );
@@ -190,11 +243,10 @@ bool ReadCockpitInstruments()
 	return 0;
 }
 
-
 bool ReadAltimeter()
 {
 
-	//keep reading this value as if we change plane it can change
+	//keep reading this value as if we change plane it can change -- this functionality is redundant - get plane type can only be read at start of mission
 	//injection saves alt. pointer at code cave's address + 0x80
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x80);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
@@ -209,6 +261,8 @@ bool ReadAltimeter()
 }
 
 
+
+
 void ReadTest()
 {
 	//we represent the data with floats in the app, so let's convert now and save network traffic
@@ -216,6 +270,8 @@ void ReadTest()
 	//read memory only when requested
 	ReadCockpitInstruments();
 	ReadAltimeter();
+	ReadPlaneType();
+
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
 	floatArray[0] = GetAltitude();
@@ -234,7 +290,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 	while (true)
 	{
 
-		bool test = false;
+		bool test = true;
 		if (test)
 		{
 
@@ -244,7 +300,10 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 			cockpitValues[14] += 1;
 
-			ReadTest();
+			planeType = "TestyPlane_7B";
+
+
+			//ReadTest();
 
 			Sleep(1);
 			continue;

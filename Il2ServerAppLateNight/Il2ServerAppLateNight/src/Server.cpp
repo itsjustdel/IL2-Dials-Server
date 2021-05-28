@@ -349,23 +349,78 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             //we represent the data with floats in the app, so let's convert now and save network traffic
             float floatArray[3];            
             //read memory only when requested
+            ReadPlaneType();
             ReadCockpitInstruments();
             ReadAltimeter();
+      
+            //packing differecnt data types in to one char array for sending (serialisation)
+            //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
+            
+            //version
+            float programVersion = GetIL2DialsVersion();
+            //planeType
+            std::string planeType = GetPlaneType();
+            //to send over tcp we need string size and data            
             
             //if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
             floatArray[0] = GetAltitude();            
             //mgh
             floatArray[1] =  GetMMHg();
             //airspeed
-            floatArray[2] = GetAirspeedFromCockpitStruct();                
+            floatArray[2] = GetAirspeedFromCockpitStruct();
 
-            //serialise
-            int nCntSend = 0;
-            char* sendBuffer = (char*)floatArray;
-            int sendLength = sizeof(floatArray);                           
+            // The buffer we will be writing bytes into
+            //make space for
+            //program version
+            //planetype string size
+            //planetype string data size
+            //float array containing instrument/dial values
+            //64 bit string (testing needed)
+            unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
+
             
+            // A pointer we will advance whenever we write data
+            unsigned char* p = outBuf;
+
+            // Serialize "program version" into outBuf
+            //using uint32_t when serializing            
+            //copy float to uint32 safely
+            uint32_t fbits = 0;
+            memcpy(&fbits, &programVersion, sizeof(programVersion));
+            //copy to buffer
+            memcpy(p, &fbits, sizeof(fbits));
+            p += sizeof(fbits);
+            
+            // Serialize "planeType string length" into outBuf
+            //size_t to uint32
+            uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is size_t and not the size of the data in the array
+            memcpy(p, &neX, sizeof(neX));
+            p += sizeof(neX);            
+
+            //string data already in correct format - copy to buffer            
+            memcpy(p, planeType.data(), 64);
+            p += 64;
+            
+            //float array to buffer
+            //we know how big this float array will be so we don't need to send size
+            memcpy(p, (char*)floatArray, sizeof(floatArray));
+           // p += planeType.size();//not needed
+
+
+            //send
+            int nCntSend = 0;
+            //char* sendBuffer = (char*)floatArray;
+            //int sendLength = sizeof(floatArray);
+            char* sendBuffer = (char*)outBuf;
+            int sendLength =  sizeof(outBuf);
+            
+
+
             // send( ) may not be able to send the complete data in one go.
             // So try sending the data in multiple requests
+            
+            
+
             while ((nCntSend = send(clientInfo.hClientSocket, sendBuffer, sendLength, 0) != sendLength))
             {
                 if (nCntSend == -1)
@@ -381,6 +436,8 @@ BOOL WINAPI ClientThread(LPVOID lpData)
                 sendBuffer += nCntSend;
                 sendLength -= nCntSend;
             }
+
+            
         }
     }
 
