@@ -191,15 +191,20 @@ bool AltimeterDataStruct(LPVOID structStart)
 bool PlaneTypeDataStruct(LPVOID structStart)
 {
 	//read string stored at "structStart"
-	char rawData[32];
-	ReadProcessMemory(hProcessIL2, structStart, &rawData, 32, NULL);
+	char rawData[64];
+	ReadProcessMemory(hProcessIL2, structStart, &rawData, 64, NULL);
 	std::string planeName;
 
-	for (size_t i = 0; i < 32; i++)
-	{
+	for (size_t i = 0; i < 64; i++)
+	{	
+		//look for null terminated string
+		if (rawData[i] == 0x00)
+			break;
 
-		
+
 		planeName.push_back(rawData[i]);
+
+
 	
 	}
 
@@ -215,12 +220,10 @@ bool ReadPlaneType()
 	//injection saves alt. pointer at code cave's address + 0x80
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0xA0);
 	LPVOID toPlaneType = PointerToDataStruct(hProcessIL2, addressToRead);
-
-	if (toPlaneType != 0)
-	{
-		PlaneTypeDataStruct(toPlaneType);
-		return 1;
-	}
+		
+	PlaneTypeDataStruct(toPlaneType);
+	return 1;
+	
 
 	return 0;
 }
@@ -229,7 +232,6 @@ bool ReadPlaneType()
 bool ReadCockpitInstruments()
 {
 
-	//keep reading this value as if we change plane it can change -- this functionality is redundant - get plane type can only be read at start of mission
 	//injection saves cockpit pointer at code cave's address + 0x60
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x60);
 	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, addressToRead );
@@ -246,8 +248,8 @@ bool ReadCockpitInstruments()
 bool ReadAltimeter()
 {
 
-	//keep reading this value as if we change plane it can change -- this functionality is redundant - get plane type can only be read at start of mission
-	//injection saves alt. pointer at code cave's address + 0x80
+
+	//injection saves alt. pointer at code cave's address + 0xxx
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x80);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
 	
@@ -290,7 +292,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 	while (true)
 	{
 
-		bool test = true;
+		bool test = false;
 		if (test)
 		{
 
