@@ -99,6 +99,7 @@ bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& c
 	else
 	{
 		//create cave
+		//codeCaveAddress = AllocateMemoryUp(hProcess, (uintptr_t)moduleRSE.modBaseAddr);
 		codeCaveAddress = AllocateMemoryUp(hProcess, (uintptr_t)moduleRSE.modBaseAddr);
 
 		if (codeCaveAddress == 0)
@@ -173,14 +174,11 @@ bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 bool InjectionPlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 
-	//src is beginning of function but we will inject at the end
-	
-	src += 0x454;
 	//note, replicated in cave code
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x45);//0x38 is after the other code in the cave stops
 
 	size_t bytesWritten = 0;
-	ReadProcessMemory(hProcess, (LPVOID)src, &originalLinePlaneType, 0x08, &bytesWritten);
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLinePlaneType,8, &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -194,9 +192,10 @@ bool InjectionPlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	LPVOID rA = (LPVOID)relativeAddress;
 	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
 	//we need to add a nope to pad out memory so we jump back at same point we left
-	BYTE nops[2] = { 0x90, 0x90 };
+	BYTE nops[3] = { 0x90, 0x90, 0x90 };
 	//add a nop
 	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);
+
 
 
 
@@ -260,7 +259,7 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 								 0x0F, 0x84, 0x05, 0x00, 0x00, 0x00,// jump if equal (je is 0x84) / if not equal we jump to end
 								 0xE9, //jmp to..
 								 0x07, 0x00, 0x00, 0x00,//2 line jump -1
-								 0x48, 0x89, 0x1D, 0x3D, 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] (48 89 1D is move rbx to.. the last four is the relative jump
+								 0x48, 0x89, 0x1D, (0x120 -0x23), 0x00, 0x00, 0x00 };// ,  //mov rbx to [memory] (48 89 1D is move rbx to.. the last four is the relative jump
 																										
 								 
 	//write above array
@@ -301,7 +300,7 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	BYTE raxToMem[2] = { 0x48, 0xA3 };	
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 ), raxToMem, sizeof(raxToMem), &bytesWritten);
 
-	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x2f +0x80);//using DWORD now?
+	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x2f +0x140);//using DWORD now?
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 + sizeof(raxToMem)), &targetAddress, sizeof(LPVOID), &bytesWritten);	
 
 	//jump to return address
@@ -325,6 +324,7 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
+	size_t totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x45);//0x?? is after other code stops
@@ -333,27 +333,43 @@ bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
-	WriteProcessMemory(hProcess, toCave, &originalLinePlaneType, 7, &bytesWritten);//7 is without ret
+	WriteProcessMemory(hProcess, toCave, &originalLinePlaneType, 8, &bytesWritten);//5 is enough for the jump plus address
+	totalWritten += bytesWritten;
+
+
+
+	//Bytes to check if rax is 0 or 1 and then push rcx 
+	//cmp rax,00
+	//48 83 F8 00 
+	//jne 5 bytes
+	//0F 85 05 00 00 00 
+	//rcx to .. a nice place
+	//E9 E2 59 E7 02 48 89 0D 25 00 00 00 //(25 00 00 00) being the relative address in the example
+	//jmp back to original code
+	//E9 D6 59 E7 02
 
 	//the pointer value we want is stored in r11, so move r11 to point in our cave for later retrieval
 	//bytes ex. 4C 89 1D 29 00 00 00
-	BYTE r11ToMem[3] = { 0x4C, 0x89, 0x1D };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7), r11ToMem, sizeof(r11ToMem), &bytesWritten);
+	BYTE cmp[4] = { 0x48, 0x83, 0xF8, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+ totalWritten), cmp, sizeof(cmp), &bytesWritten);
+	totalWritten += bytesWritten;
 
-	//relative address from inst, but we want to be "0xAO" after code cave start
-	//if we look at the debugger we know we are at line 0x45
-	// - 0xA0 - 0x4C is our relative jump
-	DWORD targetAddress = (DWORD)(0xA0 - 0x4C - 0x07); 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem)), &targetAddress, sizeof(DWORD), &bytesWritten);
+	BYTE jne[6] = { 0x0F, 0x85, 0x05, 0x00, 0x00, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jne, sizeof(jne), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	BYTE rcxToMem[12] = { 0xE9,  0xE2, 0x59, 0xE7, 0x02, 0x48, 0x89, 0x0D, (0x100 - 0x63), 0x00, 0x00, 0x00 }; //sum in brackets to get relative address
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
+	totalWritten += bytesWritten;
 
 	//jump to return address
 	BYTE jump = 0xE9;
 	//write 0x09 (jmp) 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(DWORD)), &jump, sizeof(jump), &bytesWritten);
-
-	//0x13 takes us back to start of "GetPlaneType" function and 0x45B takes us where we need ot jump back to
-	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave +(0x13 - 0x45B))); //+( 0x1 - 0x45B))
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+7 + sizeof(r11ToMem) + sizeof(DWORD) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &jump, sizeof(jump), &bytesWritten);
+	totalWritten += bytesWritten;
+	//bytes written takes us back to start of "GetPlaneType" function, and we want to jump in at +8 
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave +(totalWritten -4) ));//+4, ...still trial and error for this
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) +totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
 
 	return 1;
 }
@@ -482,8 +498,8 @@ bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult,SIZE_T size, char * ou
 LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID readAddress)
 {
 	//read only possible after injection? allocate mem at read only?
-	//DWORD dwOld;
-	//if (!VirtualProtectEx(hProcess, (LPVOID)AOBresult, size, PAGE_EXECUTE_READWRITE, &dwOld))
+//	DWORD dwOld;
+	//if (!VirtualProtectEx(hProcess, (LPVOID)readAddress, 1000, PAGE_EXECUTE_READWRITE, &dwOld))
 		//return 0;
 
 	//read process memory returns to this
@@ -494,7 +510,7 @@ LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID readAddress)
 	ReadProcessMemory(hProcess, readAddress, &pointer, sizeof(LPCVOID), &bytesRead);
 
 	////put write protections back to what they were before we injected
-	//VirtualProtectEx(hProcess, (LPVOID)AOBresult, size, dwOld, &dwOld);
+	//VirtualProtectEx(hProcess, (LPVOID)readAddress, 1000, dwOld, &dwOld);
 
 
 	return pointer;

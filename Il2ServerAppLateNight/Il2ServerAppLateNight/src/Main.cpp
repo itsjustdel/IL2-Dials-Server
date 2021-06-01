@@ -60,6 +60,7 @@ void CaveRecovered()
 {
 	injectedCockpit = true;
 	injectedAltimeter = true;	
+	injectedPlaneType = true;
 }
 
 //server uses Gets to grab data before sending it out
@@ -100,6 +101,7 @@ void ResetFlags()
 	//reports
 	injectedCockpit = false;
 	injectedAltimeter = false;
+	injectedPlaneType = false;
 }
 
  bool GetProcessData()
@@ -190,9 +192,13 @@ bool AltimeterDataStruct(LPVOID structStart)
 
 bool PlaneTypeDataStruct(LPVOID structStart)
 {
+	//string starts at 7b from pointer 
+
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(structStart)+0x7B);
+
 	//read string stored at "structStart"
 	char rawData[64];
-	ReadProcessMemory(hProcessIL2, structStart, &rawData, 64, NULL);
+	ReadProcessMemory(hProcessIL2, addressToRead, &rawData, 64, NULL);
 	std::string planeName;
 
 	for (size_t i = 0; i < 64; i++)
@@ -217,11 +223,13 @@ bool PlaneTypeDataStruct(LPVOID structStart)
 bool ReadPlaneType()
 {
 
-	//injection saves alt. pointer at code cave's address + 0x80
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0xA0);
+	//injection saves alt. pointer at code cave's address + 0x100
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x100);
 	LPVOID toPlaneType = PointerToDataStruct(hProcessIL2, addressToRead);
-		
-	PlaneTypeDataStruct(toPlaneType);
+	if (toPlaneType!= 0)
+	{
+		PlaneTypeDataStruct(toPlaneType);
+	}
 	return 1;
 	
 
@@ -232,8 +240,8 @@ bool ReadPlaneType()
 bool ReadCockpitInstruments()
 {
 
-	//injection saves cockpit pointer at code cave's address + 0x60
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x60);
+	//injection saves cockpit pointer at code cave's address + 0x100
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x120);
 	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, addressToRead );
 
 	if (toCockpitInstruments != 0)
@@ -250,7 +258,7 @@ bool ReadAltimeter()
 
 
 	//injection saves alt. pointer at code cave's address + 0xxx
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x80);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
 	
 	if (toAltimeter != 0)
@@ -296,16 +304,16 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		if (test)
 		{
 
-			altimeterValues[5] += 1;
+			//altimeterValues[5] += 1;
 
-			altimeterValues[8] += 1;
+			//altimeterValues[8] += 1;
 
-			cockpitValues[14] += 1;
+			//cockpitValues[14] += 1;
 
-			planeType = "TestyPlane_7B";
+			//planeType = "TestyPlane_7B";
 
 
-			//ReadTest();
+			
 
 			Sleep(1);
 			continue;
@@ -344,7 +352,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		//get plane name - must be done at start of mission
 		if (planeTypeAddress == 0)
 		{
-			planeTypeAddress = PointerToFunction("getPlaneType", hProcessIL2, moduleRSE);
+			planeTypeAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
 			if (planeTypeAddress == 0)
 			{
 				worker->ReportProgress(1);
@@ -424,6 +432,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 				continue;
 			}
 		}
+
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(8);
