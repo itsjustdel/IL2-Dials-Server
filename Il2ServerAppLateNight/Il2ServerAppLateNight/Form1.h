@@ -378,7 +378,8 @@ namespace Il2Dials
 	private: System::Void ServerWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
 		//start server, passing the worker so it can report back using it
-		StartServer(serverWorker);
+		bool localIP = true;
+		StartServer(serverWorker, localIP);
 	}
 
 	private: System::Void ServerWorker_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)

@@ -433,7 +433,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
-		ReadTest();
+		//ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(8);

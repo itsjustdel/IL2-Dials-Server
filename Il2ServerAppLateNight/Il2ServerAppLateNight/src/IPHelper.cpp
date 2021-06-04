@@ -149,10 +149,20 @@ std::vector<std::string> GetMyIPAddress()
 	return ipv4Addresses;
 }
 
-std::vector<std::string> GetLocalIPAddresses()
+std::vector<std::string> GetIPAddresses(bool localIP)
 {
 	std::vector<std::string> ipv4Addresses;
-	ipv4Addresses = GetMyIPAddress();
+	
+	if (localIP)
+	{
+		//local ip flag set if client and server on same machine
+		ipv4Addresses.push_back("127.0.0.1");
+	}
+	else
+	{
+		//send over wifi
+		ipv4Addresses = GetMyIPAddress();
+	}
 
 	return ipv4Addresses;
 }

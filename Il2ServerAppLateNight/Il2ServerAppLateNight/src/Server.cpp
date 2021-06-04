@@ -53,13 +53,13 @@ bool ClientInList(CLIENT_INFO clientInfo)
     return inList;
 }
 
-int StartServer(System::ComponentModel::BackgroundWorker^ worker)
+int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
 {
     OutputDebugString(L"Starting Server");
     OutputDebugString(L"\n");
 
     //get our local ipdaddress
-    std::vector<std::string> ipv4Addreses = GetLocalIPAddresses();
+    std::vector<std::string> ipv4Addreses = GetIPAddresses(localIP);
 
     if (ipv4Addreses.size() > 1)
     {

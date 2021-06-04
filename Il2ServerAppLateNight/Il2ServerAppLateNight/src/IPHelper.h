@@ -2,4 +2,4 @@
 #include <vector>
 #include <string>
 
-std::vector<std::string> GetLocalIPAddresses();
+std::vector<std::string> GetIPAddresses(bool localIP);
