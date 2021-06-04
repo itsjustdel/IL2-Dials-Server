@@ -59,6 +59,8 @@ namespace Il2Dials
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
 	private: System::Windows::Forms::CheckBox^ LocalClientCheckBox;
 	private: System::ComponentModel::BackgroundWorker^ restartWorker;
+	private: System::Windows::Forms::RichTextBox^ versionBox;
+
 
 
 
@@ -197,6 +199,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 			this->LocalClientCheckBox = (gcnew System::Windows::Forms::CheckBox());
 			this->restartWorker = (gcnew System::ComponentModel::BackgroundWorker());
+			this->versionBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->contextMenuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -376,6 +379,24 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			// 
 			this->restartWorker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::RestartWorker_DoWork);
 			// 
+			// versionBox
+			// 
+			this->versionBox->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
+				static_cast<System::Int32>(static_cast<System::Byte>(24)));
+			this->versionBox->BorderStyle = System::Windows::Forms::BorderStyle::None;
+			this->versionBox->Cursor = System::Windows::Forms::Cursors::Default;
+			this->versionBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->versionBox->ForeColor = System::Drawing::Color::CadetBlue;
+			this->versionBox->Location = System::Drawing::Point(170, 102);
+			this->versionBox->Name = L"versionBox";
+			this->versionBox->ReadOnly = true;
+			this->versionBox->Size = System::Drawing::Size(26, 17);
+			this->versionBox->TabIndex = 11;
+			this->versionBox->Text = L"v0.2";
+			this->versionBox->Visible = false;
+			
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -383,6 +404,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->ClientSize = System::Drawing::Size(218, 331);
+			this->Controls->Add(this->versionBox);
 			this->Controls->Add(this->LocalClientCheckBox);
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
@@ -623,6 +645,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		portTextBox->Visible = !portTextBox->Visible;
 		DebugTextBox->Visible = !DebugTextBox->Visible;
 		LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible;
+		versionBox->Visible = !versionBox->Visible;
 	}
 
 
@@ -749,7 +772,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		RestartApp();
 
 	}
-	
+
 };
 
 	

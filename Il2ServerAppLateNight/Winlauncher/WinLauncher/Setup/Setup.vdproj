@@ -186,7 +186,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.7768.24439, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.7825.25906, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_C17C4B234A8347258128DC09DDDCB3A1"
@@ -425,15 +425,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IL-2 Dials"
-        "ProductCode" = "8:{C5C0A353-95CC-4835-8A2A-5736641AA017}"
-        "PackageCode" = "8:{78609403-8D4C-413D-8924-AB42E8279583}"
+        "ProductCode" = "8:{40019C0F-5628-4B75-8B99-28F197BF15E5}"
+        "PackageCode" = "8:{0BDAD058-BD82-400B-B3FD-E7F035D4C700}"
         "UpgradeCode" = "8:{C7ECE9FB-58AB-4441-934F-6CCC1516720C}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
+        "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.1.0"
+        "ProductVersion" = "8:0.2.0"
         "Manufacturer" = "8:DellyWellySoftware"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
