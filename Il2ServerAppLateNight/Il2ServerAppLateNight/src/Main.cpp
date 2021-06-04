@@ -349,13 +349,16 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		}
 
+		//report that we got passed finding process here before we start work
+		worker->ReportProgress(1);
+
 		//get plane name - must be done at start of mission
 		if (planeTypeAddress == 0)
 		{
 			planeTypeAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
 			if (planeTypeAddress == 0)
 			{
-				worker->ReportProgress(1);
+				worker->ReportProgress(2); 
 
 				continue;
 			}
@@ -368,7 +371,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			cockpitInstrumentsAddress = PointerToFunction("getPointerToCockpitInstruments", hProcessIL2, moduleRSE);
 			if (cockpitInstrumentsAddress == 0)
 			{
-				worker->ReportProgress(2);
+				worker->ReportProgress(3);
 				continue;
 			}
 		}
@@ -380,7 +383,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			altimeterAddress = PointerToFunction("getPointerToAltimeter", hProcessIL2, moduleRSE);
 			if (altimeterAddress == 0)
 			{
-				worker->ReportProgress(3);
+				worker->ReportProgress(4);
 				continue;
 			}
 		}
@@ -390,7 +393,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		{
 			if (!CodeCave(hProcessIL2, (uintptr_t)cockpitInstrumentsAddress, moduleRSE, codeCaveAddress))
 			{
-				worker->ReportProgress(4);
+				worker->ReportProgress(5);
 				continue;
 			}			
 		}
@@ -402,7 +405,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			if (!injectedCockpit)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(5);
+				worker->ReportProgress(6);
 				continue;
 			}
 
@@ -416,7 +419,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			if (!injectedAltimeter)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(6);
+				worker->ReportProgress(7);
 				continue;
 			}
 		}
@@ -428,7 +431,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			if (!injectedPlaneType)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(7);
+				worker->ReportProgress(8);
 				continue;
 			}
 		}
@@ -436,7 +439,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		//ReadTest();
 
 		//we got here, good, tell the interface
-		worker->ReportProgress(8);
+		worker->ReportProgress(9);
 
 		//don't need a fast cycle on this loop
 		Sleep(100);

@@ -5,6 +5,7 @@
 #include <string>
 
 
+
 namespace Il2Dials
 {
 
@@ -28,7 +29,9 @@ namespace Il2Dials
 	private:
 		int portNumber = 11200;
 		int clients = 0;
-		int gameWorkerProgressReport;
+		int gameWorkerProgressReport;		
+		bool skipCheckBoxEvent = false;
+		bool waitingToRestart = false;
 		//loading at launch
 		;
 		System::Drawing::Icon^ cadetBlueStarIcon;
@@ -54,6 +57,10 @@ namespace Il2Dials
 		System::Drawing::Color orange = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(235)), static_cast<System::Int32>(static_cast<System::Byte>(108
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
+	private: System::Windows::Forms::CheckBox^ LocalClientCheckBox;
+	private: System::ComponentModel::BackgroundWorker^ restartWorker;
+
+
 
 		System::Drawing::Color blue = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(18)), static_cast<System::Int32>(static_cast<System::Byte>(60
 			)),
@@ -90,9 +97,20 @@ namespace Il2Dials
 			{
 				System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(pathSystemString);
 
-				//check text is legal
+				//port number
+				portTextBox->Text = reader->ReadLine();
 
-				portTextBox->Text = reader->ReadToEnd();
+				//ip checkbox
+				String^ ipCheckedString = reader->ReadLine();
+				bool ipChecked = false;
+				if (ipCheckedString == "True")
+				{
+					ipChecked = true;
+					//event fires whether we change checkbox programtically or using the form - set bool to skip this when we read from the file on startup
+					skipCheckBoxEvent = true;
+				}
+				
+				LocalClientCheckBox->Checked = ipChecked;
 
 				reader->Close();
 
@@ -142,7 +160,9 @@ namespace Il2Dials
 	private: System::Windows::Forms::TextBox^ portTextBox;
 
 	private: System::Windows::Forms::Label^ portLabel;
-	private: System::Windows::Forms::RichTextBox^ DebugTextBox;
+private: System::Windows::Forms::RichTextBox^ DebugTextBox;
+
+
 	private: System::Windows::Forms::Timer^ timer1;
 	private: System::ComponentModel::IContainer^ components;
 
@@ -175,6 +195,8 @@ namespace Il2Dials
 			this->portLabel = (gcnew System::Windows::Forms::Label());
 			this->DebugTextBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
+			this->LocalClientCheckBox = (gcnew System::Windows::Forms::CheckBox());
+			this->restartWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->contextMenuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -328,7 +350,7 @@ namespace Il2Dials
 			this->DebugTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->DebugTextBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->DebugTextBox->Location = System::Drawing::Point(29, 244);
+			this->DebugTextBox->Location = System::Drawing::Point(29, 203);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
 			this->DebugTextBox->Size = System::Drawing::Size(167, 36);
@@ -336,9 +358,23 @@ namespace Il2Dials
 			this->DebugTextBox->Text = L"Initialising...";
 			this->DebugTextBox->Visible = false;
 			// 
-			// timer1
+			// LocalClientCheckBox
 			// 
-			//this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
+			this->LocalClientCheckBox->AutoSize = true;
+			this->LocalClientCheckBox->CheckAlign = System::Drawing::ContentAlignment::MiddleRight;
+			this->LocalClientCheckBox->ForeColor = System::Drawing::Color::CadetBlue;
+			this->LocalClientCheckBox->Location = System::Drawing::Point(115, 254);
+			this->LocalClientCheckBox->Name = L"LocalClientCheckBox";
+			this->LocalClientCheckBox->Size = System::Drawing::Size(81, 17);
+			this->LocalClientCheckBox->TabIndex = 10;
+			this->LocalClientCheckBox->Text = L"Local Client";
+			this->LocalClientCheckBox->UseVisualStyleBackColor = true;
+			this->LocalClientCheckBox->Visible = false;
+			this->LocalClientCheckBox->CheckedChanged += gcnew System::EventHandler(this, &Form1::LocalClientCheckBox_CheckedChanged);
+			// 
+			// restartWorker
+			// 
+			this->restartWorker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::RestartWorker_DoWork);
 			// 
 			// Form1
 			// 
@@ -347,6 +383,7 @@ namespace Il2Dials
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->ClientSize = System::Drawing::Size(218, 331);
+			this->Controls->Add(this->LocalClientCheckBox);
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
 			this->Controls->Add(this->portTextBox);
@@ -378,7 +415,7 @@ namespace Il2Dials
 	private: System::Void ServerWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
 		//start server, passing the worker so it can report back using it
-		bool localIP = true;
+		bool localIP = LocalClientCheckBox->Checked;
 		StartServer(serverWorker, localIP);
 	}
 
@@ -404,12 +441,24 @@ namespace Il2Dials
 		UpdateReports();
 
 	}
-private: void UpdateReports()
-{
+	private: void UpdateReports()
+	{
+
+		if (waitingToRestart)
+		{
+			//wait for safe restart, wait for code cave background worker
+			DebugTextBox->Text = "Waiting to safely restart...";
+
+			return;
+		}
+
+
 	//for icon loading
-	auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
+	//auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
 	//use to get working directory
 	auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";// \\cadetBlueStar.ico";
+
+	
 
 	if (clients < 0)
 	{
@@ -446,7 +495,7 @@ private: void UpdateReports()
 
 	else if (clients > 0)
 	{
-		if (gameWorkerProgressReport < 8)
+		if (gameWorkerProgressReport < 9)
 		{
 			//font star
 			starLabel->ForeColor = blue;
@@ -458,7 +507,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, client connected...";
 		}
 
-		if (gameWorkerProgressReport == 8)
+		if (gameWorkerProgressReport == 9)
 		{
 			//font star
 			starLabel->ForeColor = red;
@@ -474,7 +523,7 @@ private: void UpdateReports()
 	}
 	else if (clients == 0)
 	{
-		if (gameWorkerProgressReport < 8)
+		if (gameWorkerProgressReport < 9)
 		{
 			// font star
 			starLabel->ForeColor = cadetBlue;
@@ -489,7 +538,7 @@ private: void UpdateReports()
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
 		}
 
-		if (gameWorkerProgressReport == 8)
+		if (gameWorkerProgressReport == 9)
 		{
 
 			//yellow font star			
@@ -573,6 +622,7 @@ private: void UpdateReports()
 		portLabel->Visible = !portLabel->Visible;
 		portTextBox->Visible = !portTextBox->Visible;
 		DebugTextBox->Visible = !DebugTextBox->Visible;
+		LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible;
 	}
 
 
@@ -595,36 +645,8 @@ private: void UpdateReports()
 			//stop form making noise
 			e->SuppressKeyPress = true;
 
-			
-			int value = Convert::ToInt32(portTextBox->Text);
-			//tell server 
-			SetPortNumber(value);
-
-			
-			//remmember in file format
-			char* appDataPath = getenv("LOCALAPPDATA");
-			std::string pathString(appDataPath);
-			pathString.append("\\Il-2 Dials\\IL2DialsConfig.txt");
-			String^ pathSystemString = gcnew String(pathString.c_str());
-			System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter(pathSystemString); //open the file for writing.
-
-			std:String^ portNumber = portTextBox->Text->ToString();
-			writer->Write(portNumber); //write the current date to the file. change this with your date or something.
-			writer->Close(); //remember to close the file again.
-			delete writer;// writer->Dispose(); //remember to dispose it from the memory.
-			
-
-
-			
-
-
-
-			//get rid of the icon in the systray
-			NotifyIcon^ thisIcon = (NotifyIcon^)notifyIcon1;
-			thisIcon->Visible = false;
-
-			Application::Restart();
-			Environment::Exit(0);
+			//write file and end process
+			WriteConfigFile();
 
 		}
 
@@ -637,10 +659,97 @@ private: void UpdateReports()
 		NotifyIcon^ thisIcon = (NotifyIcon^)notifyIcon1;
 		thisIcon->Visible = false;
 	}
-private: System::Void contextMenuStrip2_Opening(System::Object^ sender, System::ComponentModel::CancelEventArgs^ e) {
-}
-private: System::Void pictureBox2_Click_1(System::Object^ sender, System::EventArgs^ e) {
-}
+		private: System::Void contextMenuStrip2_Opening(System::Object^ sender, System::ComponentModel::CancelEventArgs^ e) {
+		}
+		private: System::Void pictureBox2_Click_1(System::Object^ sender, System::EventArgs^ e) {
+		}
+		private: System::Void LocalClientCheckBox_CheckedChanged(System::Object^ sender, System::EventArgs^ e) 
+		{
+			//write file and restart process
+			//skip bool will be set on first read of file
+			if (!skipCheckBoxEvent)
+			{
+				WriteConfigFile();				
+			}
+			else
+			{
+				//reset skip so if box i changed we will reset and save
+				skipCheckBoxEvent = false;
+			}
+		}
+
+	private: System::Void WriteConfigFile()
+	{
+
+		//Port Number
+		int value = Convert::ToInt32(portTextBox->Text);
+		//tell server 
+		SetPortNumber(value);
+
+
+		//remmember in file format
+		char* appDataPath = getenv("LOCALAPPDATA");
+		std::string pathString(appDataPath);
+		pathString.append("\\Il-2 Dials\\IL2DialsConfig.txt");
+		String^ pathSystemString = gcnew String(pathString.c_str());
+		System::IO::StreamWriter^ writer = gcnew System::IO::StreamWriter(pathSystemString); //open the file for writing.
+
+		std:String^ portNumber = portTextBox->Text->ToString();
+		writer->WriteLine(portNumber); //write the current date to the file. change this with your date or something.
+			
+
+		//Local Ip Checkbox
+		bool localIPChecked = LocalClientCheckBox->Checked;
+		String^ ipString = localIPChecked.ToString();
+
+		//write new line with bool value
+		writer->WriteLine(ipString);
+
+		//close the file again.
+		writer->Close(); 
+		
+		// dispose/delete it from the memory.
+		delete writer;
+
+
+		//get rid of the icon in the systray
+		NotifyIcon^ thisIcon = (NotifyIcon^)notifyIcon1;
+		thisIcon->Visible = false;
+
+
+		//now we set flag 
+		waitingToRestart = true;
+
+		//and text
+		//wait for safe restart, wait for code cave background worker
+		DebugTextBox->Text = "Waiting to safely restart..";
+
+		//and run worker if not already run - This way user can change their mind ( a restart will still occur though)
+		if(!restartWorker->IsBusy)
+			restartWorker->RunWorkerAsync();
+		
+
+	}
+
+
+	private: System::Void RestartApp()
+	{
+		Application::Restart();
+		Environment::Exit(0);
+	}
+	private: System::Void RestartWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
+	{
+		//check for safe restart
+		while (gameWorkerProgressReport != 9 && gameWorkerProgressReport != 0)
+		{
+			System::Threading::Thread::Sleep(10);
+		}
+
+		//if we get here
+		RestartApp();
+
+	}
+	
 };
 
 	
