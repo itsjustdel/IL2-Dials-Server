@@ -377,10 +377,14 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             //float array containing instrument/dial values
             //64 bit string (testing needed)
             unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
-
-            
             // A pointer we will advance whenever we write data
             unsigned char* p = outBuf;
+
+
+            //float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
+            //we know how big this float array will be so we don't need to send size
+            memcpy(p, (char*)floatArray, sizeof(floatArray));
+            p += 12;//4btye float * 3
 
             // Serialize "program version" into outBuf
             //using uint32_t when serializing            
@@ -401,9 +405,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             memcpy(p, planeType.data(), 64);
             p += 64;
             
-            //float array to buffer
-            //we know how big this float array will be so we don't need to send size
-            memcpy(p, (char*)floatArray, sizeof(floatArray));
+           
            // p += planeType.size();//not needed
 
 

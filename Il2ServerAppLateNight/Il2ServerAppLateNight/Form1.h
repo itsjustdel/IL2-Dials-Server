@@ -353,7 +353,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->DebugTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->DebugTextBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->DebugTextBox->Location = System::Drawing::Point(29, 203);
+			this->DebugTextBox->Location = System::Drawing::Point(29, 188);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
 			this->DebugTextBox->Size = System::Drawing::Size(167, 36);
@@ -366,11 +366,11 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->LocalClientCheckBox->AutoSize = true;
 			this->LocalClientCheckBox->CheckAlign = System::Drawing::ContentAlignment::MiddleRight;
 			this->LocalClientCheckBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->LocalClientCheckBox->Location = System::Drawing::Point(115, 254);
+			this->LocalClientCheckBox->Location = System::Drawing::Point(48, 254);
 			this->LocalClientCheckBox->Name = L"LocalClientCheckBox";
-			this->LocalClientCheckBox->Size = System::Drawing::Size(81, 17);
+			this->LocalClientCheckBox->Size = System::Drawing::Size(148, 17);
 			this->LocalClientCheckBox->TabIndex = 10;
-			this->LocalClientCheckBox->Text = L"Local Client";
+			this->LocalClientCheckBox->Text = L"Local Client (IP 127.0.0.1)";
 			this->LocalClientCheckBox->UseVisualStyleBackColor = true;
 			this->LocalClientCheckBox->Visible = false;
 			this->LocalClientCheckBox->CheckedChanged += gcnew System::EventHandler(this, &Form1::LocalClientCheckBox_CheckedChanged);
@@ -388,14 +388,13 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->versionBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->versionBox->Location = System::Drawing::Point(170, 102);
+			this->versionBox->Location = System::Drawing::Point(170, 111);
 			this->versionBox->Name = L"versionBox";
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(26, 17);
 			this->versionBox->TabIndex = 11;
 			this->versionBox->Text = L"v0.2";
 			this->versionBox->Visible = false;
-			
 			// 
 			// Form1
 			// 
