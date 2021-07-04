@@ -35,14 +35,14 @@ std::string planeType;
 
 
 //main process flags
-bool injectedCockpit;
+//bool injectedCockpit;
 bool injectedAltimeter;
 bool injectedPlaneType;
 
 //functionAddresses
-LPCVOID cockpitInstrumentsAddress;
+//LPCVOID cockpitInstrumentsAddress;
 LPCVOID altimeterAddress;
-LPCVOID planeTypeAddress;
+LPCVOID setPlayerPresenceAddress;
 
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
@@ -58,7 +58,7 @@ float testValues[3];
 
 void CaveRecovered()
 {
-	injectedCockpit = true;
+	//injectedCockpit = true;
 	injectedAltimeter = true;	
 	injectedPlaneType = true;
 }
@@ -95,11 +95,11 @@ void ResetFlags()
 {
 	//addresses of cave
 	codeCaveAddress = 0;
-	cockpitInstrumentsAddress = 0;
+	//cockpitInstrumentsAddress = 0;
 	altimeterAddress = 0;
-	planeTypeAddress = 0;
+	setPlayerPresenceAddress = 0;
 	//reports
-	injectedCockpit = false;
+	//injectedCockpit = false;
 	injectedAltimeter = false;
 	injectedPlaneType = false;
 }
@@ -137,13 +137,17 @@ void ResetFlags()
 
 
 
-bool CockpitInstrumentsDataStruct(LPVOID toCockpitInstruments) 
+bool CockpitInstrumentsDataStruct(LPVOID structStart) 
 {
+	//set player presence gives us the address we passed at "structStart"
+	//The pointer to the cockpit insturments struct is at structStart + 0x60
+	
+
 	//we need to read the data and get what values we need from it
 	//need to finalise numbers
 	const size_t sizeOfData = cockpitValuesLength * 8;
 	char rawData[sizeOfData];
-	ReadProcessMemory(hProcessIL2, toCockpitInstruments, &rawData, sizeOfData, NULL);
+	ReadProcessMemory(hProcessIL2, structStart, &rawData, sizeOfData, NULL);
 	
 	//step through data read 8 bytes at a time and grab double
 	size_t dCount = 0;
@@ -207,11 +211,8 @@ bool PlaneTypeDataStruct(LPVOID structStart)
 		if (rawData[i] == 0x00)
 			break;
 
-
 		planeName.push_back(rawData[i]);
 
-
-	
 	}
 
 	planeType = planeName;
@@ -240,9 +241,10 @@ bool ReadPlaneType()
 bool ReadCockpitInstruments()
 {
 
-	//injection saves cockpit pointer at code cave's address + 0x100
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x120);
-	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, addressToRead );
+	//injection saves cockpit pointer at code cave's address + 0x100 ( this is from setPlayerPresence - but it ahs the address we need)
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x100);
+	LPVOID toPlaneTypeStruct = PointerToDataStruct(hProcessIL2, addressToRead );
+	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, (LPVOID)((uintptr_t)(toPlaneTypeStruct) + 0x60));
 
 	if (toCockpitInstruments != 0)
 	{		
@@ -258,7 +260,7 @@ bool ReadAltimeter()
 
 
 	//injection saves alt. pointer at code cave's address + 0xxx
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x120);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
 	
 	if (toAltimeter != 0)
@@ -314,9 +316,9 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 
 			
-
-			Sleep(1);
-			continue;
+			
+			//Sleep(1);
+			//continue;
 		}
 
 
@@ -353,29 +355,16 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		worker->ReportProgress(1);
 
 		//get plane name - must be done at start of mission
-		if (planeTypeAddress == 0)
+		if (setPlayerPresenceAddress == 0)
 		{
-			planeTypeAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
-			if (planeTypeAddress == 0)
+			setPlayerPresenceAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
+			if (setPlayerPresenceAddress == 0)
 			{
 				worker->ReportProgress(2); 
 
 				continue;
 			}
 		}
-
-
-		//find getPointerToCockpitinstruments location, if we haven't found already
-		if (cockpitInstrumentsAddress == 0)
-		{
-			cockpitInstrumentsAddress = PointerToFunction("getPointerToCockpitInstruments", hProcessIL2, moduleRSE);
-			if (cockpitInstrumentsAddress == 0)
-			{
-				worker->ReportProgress(3);
-				continue;
-			}
-		}
-
 
 		//find getPointerToAltimeter location, if we haven't found already
 		if (altimeterAddress == 0)
@@ -388,30 +377,31 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
+		
+
 		//create or recover code cave	
 		if (codeCaveAddress == 0)
 		{
-			if (!CodeCave(hProcessIL2, (uintptr_t)cockpitInstrumentsAddress, moduleRSE, codeCaveAddress))
+			if (!CodeCave(hProcessIL2, (uintptr_t)setPlayerPresenceAddress, moduleRSE, codeCaveAddress))
 			{
 				worker->ReportProgress(5);
 				continue;
 			}			
 		}
 
-		//inject cockpit		
-		if (!injectedCockpit)
+		//inject getplanetype
+		if (!injectedPlaneType)
 		{
-			injectedCockpit = HookCockpitInstruments(hProcessIL2, (void*)(cockpitInstrumentsAddress), size, codeCaveAddress);
-			if (!injectedCockpit)
+			injectedPlaneType = HookPlaneType(hProcessIL2, (void*)(setPlayerPresenceAddress), size, codeCaveAddress);
+			if (!injectedPlaneType)
 			{
 				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(6);
+				worker->ReportProgress(8);
 				continue;
 			}
-
-			//note: //could create pointer for injected cockpit and asign within if check to clean this up further
 		}
 
+		
 		//inject altimeter		
 		if (!injectedAltimeter)
 		{
@@ -423,18 +413,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 				continue;
 			}
 		}
-
-		//inject getplanetype
-		if (!injectedPlaneType)
-		{		
-			injectedPlaneType = HookPlaneType(hProcessIL2, (void*)(planeTypeAddress), size, codeCaveAddress);
-			if (!injectedPlaneType)
-			{
-				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(8);
-				continue;
-			}
-		}
+		
+		
 
 		//ReadTest();
 

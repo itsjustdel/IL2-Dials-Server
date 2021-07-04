@@ -9,7 +9,6 @@ using namespace System;
 #include "Form1.h"
 
 using namespace System::Windows::Forms;
-
 [STAThread]
 int main() {	
 	Application::EnableVisualStyles();
