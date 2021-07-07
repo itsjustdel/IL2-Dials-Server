@@ -347,7 +347,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 //            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
-            float floatArray[3];            
+            float floatArray[8];            
             //read memory only when requested
             ReadPlaneType();
             ReadCockpitInstruments();
@@ -362,12 +362,23 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             std::string planeType = GetPlaneType();
             //to send over tcp we need string size and data            
             
+
             //if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-            floatArray[0] = GetAltitude();            
+            floatArray[0] = (float)(GetAltitude());
             //mgh
-            floatArray[1] =  GetMMHg();
+            floatArray[1] = (float)(GetMMHg());
             //airspeed
-            floatArray[2] = GetAirspeedFromCockpitStruct();
+            floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+            //heading
+            floatArray[3] = (float)(GetHeading());
+            //Pitch
+            floatArray[4] = (float)(GetPitch());
+            //Roll
+            floatArray[5] = (float)(GetRoll());        
+            //vertical speed 
+            floatArray[6] = (float)(GetVSI());
+            //ball
+            floatArray[7] = (float)(GetTurnAndBankBall());
 
             // The buffer we will be writing bytes into
             //make space for
@@ -384,7 +395,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             //float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
             //we know how big this float array will be so we don't need to send size
             memcpy(p, (char*)floatArray, sizeof(floatArray));
-            p += 12;//4btye float * 3
+            p += 4 * 8;//4btye float * array length
 
             // Serialize "program version" into outBuf
             //using uint32_t when serializing            

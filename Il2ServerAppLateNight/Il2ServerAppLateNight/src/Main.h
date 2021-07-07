@@ -1,18 +1,11 @@
 #pragma once
-//nclude <Windows.h>
-//#include <vector>
-//for external access
 
 void CaveRecovered();
-
-//int InjectCockpitInstruments();
-
-//bool GetInjectedCockpit();
 
 void GetProcessData();
 
 int Injector(System::ComponentModel::BackgroundWorker^);
-//
+
 double GetAltitude();
 
 double GetMMHg();
@@ -28,6 +21,19 @@ bool ReadPlaneType();
 bool ReadCockpitInstruments();
 
 bool ReadAltimeter();
+
+double GetHeading();
+
+double GetPitch();
+
+double GetRoll();
+
+double GetYaw();
+
+double GetVSI();
+
+double GetTurnAndBankBall();
+
 
 
 

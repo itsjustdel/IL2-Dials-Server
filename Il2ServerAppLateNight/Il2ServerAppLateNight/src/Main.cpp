@@ -18,7 +18,7 @@
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
-
+#include <sstream>
 
 float version = 0.2f;
 
@@ -26,7 +26,7 @@ float version = 0.2f;
 const int size = 100; //note, min size?
 
 //where we will hold our data from instruments in game
-const size_t cockpitValuesLength = 20;
+const size_t cockpitValuesLength = 50;
 double cockpitValues[cockpitValuesLength];
 const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
@@ -90,6 +90,33 @@ double GetAirspeedFromCockpitStruct()
 {
 	return cockpitValues[14];
 }
+
+double GetHeading()
+{
+	return cockpitValues[3];
+}
+
+double GetPitch()
+{
+	return cockpitValues[4];
+}
+
+double GetRoll()
+{
+	return cockpitValues[5];
+}
+double GetVSI()
+{
+	return cockpitValues[27];
+}
+
+double GetTurnAndBankBall()
+{
+	return cockpitValues[18];//x
+}
+
+
+
 
 void ResetFlags()
 {
@@ -278,19 +305,29 @@ bool ReadAltimeter()
 void ReadTest()
 {
 	//we represent the data with floats in the app, so let's convert now and save network traffic
-	float floatArray[3];
+	float floatArray[8];
 	//read memory only when requested
 	ReadCockpitInstruments();
 	ReadAltimeter();
 	ReadPlaneType();
 
-
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-	floatArray[0] = GetAltitude();
+	floatArray[0] =(float)(GetAltitude());
 	//mgh
-	floatArray[1] = GetMMHg();
+	floatArray[1] = (float)(GetMMHg());
 	//airspeed
-	floatArray[2] = GetAirspeedFromCockpitStruct();
+	floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+	//heading
+	floatArray[3] = (float)(GetHeading());
+	//Pitch
+	floatArray[4] = (float)(GetPitch());
+	//Roll
+	floatArray[5] = (float)(GetRoll());
+	//vertical speed 
+	floatArray[6] = (float)(GetVSI());
+	//ball
+	floatArray[7] = (float)(GetTurnAndBankBall());
+
 }
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
@@ -416,7 +453,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		
 		
 
-		//ReadTest();
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9);
