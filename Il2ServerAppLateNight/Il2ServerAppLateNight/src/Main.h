@@ -34,6 +34,8 @@ double GetVSI();
 
 double GetTurnAndBankBall();
 
+double GetTurnAndBankNeedle();
+
 
 
 

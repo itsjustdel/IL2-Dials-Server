@@ -5,6 +5,7 @@
 #include <string>
 
 
+
 LPCVOID PointerToFunction(std::string functionName, HANDLE hProcessIL2,MODULEENTRY32 moduleRSE)
 {
 
@@ -97,9 +98,14 @@ LPCVOID PointerToFunction(std::string functionName, HANDLE hProcessIL2,MODULEENT
 		return 0;
 
 
+	char* char_arr;
+	std::string str_obj(functionName);
+	char_arr = &str_obj[0];
+	std::string newString(char_arr);
 
 	/* Iterate through all the names and see if they match the one we are looking for */
-	for (DWORD i = 0; i < ExportTable.NumberOfNames; ++i) {
+	for (DWORD i = 0; i < ExportTable.NumberOfNames; ++i) 
+	{
 		std::string TempFunctionName;
 
 		Done = FALSE;// Reset for next name
@@ -118,7 +124,7 @@ LPCVOID PointerToFunction(std::string functionName, HANDLE hProcessIL2,MODULEENT
 			/* If it's NUL we are done */
 			if (TempChar == (CHAR)'\0')
 				Done = TRUE;
-		}
+		}	
 
 		/* Does the name match? */
 		if (TempFunctionName.find(functionName) != std::string::npos)
@@ -151,6 +157,8 @@ LPCVOID PointerToFunction(std::string functionName, HANDLE hProcessIL2,MODULEENT
 			
 			return functionAddress;
 		}
+
+
 		/* Wrong function let's try the next... */
 	}
 

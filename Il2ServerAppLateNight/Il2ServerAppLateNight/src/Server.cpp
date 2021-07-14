@@ -347,7 +347,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 //            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
-            float floatArray[8];            
+            float floatArray[9];            
             //read memory only when requested
             ReadPlaneType();
             ReadCockpitInstruments();
@@ -379,6 +379,8 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             floatArray[6] = (float)(GetVSI());
             //ball
             floatArray[7] = (float)(GetTurnAndBankBall());
+            //bank needle
+            floatArray[8] = (float)(GetTurnAndBankNeedle());
 
             // The buffer we will be writing bytes into
             //make space for
@@ -395,7 +397,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             //float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
             //we know how big this float array will be so we don't need to send size
             memcpy(p, (char*)floatArray, sizeof(floatArray));
-            p += 4 * 8;//4btye float * array length
+            p += sizeof(floatArray);//4btye float * array length
 
             // Serialize "program version" into outBuf
             //using uint32_t when serializing            

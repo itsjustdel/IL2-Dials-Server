@@ -32,6 +32,7 @@ namespace Il2Dials
 		int gameWorkerProgressReport;		
 		bool skipCheckBoxEvent = false;
 		bool waitingToRestart = false;
+		int errorMessageLimit = 8;
 		//loading at launch
 		;
 		System::Drawing::Icon^ cadetBlueStarIcon;
@@ -516,7 +517,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 	else if (clients > 0)
 	{
-		if (gameWorkerProgressReport < 9)
+		if (gameWorkerProgressReport < errorMessageLimit)
 		{
 			//font star
 			starLabel->ForeColor = blue;
@@ -528,7 +529,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			DebugTextBox->Text = "Waiting for game, client connected...";
 		}
 
-		if (gameWorkerProgressReport == 9)
+		if (gameWorkerProgressReport == errorMessageLimit)
 		{
 			//font star
 			starLabel->ForeColor = red;
@@ -544,7 +545,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	}
 	else if (clients == 0)
 	{
-		if (gameWorkerProgressReport < 9)
+		if (gameWorkerProgressReport < errorMessageLimit)
 		{
 			// font star
 			starLabel->ForeColor = cadetBlue;
@@ -559,7 +560,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			DebugTextBox->Text = "Waiting for game, waiting for client...";
 		}
 
-		if (gameWorkerProgressReport == 9)
+		if (gameWorkerProgressReport == errorMessageLimit)
 		{
 
 			//yellow font star			
@@ -762,7 +763,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	private: System::Void RestartWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
 		//check for safe restart
-		while (gameWorkerProgressReport != 9 && gameWorkerProgressReport != 0)
+		while (gameWorkerProgressReport != errorMessageLimit && gameWorkerProgressReport != 0)
 		{
 			System::Threading::Thread::Sleep(10);
 		}
