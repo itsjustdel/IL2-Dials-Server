@@ -22,6 +22,8 @@ bool HookPlaneType(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddr
 
 bool HookTurnNeedle(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
 
+bool HookTurnBall(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
+
 bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult, LPVOID caveStart, SIZE_T size, char *originalMemory);
 
 bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult, SIZE_T size, char *outStr);

@@ -31,6 +31,7 @@ double cockpitValues[cockpitValuesLength];
 const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
+double turnBallValue;
 //where we hold planeTpye string
 std::string planeType;
 
@@ -40,12 +41,14 @@ std::string planeType;
 bool injectedAltimeter;
 bool injectedPlaneType;
 bool injectedTurnNeedle;
+bool injectedTurnBall;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
 LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID turnNeedleAddress;
+LPCVOID turnBallAddress;
 
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
@@ -64,6 +67,8 @@ void CaveRecovered()
 	//injectedCockpit = true;
 	injectedAltimeter = true;	
 	injectedPlaneType = true;
+	injectedTurnNeedle = true;
+	injectedTurnBall = true;
 }
 
 //server uses Gets to grab data before sending it out
@@ -115,12 +120,12 @@ double GetVSI()
 
 double GetTurnAndBankBall()
 {
-	return cockpitValues[18];
+	return turnBallValue;//nneeds updated
 }
 
 double GetTurnAndBankNeedle()
 {
-	return turnNeedleValue;// cockpitValues[87];//x //87
+	return turnNeedleValue;
 }
 
 
@@ -137,6 +142,8 @@ void ResetFlags()
 	//injectedCockpit = false;
 	injectedAltimeter = false;
 	injectedPlaneType = false;
+	injectedTurnNeedle = false;
+	injectedTurnBall = false;
 }
 
  bool GetProcessData()
@@ -331,6 +338,29 @@ bool ReadTurnNeedle()
 }
 
 
+bool ReadTurnCoordinatorBall()
+{
+
+
+	//injection saves pointer at code cave's address + 0xxx
+	//pointer start of struct in our cave
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x160);
+	//read
+	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+	//needle value at +D0
+	LPVOID toTurnBall = (LPVOID)((uintptr_t)(toStruct)+0xD0);
+
+	const size_t sizeOfData = sizeof(double);
+	char rawData[sizeOfData];
+	ReadProcessMemory(hProcessIL2, toTurnBall, &rawData, sizeOfData, NULL);
+
+	//re interporet raw to double
+	turnBallValue = *reinterpret_cast<double*>(rawData);
+
+	return 0;
+}
+
+
 
 
 
@@ -345,6 +375,7 @@ void ReadTest()
 	ReadAltimeter();
 	ReadPlaneType();
 	ReadTurnNeedle();
+	ReadTurnCoordinatorBall();
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
 	floatArray[0] =(float)(GetAltitude());
@@ -474,6 +505,24 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
+		//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
+		if (turnBallAddress == 0)
+		{
+			//CAccelerationBallIndicator::simulation is full name after compilation but name is scrambled slightly in dll export list
+			//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
+			//change :: for @ and flip
+			// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
+
+			std::string str("simulation@CAccelerationBallIndicator");
+			turnBallAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+			if (turnBallAddress == 0)
+			{
+				worker->ReportProgress(3);
+
+				continue;
+			}
+		}
+
 
 		
 		//Code Cave
@@ -528,12 +577,23 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 		
+		//inject turn ball
+		if (!injectedTurnBall)
+		{
+			injectedTurnBall = HookTurnBall(hProcessIL2, (void*)(turnBallAddress), size, codeCaveAddress);
+			if (!injectedTurnBall)
+			{
+				//Hook function overwrites original code and writes to our code cave
+				worker->ReportProgress(8);
+				continue;
+			}
+		}
 		
 
 		ReadTest();
 
 		//we got here, good, tell the interface
-		worker->ReportProgress(8); //--change messageErrorLimit variable in Form1.h if this changes
+		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
 
 		//don't need a fast cycle on this loop
 		Sleep(100);

@@ -32,7 +32,7 @@ namespace Il2Dials
 		int gameWorkerProgressReport;		
 		bool skipCheckBoxEvent = false;
 		bool waitingToRestart = false;
-		int errorMessageLimit = 8;
+		int errorMessageLimit = 9;
 		//loading at launch
 		;
 		System::Drawing::Icon^ cadetBlueStarIcon;
