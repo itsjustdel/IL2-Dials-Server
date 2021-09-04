@@ -20,7 +20,7 @@
 #include "PointerToFunction.h"
 #include <sstream>
 
-float version = 0.2f;
+float version = 0.3f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -120,12 +120,12 @@ double GetVSI()
 
 double GetTurnAndBankBall()
 {
-	return turnBallValue;//nneeds updated
+	return turnBallValue;
 }
 
 double GetTurnAndBankNeedle()
 {
-	return turnNeedleValue;
+	return  turnNeedleValue;//nneeds updated
 }
 
 
@@ -324,8 +324,8 @@ bool ReadTurnNeedle()
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-	//needle value at +AE8
-	LPVOID toTurnNeedle = (LPVOID)((uintptr_t)(toDynamicBodyStruct)+0xAE8);
+	//needle value at +AE8 - change to af0
+	LPVOID toTurnNeedle = (LPVOID)((uintptr_t)(toDynamicBodyStruct)+0xAF0);
 
 	const size_t sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
@@ -505,9 +505,11 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
-		//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
+		//turn needle is from reading rcx at CAccelerationBallIndicator::simulation line 0 and adding AF0 to it-
+		//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees) and finding relative address
 		if (turnBallAddress == 0)
 		{
+
 			//CAccelerationBallIndicator::simulation is full name after compilation but name is scrambled slightly in dll export list
 			//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
 			//change :: for @ and flip
