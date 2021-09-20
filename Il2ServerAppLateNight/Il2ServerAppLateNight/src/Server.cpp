@@ -347,12 +347,16 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 //            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
-            float floatArray[9];            
+            float floatArray[9];          
+
             //read memory only when requested
             ReadPlaneType();
             ReadCockpitInstruments();
             ReadAltimeter();
-      
+            ReadTurnNeedle();
+            ReadTurnCoordinatorBall();
+
+
             //packing differecnt data types in to one char array for sending (serialisation)
             //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
             

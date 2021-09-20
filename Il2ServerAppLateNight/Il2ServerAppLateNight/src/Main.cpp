@@ -592,7 +592,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		}
 		
 
-		ReadTest();
+		//ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes

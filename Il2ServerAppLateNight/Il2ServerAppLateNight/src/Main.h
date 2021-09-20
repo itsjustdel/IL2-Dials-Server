@@ -22,6 +22,10 @@ bool ReadCockpitInstruments();
 
 bool ReadAltimeter();
 
+bool ReadTurnNeedle();
+
+bool ReadTurnCoordinatorBall();
+
 double GetHeading();
 
 double GetPitch();
