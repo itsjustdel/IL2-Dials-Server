@@ -328,12 +328,20 @@ bool ReadTurnNeedle()
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 	//needle value at +AE8 - change to af0
 	uintptr_t offset = 0xAF0;
-	//if (IsUSPlane(planeType))
-	//	offset = 0xD78;
+	//US plane needle at different position! //ony p38?//two engine planes?
+	if (IsUSPlane(planeType))
+	{
+		//not a20B not inlcuded in this list, this has AF0 offset. Seems there's no logic to this
+
+		if (IsTwoEngine(planeType))
+			offset = 0xD78;
+		else
+			offset = 0xCF0;
+	}
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
-	LPVOID toTurnNeedle = (LPVOID)(target); //+0130for // US+d78 
+	LPVOID toTurnNeedle = (LPVOID)(target); 
 
 	const size_t sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
