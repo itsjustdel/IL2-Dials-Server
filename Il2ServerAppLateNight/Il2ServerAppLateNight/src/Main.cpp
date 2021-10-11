@@ -15,10 +15,12 @@
 #include "Scan.h"
 #include "ProcessTools.h"
 #include "Injector.h"
+#include "USPlanes.h"
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 #include <sstream>
+
 
 float version = 0.3f;
 
@@ -325,7 +327,13 @@ bool ReadTurnNeedle()
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 	//needle value at +AE8 - change to af0
-	LPVOID toTurnNeedle = (LPVOID)((uintptr_t)(toDynamicBodyStruct)+0xAF0);
+	uintptr_t offset = 0xAF0;
+	//if (IsUSPlane(planeType))
+	//	offset = 0xD78;
+
+	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
+	
+	LPVOID toTurnNeedle = (LPVOID)(target); //+0130for // US+d78 
 
 	const size_t sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
@@ -488,6 +496,9 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 
 		//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
+
+		//turn needle is from reading rcx at CAccelerationBallIndicator::simulation line 0 and adding AF0 to it-
+		//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
 		if (turnNeedleAddress == 0)
 		{
 			//CCockpitInstruments::simulation is full name after compilation but name is scrambled slightly in dll export list
@@ -505,8 +516,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
-		//turn needle is from reading rcx at CAccelerationBallIndicator::simulation line 0 and adding AF0 to it-
-		//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees) and finding relative address
 		if (turnBallAddress == 0)
 		{
 

@@ -161,6 +161,7 @@
     <ClInclude Include="src\ProcessTools.h" />
     <ClInclude Include="src\Scan.h" />
     <ClInclude Include="src\Server.h" />
+    <ClInclude Include="src\USPlanes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="src\ProcessTools.cpp" />
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\USPlanes.cpp" />
     <ClCompile Include="WinformsProject.cpp" />
     <ClCompile Include="Form1.cpp" />
   </ItemGroup>
