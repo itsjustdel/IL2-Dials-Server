@@ -221,7 +221,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			// notifyIcon1
 			// 
 			this->notifyIcon1->ContextMenuStrip = this->contextMenuStrip1;
-			this->notifyIcon1->Text = L"notifyIcon1";
+			this->notifyIcon1->Text = L"IL-2 Dials Server";
 			this->notifyIcon1->Visible = true;
 			this->notifyIcon1->MouseDoubleClick += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::notifyIcon1_MouseDoubleClick);
 			// 
@@ -389,12 +389,12 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->versionBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->versionBox->Location = System::Drawing::Point(158, 111);
+			this->versionBox->Location = System::Drawing::Point(171, 111);
 			this->versionBox->Name = L"versionBox";
 			this->versionBox->ReadOnly = true;
-			this->versionBox->Size = System::Drawing::Size(38, 17);
+			this->versionBox->Size = System::Drawing::Size(25, 16);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.201";
+			this->versionBox->Text = L"v0.3";
 			this->versionBox->Visible = false;
 			// 
 			// Form1
