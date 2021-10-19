@@ -22,7 +22,7 @@
 #include <sstream>
 
 
-float version = 0.3f;
+float version = 0.301f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -504,8 +504,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 
 		//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
-
-		//turn needle is from reading rcx at CAccelerationBallIndicator::simulation line 0 and adding AF0 to it-
+		
+		
 		//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
 		if (turnNeedleAddress == 0)
 		{

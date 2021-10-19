@@ -238,7 +238,7 @@ bool InjectionTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 
 	//note, replicated in cave code
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x50);//turn ball is plus ??
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x65);//turn ball is plus ??
 
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineTurnBall, sizeof(originalLineTurnBall), &bytesWritten);//5 is enough for jump plus address
@@ -454,10 +454,52 @@ bool CaveTurnNeedle(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 
-	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval
+	//now we need to check if this is player plane or not - player plane memory address is stored at codeCave + 100 (it is the first thing we work out)
+	//if not player plane, jump back to main code
+	//to cmp we need both things we want to compare in two registers
+
+	//push - save temp var
+	BYTE push[1] = { 0x50 };//pop rax on to stack
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), push, sizeof(push), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//this is absolute mov instruction for rax
+	BYTE movToRax[2] = { 0x48, 0xA1};
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), movToRax, sizeof(movToRax), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//now it will want an address to mov to rbp	 (thi si shwre plane type address is tored)
+	uintptr_t relativeAddress = (uintptr_t)toCave + 0x100 - 0x39;// 0x39 for where this section of the cave starts
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
+	totalWritten += bytesWritten;
+
+
+	//compare rsi and rax
+	BYTE cmp[3] = { 0x48, 0x39, 0xC6 };
+	//0x08 will be relative jump to code cave plus 0x100
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmp, sizeof(cmp), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//pop rax back now we're done - restore temp var
+	BYTE pop[1] = { 0x58 };//pop rax on to stack
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), pop, sizeof(pop), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//if it is the player, it will be equal, else it will be not equal, so don't do anything and jump to the return addess
+	BYTE jumpIfNotEqual[6] = { 0x0F, 0x85 , 0x07, 0x00, 0x00, 0x00 };	//0x07 is the one line jump in this case
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
+
+
+//	BYTE jumpToEnd[5] = { 0xE9, 0x07, 0x00, 0x00, 0x00 };
+//	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEnd, sizeof(jumpToEnd), &bytesWritten);
+//	totalWritten += bytesWritten;
 	
+	
+	//else, store rcx
+	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval	
 	// "rcxToMem" 
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, (0x140 - 0x4B), 0x00, 0x00, 0x00 }; //sum in brackets to get relative address (we are at 4B) and +0x140 is where var will be
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, (0x140 - 0x60), 0x00, 0x00, 0x00 }; //sum in brackets to get relative address (next line is 60) and +0x140 is where var will be
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -478,7 +520,7 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	size_t totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x50);//50 is where we got to with other functions
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x65);//63 is where we got to with other functions
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
 
@@ -491,7 +533,7 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval
 
 	// "rcxToMem" //sum in brackets to get relative address (we are at xx) and +0x160 is where var will be (relative jump calcualted from next line)
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0x04, 0x01, 0x00, 0x00 };  //0x104 is the jump, spread over two bytes ( bytes reversed - little endian /big)
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xEF, 0x00, 0x00, 0x00 }; //EF new jump - keeping this info... //0x104 is the jump, spread over two bytes ( bytes reversed - little endian /big)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
