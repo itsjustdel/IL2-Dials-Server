@@ -320,6 +320,10 @@ bool ReadAltimeter()
 bool ReadTurnNeedle()
 {
 
+	//How to find new offsets-
+	//Find value in debugger by ising +140 offset in cave. Needle is clamped number after NaNs e.g 24, 31
+	//watch value and check offsets of found instructions
+
 
 	//injection saves alt. pointer at code cave's address + 0xxx
 	//pointer start of struct in our cave
@@ -338,7 +342,11 @@ bool ReadTurnNeedle()
 		else
 			offset = 0xCF0;
 	}
-
+	
+	if (planeType.compare("Yak-7B ser.36") == 0)
+	{
+		offset = 0XC50;
+	}
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
 	LPVOID toTurnNeedle = (LPVOID)(target); 
@@ -349,6 +357,13 @@ bool ReadTurnNeedle()
 
 	//re interporet raw to double
 	turnNeedleValue = *reinterpret_cast<double*>(rawData);
+
+
+	if (planeType.compare("Yak-7B ser.36") == 0)
+	{
+		//yak7b is mirrored :)
+		turnNeedleValue *= -1;
+	}
 
 	return 0;
 }
@@ -609,7 +624,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		}
 		
 
-		//ReadTest();
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
