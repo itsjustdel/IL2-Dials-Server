@@ -343,10 +343,15 @@ bool ReadTurnNeedle()
 			offset = 0xCF0;
 	}
 	
-	if (planeType.compare("Yak-7B ser.36") == 0)
-	{
+	if (planeType.compare("Yak-7B ser.36") == 0)	
 		offset = 0XC50;
-	}
+	
+	if (planeType.compare("Tempest Mk.V ser.2") == 0 )
+		offset = 0XCE8;
+
+	if (planeType.compare("Spitfire Mk.IXe") == 0)
+		offset = 0XD10;
+
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
 	LPVOID toTurnNeedle = (LPVOID)(target); 
@@ -359,11 +364,16 @@ bool ReadTurnNeedle()
 	turnNeedleValue = *reinterpret_cast<double*>(rawData);
 
 
-	if (planeType.compare("Yak-7B ser.36") == 0)
-	{
-		//yak7b is mirrored :)
+	//some are mirrored
+	if (planeType.compare("Yak-7B ser.36") == 0 )
 		turnNeedleValue *= -1;
-	}
+
+	if (planeType.compare("Tempest Mk.V ser.2") == 0)
+		turnNeedleValue *= -1;
+	
+	if (planeType.compare("Spitfire Mk.IXe") == 0)	
+		turnNeedleValue *= -1;
+	
 
 	return 0;
 }
