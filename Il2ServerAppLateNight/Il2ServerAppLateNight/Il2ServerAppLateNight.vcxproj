@@ -173,8 +173,8 @@
     <ClCompile Include="src\ProcessTools.cpp" />
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\TurnNeedle.cpp" />
     <ClCompile Include="src\USPlanes.cpp" />
-    <ClCompile Include="TurnNeedle.cpp" />
     <ClCompile Include="WinformsProject.cpp" />
     <ClCompile Include="Form1.cpp" />
   </ItemGroup>

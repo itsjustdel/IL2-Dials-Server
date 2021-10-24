@@ -79,7 +79,7 @@
     <ClCompile Include="src\USPlanes.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TurnNeedle.cpp">
+    <ClCompile Include="src\TurnNeedle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

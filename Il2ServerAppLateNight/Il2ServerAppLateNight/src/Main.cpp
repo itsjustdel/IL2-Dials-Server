@@ -331,9 +331,11 @@ bool ReadTurnNeedle()
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-	//needle value at +AE8 - change to af0
-	uintptr_t offset = 0xAF0;
+	//needle value at +AE8 - change to af0 w.i.p
+	//uintptr_t offset = 0xAF0;
 	//US plane needle at different position! //ony p38?//two engine planes?
+
+	/*
 	if (IsUSPlane(planeType))
 	{
 		//not a20B not inlcuded in this list, this has AF0 offset. Seems there's no logic to this
@@ -353,7 +355,8 @@ bool ReadTurnNeedle()
 	if (planeType.compare("Spitfire Mk.IXe") == 0)
 		offset = 0XD10;
 
-	
+		*/
+	uintptr_t offset = OffsetToTurnNeedle(planeType);
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
