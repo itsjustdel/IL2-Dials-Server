@@ -2,5 +2,5 @@
 #include <Windows.h>
 #include <string>
 
-LPVOID OffsetToTurnNeedle(std::string planeType);
+uintptr_t OffsetToTurnNeedle(std::string planeType);
 

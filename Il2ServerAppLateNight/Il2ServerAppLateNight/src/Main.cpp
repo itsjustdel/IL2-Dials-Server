@@ -16,6 +16,7 @@
 #include "ProcessTools.h"
 #include "Injector.h"
 #include "USPlanes.h"
+#include "TurnNeedle.h"
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
@@ -351,6 +352,8 @@ bool ReadTurnNeedle()
 
 	if (planeType.compare("Spitfire Mk.IXe") == 0)
 		offset = 0XD10;
+
+	offset = 
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
