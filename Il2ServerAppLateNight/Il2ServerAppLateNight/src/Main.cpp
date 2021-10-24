@@ -353,7 +353,7 @@ bool ReadTurnNeedle()
 	if (planeType.compare("Spitfire Mk.IXe") == 0)
 		offset = 0XD10;
 
-	offset = 
+	
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
