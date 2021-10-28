@@ -379,6 +379,15 @@ bool ReadTurnNeedle()
 	
 	if (planeType.compare("Spitfire Mk.IXe") == 0)	
 		turnNeedleValue *= -1;
+
+	if (planeType.compare("Hurricane Mk.II") == 0)
+		turnNeedleValue *= -1;
+
+	if (planeType.compare("Yak-9 ser.1") == 0)
+		turnNeedleValue *= -1;
+
+	if (planeType.compare("Yak-9T ser.1") == 0)
+		turnNeedleValue *= -1;
 	
 
 	return 0;

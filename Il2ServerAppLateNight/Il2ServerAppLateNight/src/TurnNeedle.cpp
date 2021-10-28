@@ -20,6 +20,22 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	if (planeType.compare("Spitfire Mk.IXe") == 0)
 		return 0XD10;
 
+	if (planeType.compare("Hurricane Mk.II") == 0)
+		return 0XCE0;
+
+	//yak9 s1 0xC48
+	if (planeType.compare("Yak-9 ser.1") == 0)
+		return 0XC48;
+
+	//9t 0xC50
+	if (planeType.compare("Yak-9T ser.1") == 0)
+		return 0XC50;
+
+	//hs 129 = 0xCA8
+	if (planeType.compare("Hs 129 B-2") == 0)
+		return 0XCA8;
+	//
+
 	if (IsUSPlane(planeType))
 	{
 
