@@ -23,7 +23,7 @@
 #include <sstream>
 
 
-float version = 0.301f;
+float version = 0.31f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -649,7 +649,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		}
 		
 
-		ReadTest();
+		//ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
