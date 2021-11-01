@@ -6,6 +6,7 @@
 
 
 
+
 namespace Il2Dials
 {
 
@@ -16,6 +17,7 @@ namespace Il2Dials
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace System::Resources;
+	
 
 
 	
@@ -61,6 +63,8 @@ namespace Il2Dials
 	private: System::Windows::Forms::CheckBox^ LocalClientCheckBox;
 	private: System::ComponentModel::BackgroundWorker^ restartWorker;
 	private: System::Windows::Forms::RichTextBox^ versionBox;
+	private: System::Windows::Forms::RichTextBox^ DebugTextBox2;
+
 
 
 
@@ -201,6 +205,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->LocalClientCheckBox = (gcnew System::Windows::Forms::CheckBox());
 			this->restartWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->versionBox = (gcnew System::Windows::Forms::RichTextBox());
+			this->DebugTextBox2 = (gcnew System::Windows::Forms::RichTextBox());
 			this->contextMenuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -397,6 +402,23 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->Text = L"v0.31";
 			this->versionBox->Visible = false;
 			// 
+			// DebugTextBox2
+			// 
+			this->DebugTextBox2->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
+				static_cast<System::Int32>(static_cast<System::Byte>(24)));
+			this->DebugTextBox2->BorderStyle = System::Windows::Forms::BorderStyle::None;
+			this->DebugTextBox2->Cursor = System::Windows::Forms::Cursors::Default;
+			this->DebugTextBox2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->DebugTextBox2->ForeColor = System::Drawing::Color::CadetBlue;
+			this->DebugTextBox2->Location = System::Drawing::Point(26, 147);
+			this->DebugTextBox2->Name = L"DebugTextBox2";
+			this->DebugTextBox2->ReadOnly = true;
+			this->DebugTextBox2->Size = System::Drawing::Size(167, 36);
+			this->DebugTextBox2->TabIndex = 12;
+			this->DebugTextBox2->Text = L"";
+			this->DebugTextBox2->Visible = false;
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -404,6 +426,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->ClientSize = System::Drawing::Size(218, 331);
+			this->Controls->Add(this->DebugTextBox2);
 			this->Controls->Add(this->versionBox);
 			this->Controls->Add(this->LocalClientCheckBox);
 			this->Controls->Add(this->DebugTextBox);
@@ -474,6 +497,26 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			return;
 		}
 
+		
+		//look for turn needle scanner (only in test builds)
+		//bool needleTest = true;
+		//only returned offsets pass over 100
+		if (gameWorkerProgressReport > 100)
+		{
+			if (gameWorkerProgressReport <= errorMessageLimit)
+				DebugTextBox2->Text = "Scanning for needle offset...";
+			else
+			{
+				//convert to hex for print
+				char c = System::Convert::ToChar(gameWorkerProgressReport);
+				System::String^ sysString = System::Convert::ToString(c);
+
+				DebugTextBox2->Text = System::Convert::ToString("offset found at = " + gameWorkerProgressReport);
+			}
+				
+			return;
+		}
+
 
 	//for icon loading
 	//auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
@@ -517,6 +560,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 	else if (clients > 0)
 	{
+		
 		if (gameWorkerProgressReport < errorMessageLimit)
 		{
 			//font star
