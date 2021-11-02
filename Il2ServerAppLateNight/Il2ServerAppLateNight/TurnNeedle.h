@@ -4,3 +4,4 @@
 
 uintptr_t OffsetToTurnNeedle(std::string planeType);
 
+LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTurnNeedle);

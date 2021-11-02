@@ -52,3 +52,76 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	return 0xAF0;
 }
 
+
+//bools used for turn needle scan  -move function to turn needle class
+bool foundNegativeTurnLimit[100];//oversized
+bool foundPositiveTurnLimit[100];
+LPCVOID positiveTurnNeedleOffset[100];
+LPCVOID negativeTurnNeedleOffset[100];
+
+LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTurnNeedle)
+{
+	//we need to wait for injection before we do this
+	if (!injectedTurnNeedle)
+		return 0;
+
+
+
+	//find where to setart our search
+	//turn needle location stored at codecave + 140
+	LPVOID turnNeedleAddressInCave = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
+	//read address in cave 
+	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, turnNeedleAddressInCave);
+
+	//only search for limits between 20 and 50
+	for (size_t a = 10; a < 60; a++)
+	{
+
+		//scan through segment of memory we know value is in until we find "limit" 
+		//limit is the known value where the rotation is locked - user will fly plane in a manner to max out needle movement while we scan
+		for (size_t i = 0; i < 1000 * sizeof(double); i += sizeof(double))
+		{
+			//add address using uintptr_t and cast back to lpcvoid to use with ReadProcessMemory function		
+			LPCVOID targetAddress = (LPCVOID)((uintptr_t)(toDynamicBodyStruct)+i);
+			//read a double in to this variable
+			double d;
+			//for debug to see if we read anything
+			size_t bytesRead;
+			//read memory from process at "struct start", read a double
+			ReadProcessMemory(hProcess, targetAddress, &d, sizeof(double), &bytesRead);
+
+			//check read double against passed "limit"
+			//make sure to compare the same data type (negative numbers can differ)
+
+			double doubleA = (double)(a);
+			double minusDoubleA = -(double)(a);
+			if (d == doubleA)
+			{
+				//we have found potentially found our offset
+				foundPositiveTurnLimit[a] = true;
+				positiveTurnNeedleOffset[a] = (LPCVOID)i;
+			}
+
+			if (d == minusDoubleA)
+			{
+				//we have found potentially found our offset
+				foundNegativeTurnLimit[a] = true;
+				negativeTurnNeedleOffset[a] = (LPCVOID)i;
+			}
+		}
+
+		//check if we have found both neative and positive offsets
+		if (foundNegativeTurnLimit[a] && foundPositiveTurnLimit[a])
+		{
+			if (negativeTurnNeedleOffset[a] == positiveTurnNeedleOffset[a])
+			{
+				//looks like we have it!
+				return negativeTurnNeedleOffset[a];
+			}
+
+		}
+	}
+	return 0;
+
+}
+
