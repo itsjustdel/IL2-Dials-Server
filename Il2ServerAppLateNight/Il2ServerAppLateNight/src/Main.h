@@ -40,6 +40,7 @@ double GetTurnAndBankBall();
 
 double GetTurnAndBankNeedle();
 
+double GetRPM();
 
 
 

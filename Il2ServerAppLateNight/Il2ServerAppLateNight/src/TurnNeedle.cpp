@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "USPlanes.h"
 #include <string>
+#include "Injector.h"
 
 uintptr_t OffsetToTurnNeedle(std::string planeType)
 {
@@ -34,7 +35,22 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	//hs 129 = 0xCA8
 	if (planeType.compare("Hs 129 B-2") == 0)
 		return 0XCA8;
-	//
+
+	//Typhoon Mk.Ib	
+	if (planeType.compare("Typhoon Mk.Ib") == 0)
+		return 0XD48;
+
+	//"U-2VS"
+	if (planeType.compare("U-2VS") == 0)
+		return 0X10B8;
+
+	//P-47D-22
+	if (planeType.compare("P-47D-22") == 0)
+		return 0XCA0;
+
+	//Spitfire Mk.XIV
+	if (planeType.compare("Spitfire Mk.XIV") == 0)
+		return 0XE30;
 
 	if (IsUSPlane(planeType))
 	{
@@ -59,7 +75,7 @@ bool foundPositiveTurnLimit[100];
 LPCVOID positiveTurnNeedleOffset[100];
 LPCVOID negativeTurnNeedleOffset[100];
 
-LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTurnNeedle)
+LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTurnNeedle, LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
 	//we need to wait for injection before we do this
 	if (!injectedTurnNeedle)

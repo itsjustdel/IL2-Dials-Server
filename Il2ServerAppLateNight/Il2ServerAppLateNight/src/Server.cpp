@@ -347,7 +347,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 //            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
-            float floatArray[9];          
+            float floatArray[10];          
 
             //read memory only when requested
             ReadPlaneType();
@@ -385,6 +385,8 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             floatArray[7] = (float)(GetTurnAndBankBall());
             //bank needle
             floatArray[8] = (float)(GetTurnAndBankNeedle());
+            //rpm
+            floatArray[9] = (float)(GetRPM());
 
             // The buffer we will be writing bytes into
             //make space for

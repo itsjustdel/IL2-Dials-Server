@@ -16,11 +16,13 @@
 #include "ProcessTools.h"
 #include "Injector.h"
 #include "USPlanes.h"
-#include "TurnNeedle.h"
+//#include "TurnNeedle.h"
+#include "../TurnNeedle.h"
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 #include <sstream>
+
 
 
 float version = 0.31f;
@@ -126,7 +128,12 @@ double GetTurnAndBankBall()
 
 double GetTurnAndBankNeedle()
 {
-	return  turnNeedleValue;//nneeds updated
+	return turnNeedleValue;
+}
+
+double GetRPM()
+{
+	return cockpitValues[31];
 }
 
 
@@ -321,39 +328,14 @@ bool ReadTurnNeedle()
 
 	//How to find new offsets-
 	//Find value in debugger by ising +140 offset in cave. Needle is clamped number after NaNs e.g 24, 31
-	//watch value and check offsets of found instructions
-
+	//watch value and check offsets of found instructions (or use turn needle scanner!)
 
 	//injection saves alt. pointer at code cave's address + 0xxx
 	//pointer start of struct in our cave
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-	//needle value at +AE8 - change to af0 w.i.p
-	//uintptr_t offset = 0xAF0;
-	//US plane needle at different position! //ony p38?//two engine planes?
 
-	/*
-	if (IsUSPlane(planeType))
-	{
-		//not a20B not inlcuded in this list, this has AF0 offset. Seems there's no logic to this
-
-		if (IsTwoEngine(planeType))
-			offset = 0xD78;
-		else
-			offset = 0xCF0;
-	}
-	
-	if (planeType.compare("Yak-7B ser.36") == 0)	
-		offset = 0XC50;
-	
-	if (planeType.compare("Tempest Mk.V ser.2") == 0 )
-		offset = 0XCE8;
-
-	if (planeType.compare("Spitfire Mk.IXe") == 0)
-		offset = 0XD10;
-
-		*/
 	uintptr_t offset = OffsetToTurnNeedle(planeType);
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
@@ -457,27 +439,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 	
 	while (true)
 	{
-
-		bool test = false;
-		if (test)
-		{
-
-			//altimeterValues[5] += 1;
-
-			//altimeterValues[8] += 1;
-
-			//cockpitValues[14] += 1;
-
-			//planeType = "TestyPlane_7B";
-
-
-
-
-			//Sleep(1);
-			//continue;
-		}
-
-
 		//check if game is running 
 		//after found once, only check this every so often, causes too much cpu usage
 		//if we haven't received anything, start a timout timer
@@ -506,13 +467,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			//std::cout << "Waiting for exe" << std::endl;
 			continue;
 		}
-
-		//report that we got passed finding process here before we start work
-		//worker->ReportProgress(1);
-
-		//Find functions
-
-
 
 		//get plane name - must be done at start of mission
 		if (setPlayerPresenceAddress == 0)
@@ -576,8 +530,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 				continue;
 			}
 		}
-
-
 
 		//Code Cave
 
@@ -643,13 +595,14 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			}
 		}
 
-		
 
-		//ReadTest();
+		ReadTest();
+
+
 		bool needleScan = false;
 		if (needleScan)//don't run unless needed
 		{	
-			LPCVOID needleOffset = TurnNeedleScanner(turnNeedleAddress, hProcessIL2,injectedTurnNeedle);
+			LPCVOID needleOffset = TurnNeedleScanner(turnNeedleAddress, hProcessIL2,injectedTurnNeedle,codeCaveAddress,hProcessIL2);
 			if (needleOffset != 0)
 				//conver to int and send
 				worker->ReportProgress((uintptr_t)needleOffset);
