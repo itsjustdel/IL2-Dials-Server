@@ -131,11 +131,10 @@ double GetTurnAndBankNeedle()
 	return turnNeedleValue;
 }
 
-double GetRPM()
+double GetRPM(int engine)
 {
-	return cockpitValues[31];
+	return cockpitValues[31 + engine];
 }
-
 
 
 
@@ -596,7 +595,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		}
 
 
-		ReadTest();
+		//ReadTest();
 
 
 		bool needleScan = false;
