@@ -394,13 +394,14 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->versionBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->versionBox->Location = System::Drawing::Point(164, 102);
+			this->versionBox->Location = System::Drawing::Point(174, 102);
 			this->versionBox->Name = L"versionBox";
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(32, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.31";
+			this->versionBox->Text = L"v0.4";
 			this->versionBox->Visible = false;
+			this->versionBox->TextChanged += gcnew System::EventHandler(this, &Form1::versionBox_TextChanged);
 			// 
 			// DebugTextBox2
 			// 
@@ -817,8 +818,5 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 	}
 
-};
-
-	
 
 }
