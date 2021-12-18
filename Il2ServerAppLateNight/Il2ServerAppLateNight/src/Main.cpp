@@ -25,7 +25,7 @@
 
 
 
-float version = 0.4f;
+float version = 0.31f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
