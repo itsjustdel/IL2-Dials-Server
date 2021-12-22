@@ -15,6 +15,18 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_25C2E38BA41E408CBE8F6E24FC4E868B"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_2E9FC9371C864B549EA90B9D053E79B9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_41DD2C2DDFF442228A6CD2366E089B94"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -22,6 +34,12 @@
         "Entry"
         {
         "MsmKey" = "8:_59C05B4FFE03409FB534940D4FDB46C7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A08014079A934AEF8B7AD21D0D9ED1DC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -162,6 +180,46 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_25C2E38BA41E408CBE8F6E24FC4E868B"
+            {
+            "SourcePath" = "8:..\\..\\..\\IL2Closer\\IL2Dials Closer\\x64\\Release\\IL-2 Dials Closer.exe"
+            "TargetName" = "8:IL-2 Dials Closer.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_6FBCAD68991C4FB8A6E6A12AEB2E7E87"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2E9FC9371C864B549EA90B9D053E79B9"
+            {
+            "SourcePath" = "8:..\\..\\..\\IL2Closer\\IL2Dials Closer\\x64\\Release\\processesToClose.ini"
+            "TargetName" = "8:processesToClose.ini"
+            "Tag" = "8:"
+            "Folder" = "8:_6FBCAD68991C4FB8A6E6A12AEB2E7E87"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_41DD2C2DDFF442228A6CD2366E089B94"
             {
             "SourcePath" = "8:..\\..\\..\\x64\\Release\\Icons\\cadetBlueStar.ico"
@@ -182,11 +240,31 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A08014079A934AEF8B7AD21D0D9ED1DC"
+            {
+            "SourcePath" = "8:..\\..\\..\\IL2Closer\\IL2Dials Closer\\x64\\Release\\Readme.txt"
+            "TargetName" = "8:Readme.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_6FBCAD68991C4FB8A6E6A12AEB2E7E87"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C17C4B234A8347258128DC09DDDCB3A1"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.7971.32533, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.8026.27848, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_C17C4B234A8347258128DC09DDDCB3A1"
@@ -360,6 +438,17 @@
                                 {
                                 }
                             }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_6FBCAD68991C4FB8A6E6A12AEB2E7E87"
+                            {
+                            "Name" = "8:Auto Closer"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_E2FE8B9EFF334466B588DE6791862F66"
+                                "Folders"
+                                {
+                                }
+                            }
                             "{9EF0B969-E518-4E46-987F-47570745A589}:_FEEB621659774B4095CC91F335608EF7"
                             {
                             "Name" = "8:Icons"
@@ -425,15 +514,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IL-2 Dials"
-        "ProductCode" = "8:{A52EC818-967B-4502-BADF-29CE7DD13B2F}"
-        "PackageCode" = "8:{D856A61C-F9A4-4CD1-B328-9A6D0B49FE6B}"
+        "ProductCode" = "8:{4F59B5EC-AC13-41F9-A997-5AA5FD5C0CD3}"
+        "PackageCode" = "8:{BBC83CCE-8EE8-4BD8-9D1D-CBEFBC7F505A}"
         "UpgradeCode" = "8:{C7ECE9FB-58AB-4441-934F-6CCC1516720C}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.31"
+        "ProductVersion" = "8:0.4.0.0"
         "Manufacturer" = "8:DellyWellySoftware"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
