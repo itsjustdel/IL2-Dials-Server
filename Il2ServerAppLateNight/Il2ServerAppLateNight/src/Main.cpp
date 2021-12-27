@@ -430,14 +430,29 @@ void ReadTest()
 
 }
 
+void SendTest()
+{
+	for (size_t i = 0; i < cockpitValuesLength; i++)
+	{
+		cockpitValues[i] += 0.0000001;
+	}
+}
+
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
 	lastChecked -= std::chrono::hours(1);
+
+	
 	
 	while (true)
 	{
+		//false data
+		//SendTest();
+		//continue;
+
+
 		//check if game is running 
 		//after found once, only check this every so often, causes too much cpu usage
 		//if we haven't received anything, start a timout timer
@@ -596,6 +611,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 
 		//ReadTest();
+		
 
 
 		bool needleScan = false;
