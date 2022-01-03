@@ -52,6 +52,11 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	if (planeType.compare("Spitfire Mk.XIV") == 0)
 		return 0XE30;
 
+	//P-51B-5
+	if (planeType.compare("P-51B-5") == 0)
+		return 0XCD8;
+
+
 	if (IsUSPlane(planeType))
 	{
 
