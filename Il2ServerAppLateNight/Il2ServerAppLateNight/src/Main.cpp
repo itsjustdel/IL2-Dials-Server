@@ -438,6 +438,168 @@ void SendTest()
 	}
 }
 
+int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
+{
+	//get plane name - must be done at start of mission
+	if (setPlayerPresenceAddress == 0)
+	{
+		setPlayerPresenceAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
+		if (setPlayerPresenceAddress == 0)
+		{
+			worker->ReportProgress(1);
+
+			return 0;
+		}
+	}
+
+	//find getPointerToAltimeter location, if we haven't found already
+	if (altimeterAddress == 0)
+	{
+		altimeterAddress = PointerToFunction("getPointerToAltimeter", hProcessIL2, moduleRSE);
+		if (altimeterAddress == 0)
+		{
+			worker->ReportProgress(2);
+			return 0;
+		}
+	}
+
+
+	//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
+
+
+	//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
+	if (turnNeedleAddress == 0)
+	{
+		//CCockpitInstruments::simulation is full name after compilation but name is scrambled slightly in dll export list
+		//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
+		//change :: for @ and flip
+		// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
+
+		std::string str("simulation@CCockpitInstruments");
+		turnNeedleAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (turnNeedleAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
+	if (turnBallAddress == 0)
+	{
+
+		//CAccelerationBallIndicator::simulation is full name after compilation but name is scrambled slightly in dll export list
+		//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
+		//change :: for @ and flip
+		// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
+
+		std::string str("simulation@CAccelerationBallIndicator");
+		turnBallAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (turnBallAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+int FindCodeCave(System::ComponentModel::BackgroundWorker^ worker)
+{
+
+	//create or recover code cave	
+	if (codeCaveAddress == 0)
+	{
+		if (!CodeCave(hProcessIL2, (uintptr_t)setPlayerPresenceAddress, moduleRSE, codeCaveAddress))
+		{
+			worker->ReportProgress(4);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+int Injections(System::ComponentModel::BackgroundWorker^ worker) 
+{
+
+	
+	//inject getplanetype
+	if (!injectedPlaneType)
+	{
+		injectedPlaneType = HookPlaneType(hProcessIL2, (void*)(setPlayerPresenceAddress), size, codeCaveAddress);
+		if (!injectedPlaneType)
+		{
+			//Hook function overwrites original code and writes to our code cave
+			worker->ReportProgress(5);
+			return 0;
+		}
+	}
+
+
+	//inject altimeter		
+	if (!injectedAltimeter)
+	{
+		injectedAltimeter = HookAltimeter(hProcessIL2, (void*)(altimeterAddress), size, codeCaveAddress);
+		if (!injectedAltimeter)
+		{
+			//Hook function overwrites original code and writes to our code cave
+			worker->ReportProgress(6);
+			return 0;
+		}
+	}
+
+
+	//inject turn needle
+	if (!injectedTurnNeedle)
+	{
+		injectedTurnNeedle = HookTurnNeedle(hProcessIL2, (void*)(turnNeedleAddress), size, codeCaveAddress);
+		if (!injectedTurnNeedle)
+		{
+			//Hook function overwrites original code and writes to our code cave
+			worker->ReportProgress(7);
+			return 0;
+		}
+	}
+
+	//inject turn ball
+	if (!injectedTurnBall)
+	{
+		injectedTurnBall = HookTurnBall(hProcessIL2, (void*)(turnBallAddress), size, codeCaveAddress);
+		if (!injectedTurnBall)
+		{
+			//Hook function overwrites original code and writes to our code cave
+			worker->ReportProgress(8);
+			return 0;
+		}
+	}
+
+
+	return 1;
+
+}
+
+int NeedleScan(System::ComponentModel::BackgroundWorker^ worker)
+{
+	//debugging function to find offsets
+	LPCVOID needleOffset = TurnNeedleScanner(turnNeedleAddress, hProcessIL2, injectedTurnNeedle, codeCaveAddress, hProcessIL2);
+	if (needleOffset != 0)
+		//convert to int and send
+		worker->ReportProgress((uintptr_t)needleOffset);
+
+	return 1;
+}
+
+void ClearAddresses()
+{
+	setPlayerPresenceAddress = 0;
+	altimeterAddress = 0;
+	turnNeedleAddress = 0;
+	turnBallAddress = 0;
+}
+
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
 	auto lastChecked = std::chrono::system_clock::now();
@@ -475,6 +637,9 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			//using BackgroundWorker class to send info safely cross threaded
 			worker->ReportProgress(0);
 
+			//clear addresses in case il2 is restarting, there will be all new addresses after restart
+			ClearAddresses();
+
 			//can't spam getprocessdata, too much cpu usage
 			Sleep(1000);
 
@@ -482,146 +647,21 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		}
 
-		//get plane name - must be done at start of mission
-		if (setPlayerPresenceAddress == 0)
-		{
-			setPlayerPresenceAddress = PointerToFunction("setPlayerPresence", hProcessIL2, moduleRSE);
-			if (setPlayerPresenceAddress == 0)
-			{
-				worker->ReportProgress(1);
-
-				continue;
-			}
-		}
-
-		//find getPointerToAltimeter location, if we haven't found already
-		if (altimeterAddress == 0)
-		{
-			altimeterAddress = PointerToFunction("getPointerToAltimeter", hProcessIL2, moduleRSE);
-			if (altimeterAddress == 0)
-			{
-				worker->ReportProgress(2);
-				continue;
-			}
-		}
-
-
-		//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
-
-
-		//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
-		if (turnNeedleAddress == 0)
-		{
-			//CCockpitInstruments::simulation is full name after compilation but name is scrambled slightly in dll export list
-			//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
-			//change :: for @ and flip
-			// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
-
-			std::string str("simulation@CCockpitInstruments");
-			turnNeedleAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
-			if (turnNeedleAddress == 0)
-			{
-				worker->ReportProgress(3);
-
-				continue;
-			}
-		}
-
-		if (turnBallAddress == 0)
-		{
-
-			//CAccelerationBallIndicator::simulation is full name after compilation but name is scrambled slightly in dll export list
-			//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
-			//change :: for @ and flip
-			// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
-
-			std::string str("simulation@CAccelerationBallIndicator");
-			turnBallAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
-			if (turnBallAddress == 0)
-			{
-				worker->ReportProgress(3);
-
-				continue;
-			}
-		}
+		//scan for functions and save addresses		
+		if (FindFunctions(worker) == 0)
+			//if all functions not found, skip(we have reported back to worker thread already
+			continue;
 
 		//Code Cave
-
-		//create or recover code cave	
-		if (codeCaveAddress == 0)
-		{
-			if (!CodeCave(hProcessIL2, (uintptr_t)setPlayerPresenceAddress, moduleRSE, codeCaveAddress))
-			{
-				worker->ReportProgress(4);
-				continue;
-			}
-		}
+		if (FindCodeCave(worker) == 0)
+			continue;
 
 		//Inject code
-
-		//inject getplanetype
-		if (!injectedPlaneType)
-		{
-			injectedPlaneType = HookPlaneType(hProcessIL2, (void*)(setPlayerPresenceAddress), size, codeCaveAddress);
-			if (!injectedPlaneType)
-			{
-				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(5);
-				continue;
-			}
-		}
-
-
-		//inject altimeter		
-		if (!injectedAltimeter)
-		{
-			injectedAltimeter = HookAltimeter(hProcessIL2, (void*)(altimeterAddress), size, codeCaveAddress);
-			if (!injectedAltimeter)
-			{
-				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(6);
-				continue;
-			}
-		}
-
-
-		//inject turn needle
-		if (!injectedTurnNeedle)
-		{
-			injectedTurnNeedle = HookTurnNeedle(hProcessIL2, (void*)(turnNeedleAddress), size, codeCaveAddress);
-			if (!injectedTurnNeedle)
-			{
-				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(7);
-				continue;
-			}
-		}
-
-		//inject turn ball
-		if (!injectedTurnBall)
-		{
-			injectedTurnBall = HookTurnBall(hProcessIL2, (void*)(turnBallAddress), size, codeCaveAddress);
-			if (!injectedTurnBall)
-			{
-				//Hook function overwrites original code and writes to our code cave
-				worker->ReportProgress(8);
-				continue;
-			}
-		}
-
-
-		//ReadTest();
+		if (Injections(worker) == 0)
+			continue;
 		
-
-
-		bool needleScan = false;
-		if (needleScan)//don't run unless needed
-		{	
-			LPCVOID needleOffset = TurnNeedleScanner(turnNeedleAddress, hProcessIL2,injectedTurnNeedle,codeCaveAddress,hProcessIL2);
-			if (needleOffset != 0)
-				//conver to int and send
-				worker->ReportProgress((uintptr_t)needleOffset);
-		}
+		//debugging function
+		//NeedleScan(worker);
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
