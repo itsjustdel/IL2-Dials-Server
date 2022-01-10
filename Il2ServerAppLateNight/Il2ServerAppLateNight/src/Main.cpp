@@ -76,6 +76,14 @@ void CaveRecovered()
 
 //server uses Gets to grab data before sending it out
 
+bool GetInjected()
+{
+	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle)
+		return true;
+	else	
+		return false;	
+}
+
 
 float GetIL2DialsVersion()
 {
@@ -636,6 +644,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		{
 			//using BackgroundWorker class to send info safely cross threaded
 			worker->ReportProgress(0);
+
 
 			//clear addresses in case il2 is restarting, there will be all new addresses after restart
 			ClearAddresses();

@@ -13,11 +13,13 @@
 #include <codecvt>
 
 #include "IPHelper.h"
+using namespace System::Diagnostics;
 
 struct CLIENT_INFO
 {
     SOCKET hClientSocket;
     struct sockaddr_in clientAddr;   
+    
     //used to remove thread from thread list when closing
    // DWORD dwThreadId;    
     //needs to be a pointer because it is non managed. We will recast aftert it has been passsed through to worker function
@@ -32,6 +34,7 @@ wchar_t szServerIPAddr[20] = L"192.168.1.76"; //finding auto- may need for user 
 bool InitWinSock2_0();
 BOOL WINAPI ClientThread(LPVOID lpData);
 std::vector<CLIENT_INFO> clientThreads;
+PCSTR serverIP;
 
 void SetPortNumber(int t)
 {
@@ -83,14 +86,14 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
         //return -1;
     }
 
-    SOCKET hServerSocket;
+    SOCKET hServerSocketTCP;
 
-    hServerSocket = socket(
+    hServerSocketTCP = socket(
         AF_INET,        // The address family. AF_INET specifies TCP/IP
         SOCK_STREAM,    // Protocol type. SOCK_STREM specified TCP
         0               // Protoco Name. Should be 0 for AF_INET address family
     );
-    if (hServerSocket == INVALID_SOCKET)
+    if (hServerSocketTCP == INVALID_SOCKET)
     {
         OutputDebugString(L"Unable to Create Socket");
         OutputDebugString(L"\n");
@@ -106,7 +109,7 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
 
     serverAddr.sin_family = AF_INET;     // The address family. MUST be AF_INET
     //serverAddr.sin_addr.s_addr = inet_addr(szServerIPAddr); //https://stackoverflow.com/questions/36683785/inet-addr-use-inet-pton-or-inetpton-instead-or-define-winsock-deprecated
-    PCWSTR ipFromVariable = (PCWSTR)(szServerIPAddr);
+    //PCWSTR ipFromVariable = (PCWSTR)(szServerIPAddr);
     
     //convert from string to wide char - converting to a const ensures it stays literal - 
     //https://stackoverflow.com/questions/13690306/conversion-from-string-literal-to-char-is-deprecated
@@ -115,32 +118,33 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
     const wchar_t* c0 = wideIPstr.c_str();
 
     //note this isn't byte perfect? compare to ipFromVariable - but working...
-    PCWSTR ip = (PCWSTR)(c0);
+    //stored in global, client threads will access this
+    serverIP = (PCSTR)(c0);
    
-    InetPton(AF_INET, ip, &serverAddr.sin_addr.s_addr); //changed to compile-del
+    InetPton(AF_INET, (PCWSTR)serverIP, &serverAddr.sin_addr.s_addr); //changed to compile-del
     serverAddr.sin_port = htons(nServerPort);
 
     // Bind the Server socket to the address & port
-    if (bind(hServerSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+    if (bind(hServerSocketTCP, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
     {
         OutputDebugString(L"Unable to bind to port");
         OutputDebugString(L"\n");
-        std::cout << "Unable to bind to " << ip << " port " << nServerPort << std::endl;
+        std::cout << "Unable to bind to " << serverIP << " port " << nServerPort << std::endl;
         // Free the socket and cleanup the environment initialized by WSAStartup()
-        closesocket(hServerSocket);
+        closesocket(hServerSocketTCP);
         WSACleanup();
         worker->ReportProgress(-4);
         return -1;
     }
 
     // Put the Server socket in listen state so that it can wait for client connections
-    if (listen(hServerSocket, SOMAXCONN) == SOCKET_ERROR)
+    if (listen(hServerSocketTCP, SOMAXCONN) == SOCKET_ERROR)
     {
         OutputDebugString(L"Unable to put server in listen state");
         OutputDebugString(L"\n");
         std::cout << "Unable to put server in listen state" << std::endl;
         // Free the socket and cleanup the environment initialized by WSAStartup()
-        closesocket(hServerSocket);
+        closesocket(hServerSocketTCP);
         WSACleanup();
 
         worker->ReportProgress(-5);
@@ -161,8 +165,11 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
         OutputDebugString(L"Starting blocking accept()");
         OutputDebugString(L"\n");
         std::cout << "Starting Accept (blocking function)" << std::endl;
-        //blocking
-        hClientSocket = accept(hServerSocket, (struct sockaddr*)&clientAddr, &nSize);
+
+        //blocking ///////////
+        hClientSocket = accept(hServerSocketTCP, (struct sockaddr*)&clientAddr, &nSize);
+        ////////////////
+
         OutputDebugString(L"Completed accept");
         OutputDebugString(L"\n");
         std::cout << "Completed Accept (blocking function)" << std::endl;
@@ -175,6 +182,8 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
         }
         else
         {
+            //Start client thread
+
             HANDLE hClientThread;
             struct CLIENT_INFO clientInfo;
             DWORD dwThreadId;
@@ -182,6 +191,7 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
             clientInfo.clientAddr = clientAddr;
             clientInfo.hClientSocket = hClientSocket;
             clientInfo.worker = &worker;
+
             //check we don't already have this client in our list
             if (ClientInList(clientInfo))
             {
@@ -189,14 +199,14 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
                 OutputDebugStringW(L"\n");
                 continue;
             }
-
             
             OutputDebugString(L"Client connected");
             OutputDebugStringW(L"\n");
             std::cout << "Client connected from ..." << std::endl;// << inet_ntoa(clientAddr.sin_addr) << std::endl;
             
             // Start the client thread - could be background worker - keeping so I have an example of a thread started in this way
-            hClientThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ClientThread, (LPVOID)&clientInfo, 0, &dwThreadId);
+            //hClientThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ClientThread, (LPVOID)&clientInfo, 0, &dwThreadId);
+            hClientThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ClientThreadUDP, (LPVOID)&clientInfo, 0, &dwThreadId);
 
 
             if (hClientThread == NULL)
@@ -213,7 +223,7 @@ int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
         }
     }
 
-    closesocket(hServerSocket);
+    closesocket(hServerSocketTCP);
     WSACleanup();
 
     return 1;
@@ -256,6 +266,169 @@ void RemoveClient(CLIENT_INFO clientInfo)
 
         }
     }
+}
+
+
+char* Package()
+{
+    //we represent the data with floats in the app, so let's convert now and save network traffic
+    float floatArray[14];
+
+    //read memory only when requested
+    ReadPlaneType();
+    ReadCockpitInstruments();
+    ReadAltimeter();
+    ReadTurnNeedle();
+    ReadTurnCoordinatorBall();
+
+
+    //packing differecnt data types in to one char array for sending (serialisation)
+    //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
+
+    //version
+    float programVersion = GetIL2DialsVersion();
+    //planeType
+    std::string planeType = GetPlaneType();
+    //to send over tcp we need string size and data            
+
+    //send blanks if no game found/injected
+    if (GetInjected() == false)
+    {
+        planeType = "No Game Process/ Injection";
+
+        for (size_t i = 0; i < 8; i++)
+        {
+            floatArray[i] = 0.0f;
+        }
+        for (size_t i = 0; i < 4; i++)//4 engines max
+        {
+            //get rpm know where the rpm struct starts
+            floatArray[9 + i] = 0.0f;
+        }
+    }
+    else
+    {
+        //if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
+        floatArray[0] = (float)(GetAltitude());
+        //mgh
+        floatArray[1] = (float)(GetMMHg());
+        //airspeed
+        floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+        //heading
+        floatArray[3] = (float)(GetHeading());
+        //Pitch
+        floatArray[4] = (float)(GetPitch());
+        //Roll
+        floatArray[5] = (float)(GetRoll());
+        //vertical speed 
+        floatArray[6] = (float)(GetVSI());
+        //ball
+        floatArray[7] = (float)(GetTurnAndBankBall());
+        //bank needle
+        floatArray[8] = (float)(GetTurnAndBankNeedle());
+        //rpm
+        for (size_t i = 0; i < 4; i++)//4 engines max
+        {
+            //get rpm know where the rpm struct starts
+            floatArray[9 + i] = (float)(GetRPM(i));
+        }
+    }
+
+    // The buffer we will be writing bytes into
+    //make space for
+    //program version
+    //planetype string size
+    //planetype string data size
+    //float array containing instrument/dial values
+    //64 bit string (testing needed)
+    unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
+    // A pointer we will advance whenever we write data
+    unsigned char* p = outBuf;
+
+
+    //float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
+    //we know how big this float array will be so we don't need to send size
+    memcpy(p, (char*)floatArray, sizeof(floatArray));
+    p += sizeof(floatArray);//4btye float * array length
+
+    // Serialize "program version" into outBuf
+    //using uint32_t when serializing            
+    //copy float to uint32 safely
+    uint32_t fbits = 0;
+    memcpy(&fbits, &programVersion, sizeof(programVersion));
+    //copy to buffer
+    memcpy(p, &fbits, sizeof(fbits));
+    p += sizeof(fbits);
+
+    // Serialize "planeType string length" into outBuf
+    //size_t to uint32
+    uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is size_t and not the size of the data in the array
+    memcpy(p, &neX, sizeof(neX));
+    p += sizeof(neX);
+
+    //string data already in correct format - copy to buffer            
+    memcpy(p, planeType.data(), 64);
+    p += 64;
+
+
+    char* sendBuffer = (char*)outBuf;
+    //int sendLength = sizeof(outBuf);
+
+    return sendBuffer;
+}
+
+BOOL WINAPI ClientThreadUDP(LPVOID lpData)
+{
+
+    OutputDebugString(L"UDP Client thread");
+    //rebuild client info struct
+    CLIENT_INFO* pClientInfoA = (CLIENT_INFO*)lpData;
+    //this is our instance, so it stays in this thread and doesn't get overwritten
+    CLIENT_INFO clientInfo = *pClientInfoA;
+
+
+    sockaddr_in dest;
+    sockaddr_in local;
+    WSAData data;
+    WSAStartup(MAKEWORD(2, 2), &data);
+
+    //server
+    local.sin_family = AF_INET;
+    inet_pton(AF_INET, serverIP, &local.sin_addr.s_addr);
+    local.sin_port = htons(0);
+
+    //client
+    dest = clientInfo.clientAddr;
+
+    SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    bind(s, (sockaddr*)&local, sizeof(local));
+
+    
+    std::chrono::time_point<std::chrono::system_clock> timer;
+
+    timer = std::chrono::system_clock::now();
+
+    while (true)
+    {   
+        std::chrono::duration<double> diff = std::chrono::system_clock::now() - timer;
+        std::chrono::duration<double> interval = (std::chrono::duration < double>) 1000;
+
+        if (diff > interval)
+        {
+
+            //grab all data we want from main.cpp - this is our send package
+            const char* pkt = Package();
+
+            sendto(s, pkt, strlen(pkt), 0, (sockaddr*)&dest, sizeof(dest));
+        }
+        else
+            timer = std::chrono::system_clock::now();
+    }
+    //closesocket(s);
+    //WSACleanup(); //after disconnect?
+
+
+    return TRUE;
 }
 
 BOOL WINAPI ClientThread(LPVOID lpData)
@@ -303,9 +476,9 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             if (timeInSeconds > 5)
             {
                 // Close this socket 
-                RemoveClient(clientInfo);                
+          //      RemoveClient(clientInfo);                
                 //and end thread
-                return true;
+            //    return true;
             }
         }
         //check this works and thne figure out
@@ -313,9 +486,9 @@ BOOL WINAPI ClientThread(LPVOID lpData)
         {
             ////if we get a timeout or error, client must have gone.
             // Close this socket 
-            RemoveClient(clientInfo);
+       //     RemoveClient(clientInfo);
             //and end thread
-            return true;
+       //     return true;
 
         }
         else
@@ -347,7 +520,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 //            std::cout << "evcode == 1 - cockpit and altimeter values" << std::endl;
 
             //we represent the data with floats in the app, so let's convert now and save network traffic
-            float floatArray[14];          
+            float floatArray[14];
 
             //read memory only when requested
             ReadPlaneType();
@@ -359,39 +532,55 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 
             //packing differecnt data types in to one char array for sending (serialisation)
             //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
-            
+
             //version
             float programVersion = GetIL2DialsVersion();
             //planeType
             std::string planeType = GetPlaneType();
             //to send over tcp we need string size and data            
-            
 
-            //if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-            floatArray[0] = (float)(GetAltitude());
-            //mgh
-            floatArray[1] = (float)(GetMMHg());
-            //airspeed
-            floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
-            //heading
-            floatArray[3] = (float)(GetHeading());
-            //Pitch
-            floatArray[4] = (float)(GetPitch());
-            //Roll
-            floatArray[5] = (float)(GetRoll());        
-            //vertical speed 
-            floatArray[6] = (float)(GetVSI());
-            //ball
-            floatArray[7] = (float)(GetTurnAndBankBall());
-            //bank needle
-            floatArray[8] = (float)(GetTurnAndBankNeedle());
-            //rpm
-            for (size_t i = 0; i < 4; i++)//4 engines max
+            //send blanks if no game found/injected
+            if (GetInjected() == false)
             {
-                //get rpm know where the rpm struct starts
-                floatArray[9 + i] = (float)(GetRPM(i));
+                planeType = "No Game Process/ Injection";
+
+                for (size_t i = 0; i < 8; i++)
+                {
+                    floatArray[i] = 0.0f;
+                }
+                for (size_t i = 0; i < 4; i++)//4 engines max
+                {
+                    //get rpm know where the rpm struct starts
+                    floatArray[9 + i] = 0.0f;
+                }
             }
-            
+            else
+            {            
+                //if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
+                floatArray[0] = (float)(GetAltitude());
+                //mgh
+                floatArray[1] = (float)(GetMMHg());
+                //airspeed
+                floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+                //heading
+                floatArray[3] = (float)(GetHeading());
+                //Pitch
+                floatArray[4] = (float)(GetPitch());
+                //Roll
+                floatArray[5] = (float)(GetRoll());
+                //vertical speed 
+                floatArray[6] = (float)(GetVSI());
+                //ball
+                floatArray[7] = (float)(GetTurnAndBankBall());
+                //bank needle
+                floatArray[8] = (float)(GetTurnAndBankNeedle());
+                //rpm
+                for (size_t i = 0; i < 4; i++)//4 engines max
+                {
+                    //get rpm know where the rpm struct starts
+                    floatArray[9 + i] = (float)(GetRPM(i));
+                }
+            }
 
             // The buffer we will be writing bytes into
             //make space for
@@ -433,8 +622,7 @@ BOOL WINAPI ClientThread(LPVOID lpData)
            // p += planeType.size();//not needed
 
 
-            //send
-            int nCntSend = 0;
+            
             //char* sendBuffer = (char*)floatArray;
             //int sendLength = sizeof(floatArray);
             char* sendBuffer = (char*)outBuf;
@@ -446,7 +634,8 @@ BOOL WINAPI ClientThread(LPVOID lpData)
             // So try sending the data in multiple requests
             
             
-
+            //send
+            int nCntSend = 0;
             while ((nCntSend = send(clientInfo.hClientSocket, sendBuffer, sendLength, 0) != sendLength))
             {
                 if (nCntSend == -1)
@@ -469,3 +658,4 @@ BOOL WINAPI ClientThread(LPVOID lpData)
 
     return TRUE;
 }
+

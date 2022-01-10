@@ -1,5 +1,7 @@
 #pragma once
 
+bool GetInjected();
+
 void CaveRecovered();
 
 void GetProcessData();

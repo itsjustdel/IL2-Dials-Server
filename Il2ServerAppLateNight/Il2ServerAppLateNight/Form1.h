@@ -9,7 +9,7 @@
 
 namespace Il2Dials
 {
-
+	using namespace System::Diagnostics;
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -459,6 +459,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		//server worker
 	private: System::Void ServerWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
+
+		Debug::WriteLine("Server Worker");
 		//start server, passing the worker so it can report back using it
 		bool localIP = LocalClientCheckBox->Checked;
 		StartServer(serverWorker, localIP);
