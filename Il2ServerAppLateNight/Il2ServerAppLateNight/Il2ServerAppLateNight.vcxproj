@@ -175,6 +175,7 @@
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\TurnNeedle.cpp" />
     <ClCompile Include="src\USPlanes.cpp" />
+    <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="WinformsProject.cpp" />
     <ClCompile Include="Form1.cpp" />
   </ItemGroup>

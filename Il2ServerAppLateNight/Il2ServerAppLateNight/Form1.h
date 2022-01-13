@@ -64,6 +64,8 @@ namespace Il2Dials
 	private: System::ComponentModel::BackgroundWorker^ restartWorker;
 	private: System::Windows::Forms::RichTextBox^ versionBox;
 	private: System::Windows::Forms::RichTextBox^ DebugTextBox2;
+	private: System::ComponentModel::BackgroundWorker^ serverWorkerTCP;
+
 
 
 
@@ -139,7 +141,8 @@ namespace Il2Dials
 			starLabel->ForeColor = cadetBlue;
 
 			//start our backgroudn workers (asyncs)
-			serverWorker->RunWorkerAsync();
+			serverWorkerUDP->RunWorkerAsync();
+			serverWorkerTCP->RunWorkerAsync();
 			gameWorker->RunWorkerAsync();
 		}
 
@@ -153,7 +156,8 @@ namespace Il2Dials
 		}
 
 	private: System::ComponentModel::BackgroundWorker^ gameWorker;
-	private: System::ComponentModel::BackgroundWorker^ serverWorker;
+private: System::ComponentModel::BackgroundWorker^ serverWorkerUDP;
+
 	private: System::Windows::Forms::NotifyIcon^ notifyIcon1;
 	private: System::Windows::Forms::ContextMenuStrip^ contextMenuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^ toolStripMenuItem1;
@@ -188,7 +192,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		{
 			this->components = (gcnew System::ComponentModel::Container());
 			this->gameWorker = (gcnew System::ComponentModel::BackgroundWorker());
-			this->serverWorker = (gcnew System::ComponentModel::BackgroundWorker());
+			this->serverWorkerUDP = (gcnew System::ComponentModel::BackgroundWorker());
 			this->notifyIcon1 = (gcnew System::Windows::Forms::NotifyIcon(this->components));
 			this->contextMenuStrip1 = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->toolStripMenuItem2 = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -206,6 +210,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->restartWorker = (gcnew System::ComponentModel::BackgroundWorker());
 			this->versionBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->DebugTextBox2 = (gcnew System::Windows::Forms::RichTextBox());
+			this->serverWorkerTCP = (gcnew System::ComponentModel::BackgroundWorker());
 			this->contextMenuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -216,12 +221,20 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->gameWorker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::GameWorker_DoWork);
 			this->gameWorker->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::GameWorker_ProgressChanged);
 			// 
-			// serverWorker
+			// serverWorkerUDP
 			// 
-			this->serverWorker->WorkerReportsProgress = true;
-			this->serverWorker->WorkerSupportsCancellation = true;
-			this->serverWorker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorker_DoWork);
-			this->serverWorker->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorker_ProgressChanged);
+			this->serverWorkerUDP->WorkerReportsProgress = true;
+			this->serverWorkerUDP->WorkerSupportsCancellation = true;
+			this->serverWorkerUDP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerUDP_DoWork);
+			this->serverWorkerUDP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerUDP_ProgressChanged);
+
+			//
+			// serverWorkerTCP
+			//
+			this->serverWorkerTCP->WorkerReportsProgress = true;
+			this->serverWorkerTCP->WorkerSupportsCancellation = true;
+			this->serverWorkerTCP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerTCP_DoWork);
+			this->serverWorkerTCP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerTCP_ProgressChanged);
 			// 
 			// notifyIcon1
 			// 
@@ -418,6 +431,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->DebugTextBox2->TabIndex = 12;
 			this->DebugTextBox2->Text = L"";
 			this->DebugTextBox2->Visible = false;
+			
 			// 
 			// Form1
 			// 
@@ -457,16 +471,36 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 
 		//server worker
-	private: System::Void ServerWorker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
+	private: System::Void ServerWorkerUDP_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
 
 		Debug::WriteLine("Server Worker");
 		//start server, passing the worker so it can report back using it
 		bool localIP = LocalClientCheckBox->Checked;
-		StartServer(serverWorker, localIP);
+		StartServerUDP(serverWorkerUDP, localIP);
+
 	}
 
-	private: System::Void ServerWorker_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
+	private: System::Void ServerWorkerUDP_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
+	{
+		//clients = e->ProgressPercentage; //enable for socket error tracking
+
+	//	UpdateReports();
+	}
+
+
+	private: System::Void ServerWorkerTCP_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
+	{
+		//unused, enable to track client numbers
+
+		//Debug::WriteLine("Server Worker TCP");
+		//start server, passing the worker so it can report back using it
+		//bool localIP = LocalClientCheckBox->Checked;
+		//StartServerTCP(serverWorkerTCP, localIP);
+
+	}
+
+	private: System::Void ServerWorkerTCP_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
 	{
 		clients = e->ProgressPercentage;
 
