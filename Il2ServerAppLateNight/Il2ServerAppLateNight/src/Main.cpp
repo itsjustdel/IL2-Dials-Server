@@ -25,7 +25,7 @@
 
 
 
-float version = 0.4f;
+float version = 0.42f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -75,6 +75,14 @@ void CaveRecovered()
 }
 
 //server uses Gets to grab data before sending it out
+
+bool GetInjected()
+{
+	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle)
+		return true;
+	else	
+		return false;	
+}
 
 
 float GetIL2DialsVersion()

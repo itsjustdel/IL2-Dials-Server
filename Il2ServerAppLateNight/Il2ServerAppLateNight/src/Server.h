@@ -3,5 +3,6 @@
 #include <string>
 
 void SetPortNumber(int t);
-int StartServer(System::ComponentModel::BackgroundWorker^ worker, bool localIP);
+int StartServerUDP(System::ComponentModel::BackgroundWorker^ worker, bool localIP);
+
 

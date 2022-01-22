@@ -82,12 +82,12 @@
     <ClCompile Include="src\TurnNeedle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="TCPServer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Il2Dials.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Icons\cadetBlueStar.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
