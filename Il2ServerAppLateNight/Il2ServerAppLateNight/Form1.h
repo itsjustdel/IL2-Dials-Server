@@ -30,17 +30,21 @@ namespace Il2Dials
 
 	private:
 		int portNumber = 11200;
-		int clients = 0;
+		//int clients = 0;
+		int serverProgressMessage = 0;
 		int gameWorkerProgressReport;		
 		bool skipCheckBoxEvent = false;
 		bool waitingToRestart = false;
 		int errorMessageLimit = 9;
+		System::String^ currentIcon = "";
 		//loading at launch
-		;
-		System::Drawing::Icon^ cadetBlueStarIcon;
+		
+		//System::Drawing::Icon^ cadetBlueStarIcon;
 		System::Drawing::Icon^ redStarIcon;
 		System::Drawing::Icon^ yellowStarIcon;
 		System::Drawing::Icon^ blueStarIcon;
+		System::Drawing::Icon^ greenStarIcon;
+		System::Drawing::Icon^ darkRedStarIcon;
 		
 		
 
@@ -60,6 +64,15 @@ namespace Il2Dials
 		System::Drawing::Color orange = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(235)), static_cast<System::Int32>(static_cast<System::Byte>(108
 			)),
 			static_cast<System::Int32>(static_cast<System::Byte>(2)));
+
+		System::Drawing::Color darkRed = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7
+			)),
+			static_cast<System::Int32>(static_cast<System::Byte>(13)));
+
+		System::Drawing::Color green = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(18)), static_cast<System::Int32>(static_cast<System::Byte>(136
+			)),
+			static_cast<System::Int32>(static_cast<System::Byte>(6)));
+
 	private: System::Windows::Forms::CheckBox^ LocalClientCheckBox;
 	private: System::ComponentModel::BackgroundWorker^ restartWorker;
 	private: System::Windows::Forms::RichTextBox^ versionBox;
@@ -85,12 +98,14 @@ namespace Il2Dials
 			auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";
 
 			//asign icons manually, c++/clr is missing support for resource file usage
-			cadetBlueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
+			//cadetBlueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
 			redStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "redStar.ico");
 			yellowStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");
 			blueStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "blueStar.ico");
-			//set to cadet blue to start - do before initialising components
-			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");
+			darkRedStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "darkRedStar.ico");
+			greenStarIcon = gcnew System::Drawing::Icon(iconsDirectory + "greenStar.ico");
+			//set to red to start - before initialising components
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "darkRedStar.ico");
 
 			InitializeComponent();
 
@@ -134,11 +149,13 @@ namespace Il2Dials
 			int value = Convert::ToInt32(portTextBox->Text);
 			SetPortNumber(value);
 
-			this->notifyIcon1->Icon = cadetBlueStarIcon;
+			this->notifyIcon1->Icon = darkRedStarIcon;// cadetBlueStarIcon;
 			this->pictureBox1->ImageLocation = iconsDirectory + "setting-gears3.png";
 			//set colour of font star
 
-			starLabel->ForeColor = cadetBlue;
+			starLabel->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7
+				)),
+				static_cast<System::Int32>(static_cast<System::Byte>(13)));
 
 			//start our backgroudn workers (asyncs)
 			serverWorkerUDP->RunWorkerAsync();
@@ -227,14 +244,6 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->serverWorkerUDP->WorkerSupportsCancellation = true;
 			this->serverWorkerUDP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerUDP_DoWork);
 			this->serverWorkerUDP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerUDP_ProgressChanged);
-
-			//
-			// serverWorkerTCP
-			//
-			this->serverWorkerTCP->WorkerReportsProgress = true;
-			this->serverWorkerTCP->WorkerSupportsCancellation = true;
-			this->serverWorkerTCP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerTCP_DoWork);
-			this->serverWorkerTCP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerTCP_ProgressChanged);
 			// 
 			// notifyIcon1
 			// 
@@ -283,7 +292,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->starLabel->AutoSize = true;
 			this->starLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->starLabel->ForeColor = System::Drawing::Color::CadetBlue;
+			this->starLabel->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7
+				)),static_cast<System::Int32>(static_cast<System::Byte>(13))); //dark red
 			this->starLabel->Location = System::Drawing::Point(38, 57);
 			this->starLabel->Margin = System::Windows::Forms::Padding(0);
 			this->starLabel->Name = L"starLabel";
@@ -431,7 +441,13 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->DebugTextBox2->TabIndex = 12;
 			this->DebugTextBox2->Text = L"";
 			this->DebugTextBox2->Visible = false;
-			
+			// 
+			// serverWorkerTCP
+			// 
+			this->serverWorkerTCP->WorkerReportsProgress = true;
+			this->serverWorkerTCP->WorkerSupportsCancellation = true;
+			this->serverWorkerTCP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerTCP_DoWork);
+			this->serverWorkerTCP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerTCP_ProgressChanged);
 			// 
 			// Form1
 			// 
@@ -474,7 +490,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	private: System::Void ServerWorkerUDP_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
 
-		Debug::WriteLine("Server Worker");
+		//Debug::WriteLine("Server Worker");
 		//start server, passing the worker so it can report back using it
 		bool localIP = LocalClientCheckBox->Checked;
 		StartServerUDP(serverWorkerUDP, localIP);
@@ -484,8 +500,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	private: System::Void ServerWorkerUDP_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
 	{
 		//clients = e->ProgressPercentage; //enable for socket error tracking
-
-	//	UpdateReports();
+		serverProgressMessage = e->ProgressPercentage;
+		UpdateReports();
 	}
 
 
@@ -502,7 +518,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 	private: System::Void ServerWorkerTCP_ProgressChanged(System::Object^ sender, System::ComponentModel::ProgressChangedEventArgs^ e)
 	{
-		clients = e->ProgressPercentage;
+		//clients = e->ProgressPercentage; //udp now doesn't track clients
 
 		UpdateReports();
 	}
@@ -555,105 +571,93 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 
 	//for icon loading
-	//auto resourceAssembly = Reflection::Assembly::GetExecutingAssembly();
 	//use to get working directory
-	auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";// \\cadetBlueStar.ico";
+	auto iconsDirectory = AppDomain::CurrentDomain->BaseDirectory + "Icons\\";
 
 	
-
-	if (clients < 0)
+	if (serverProgressMessage == -10)
 	{
-		//errors
-		if (clients == -1)
-		{
-			DebugTextBox->Text = "ERROR - Unable to find local IP";
-		}
-		if (clients == -2)
-		{
-			DebugTextBox->Text = "ERROR - Unable to initialise socket";
-		}
-		if (clients == -3)
-		{
-			DebugTextBox->Text = "ERROR - Unable to create server socket";
-		}
-		if (clients == -4)
-		{
-			DebugTextBox->Text = "ERROR - Unable to bind port";
-		}
-		if (clients == -5)
-		{
-			DebugTextBox->Text = "ERROR - Unable to put server in listen state";
-		}
-		if (clients == -6)
-		{
-			DebugTextBox->Text = "ERROR - Invalid socket";
-		}
-		if (clients == -7)
-		{
-			DebugTextBox->Text = "ERROR - Unable to create client thread";
-		}
-	}
-
-	else if (clients > 0)
-	{
-		
-		if (gameWorkerProgressReport < errorMessageLimit)
-		{
-			//font star
-			starLabel->ForeColor = blue;
-
-			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "blueStar.ico");
-			this->notifyIcon1->Icon = blueStarIcon;
-			
-
-			DebugTextBox->Text = "Waiting for game, client connected...";
-		}
-
-		if (gameWorkerProgressReport == errorMessageLimit)
-		{
-			//font star
-			starLabel->ForeColor = red;
-
-			//all go, set star to red
-			
-			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "redStar.ico");
-			this->notifyIcon1->Icon = redStarIcon;
-			
-
-			DebugTextBox->Text = "Reading data, client connected";
-		}
-	}
-	else if (clients == 0)
-	{
-		if (gameWorkerProgressReport < errorMessageLimit)
-		{
-			// font star
-			starLabel->ForeColor = cadetBlue;
-
-			//default cadet blue
-			
-			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "cadetBlueStar.ico");;
-			this->notifyIcon1->Icon = cadetBlueStarIcon;
-			
-			
-
-			DebugTextBox->Text = "Waiting for game, waiting for client...";
-		}
-
-		if (gameWorkerProgressReport == errorMessageLimit)
-		{
-
+		//can't rely on icon type check - control ourself with string compare
+		if (currentIcon != "yellow")
+		{	
 			//yellow font star			
 			starLabel->ForeColor = yellow;
 
-		
 			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");;
 			this->notifyIcon1->Icon = yellowStarIcon;
-			
 
-			DebugTextBox->Text = "Reading data, waiting for client...";
+			DebugTextBox->Text = "Could not find local IP - 10";
+			currentIcon = "yellow";
 		}
+		return;
 	}
+	if (serverProgressMessage == -20)
+	{
+		if (currentIcon != "yellow")
+		{
+			//yellow font star			
+			starLabel->ForeColor = yellow;
+
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");;
+			this->notifyIcon1->Icon = yellowStarIcon;
+
+			DebugTextBox->Text = "Socket address error - 20";
+			currentIcon = "yellow";
+		}
+		return;
+	}
+
+	if (gameWorkerProgressReport == 0)
+	{
+		//waiting for game
+		if (currentIcon != "darkRed")
+		{
+			starLabel->ForeColor = darkRed;
+
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "darkRedStar.ico");
+			this->notifyIcon1->Icon = darkRedStarIcon;
+
+			DebugTextBox->Text = "Waiting for game...";
+			currentIcon = "darkRed";
+		}
+		return;
+	}
+	
+	if (gameWorkerProgressReport < errorMessageLimit)
+	{
+		if (currentIcon != "yellow")
+		{		
+			//yellow font star			
+			starLabel->ForeColor = yellow;
+
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "yellowStar.ico");;
+			this->notifyIcon1->Icon = yellowStarIcon;
+
+			DebugTextBox->Text = "Can not read data from game";
+			currentIcon = "yellow";
+		}
+		return;
+	}
+
+	if (gameWorkerProgressReport == errorMessageLimit)
+	{
+		if (currentIcon != "green")
+		{
+			//game patched and udp sending
+			
+			starLabel->ForeColor = green;
+
+			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "greenStar.ico");;
+			this->notifyIcon1->Icon = greenStarIcon;
+
+			DebugTextBox->Text = "Reading data, sending UDP";
+			currentIcon = "green";
+		}
+
+		return;
+	}
+	
+	
 }
 	//move borderless window 
 	private: bool mouseDown;

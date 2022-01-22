@@ -1,4 +1,6 @@
-/* A history of tcp client in case I want to track clients. Not compiling due to import probs, needs header file
+
+/*
+// A history of tcp client in case I want to track clients. Not compiling due to import probs, needs header file
 
 #pragma comment(lib, "ws2_32.lib") //https://stackoverflow.com/questions/57831867/do-i-actually-have-to-link-ws2-32-lib
 #pragma warning(disable:4996)

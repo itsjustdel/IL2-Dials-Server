@@ -26,17 +26,25 @@ void SetPortNumber(int t)
 
 sockaddr_in CreateServerSocketAddress(bool localIP)
 {
+    // setup address structure
+    sockaddr_in serverSocketAddress;
+    //clear
+    memset((char*)&serverSocketAddress, 0, sizeof(serverSocketAddress));
 
     //get local ipdaddress
     std::vector<std::string> ipv4Addreses = GetIPAddresses(localIP);
+    if (ipv4Addreses.size() == 0)
+    {
+        //returne mpty
+        return serverSocketAddress;
+    }
+
     std::string ipAddress = ipv4Addreses[0];
     const std::wstring wideIPstr = std::wstring(ipAddress.begin(), ipAddress.end());
     const wchar_t* c0 = wideIPstr.c_str();
     PCWSTR serverIP = (PCWSTR)c0;
 
-    // setup address structure
-    sockaddr_in serverSocketAddress;
-    memset((char*)&serverSocketAddress, 0, sizeof(serverSocketAddress));
+   
     serverSocketAddress.sin_family = AF_INET;
     serverSocketAddress.sin_port = htons(nServerPort);
 
@@ -72,7 +80,7 @@ int InitialiseWinsockUDP()
 
 
 
-int SendPackageUDP(SOCKET client_socket, sockaddr_in serverSocketAddress )
+int SendPackageUDP(SOCKET client_socket, sockaddr_in serverSocketAddress)
 {
     //we represent the data with floats in the app, so let's convert now and save network traffic
     float floatArray[14];
@@ -99,15 +107,11 @@ int SendPackageUDP(SOCKET client_socket, sockaddr_in serverSocketAddress )
     {
         planeType = "No Game Process/ Injection";
 
-        for (size_t i = 0; i < 8; i++)
+        for (size_t i = 0; i < 14; i++)
         {
-            floatArray[i] = (float)(i);
+            floatArray[i] = 0;
         }
-        for (size_t i = 0; i < 4; i++)//4 engines max
-        {
-            //get rpm know where the rpm struct starts
-            floatArray[9 + i] = (float)(9 + i);
-        }
+        
     }
     else
     {
@@ -182,27 +186,36 @@ int SendPackageUDP(SOCKET client_socket, sockaddr_in serverSocketAddress )
     // send the message
     if (sendto(client_socket, sendBuffer, sendLength, 0, (sockaddr*)&serverSocketAddress, sizeof(sockaddr_in)) == SOCKET_ERROR)
     {
-        OutputDebugString(L"sendto() failed with error code");
+       // OutputDebugString(L"sendto() failed with error code");
         return 3;
     }
 
     return 1;
 }
 
-
-BOOL WINAPI SendThreadUDP(bool localIP)
+//WINAPI
+BOOL __clrcall   SendThreadUDP(bool localIP, System::ComponentModel::BackgroundWorker^* pWorker)
 {
-    OutputDebugString(L"UDP Client thread");
-    OutputDebugString(L"\n");
+   // OutputDebugString(L"UDP Client thread");
+   // OutputDebugString(L"\n");
+
+    //moving from managed to unmanaged doesn't allow a worker reference to be passed, so pass a pointer and rebuild as we want
+   // System::ComponentModel::BackgroundWorker^* pWorker = (System::ComponentModel::BackgroundWorker^*)worker;
+    System::ComponentModel::BackgroundWorker^ worker = *pWorker;
 
     // initialise winsock
     InitialiseWinsockUDP();
 
     // create client socket
     SOCKET client_socket = CreateClientSocket();
-
+    if (client_socket == 0)    
+        worker->ReportProgress(-10);
+    
     //create server sock address
     sockaddr_in serverSocketAddress = CreateServerSocketAddress(localIP);
+    //check for empty socket address
+    if(serverSocketAddress.sin_family == 0)
+        worker->ReportProgress(-20);
 
     // start communication
     while (true)
@@ -215,14 +228,11 @@ BOOL WINAPI SendThreadUDP(bool localIP)
 
 int StartServerUDP(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
 {
-    OutputDebugString(L"Starting Server UDP");
-    OutputDebugString(L"\n");
+   // OutputDebugString(L"Starting Server UDP");
+   // OutputDebugString(L"\n");
 
-
-    SendThreadUDP(localIP);
+    //pass reference to worker so we can recast after we pass to unmanaged code
+    SendThreadUDP(localIP, &worker);
 
     return 1;
 }
-
-//UNUSED BELOW
-

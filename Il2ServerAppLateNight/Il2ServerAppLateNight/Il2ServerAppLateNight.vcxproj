@@ -196,9 +196,6 @@
     <ResourceCompile Include="Il2Dials.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Icons\cadetBlueStar.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

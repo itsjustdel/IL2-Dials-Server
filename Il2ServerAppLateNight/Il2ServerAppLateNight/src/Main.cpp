@@ -25,7 +25,7 @@
 
 
 
-float version = 0.4f;
+float version = 0.42f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -644,7 +644,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		{
 			//using BackgroundWorker class to send info safely cross threaded
 			worker->ReportProgress(0);
-
 
 			//clear addresses in case il2 is restarting, there will be all new addresses after restart
 			ClearAddresses();
