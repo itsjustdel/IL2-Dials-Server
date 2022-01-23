@@ -584,7 +584,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-
 	return 1;
 
 }
@@ -612,9 +611,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
-	lastChecked -= std::chrono::hours(1);
-
-	
+	lastChecked -= std::chrono::hours(1);	
 	
 	while (true)
 	{

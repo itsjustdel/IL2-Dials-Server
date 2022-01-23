@@ -292,8 +292,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->starLabel->AutoSize = true;
 			this->starLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->starLabel->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7
-				)),static_cast<System::Int32>(static_cast<System::Byte>(13))); //dark red
+			this->starLabel->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7)),
+				static_cast<System::Int32>(static_cast<System::Byte>(13)));
 			this->starLabel->Location = System::Drawing::Point(38, 57);
 			this->starLabel->Margin = System::Windows::Forms::Padding(0);
 			this->starLabel->Name = L"starLabel";
@@ -382,7 +382,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->DebugTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->DebugTextBox->ForeColor = System::Drawing::Color::CadetBlue;
-			this->DebugTextBox->Location = System::Drawing::Point(29, 188);
+			this->DebugTextBox->Location = System::Drawing::Point(29, 212);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
 			this->DebugTextBox->Size = System::Drawing::Size(167, 36);
@@ -420,9 +420,9 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->Location = System::Drawing::Point(160, 102);
 			this->versionBox->Name = L"versionBox";
 			this->versionBox->ReadOnly = true;
-			this->versionBox->Size = System::Drawing::Size(49, 21);
+			this->versionBox->Size = System::Drawing::Size(36, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.4.01";
+			this->versionBox->Text = L"v0.4.2";
 			this->versionBox->Visible = false;
 			// 
 			// DebugTextBox2
@@ -650,7 +650,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->Icon = gcnew System::Drawing::Icon(iconsDirectory + "greenStar.ico");;
 			this->notifyIcon1->Icon = greenStarIcon;
 
-			DebugTextBox->Text = "Reading data, sending UDP";
+			DebugTextBox->Text = "Reading data...";
 			currentIcon = "green";
 		}
 
@@ -728,7 +728,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		portLabel->Visible = !portLabel->Visible;
 		portTextBox->Visible = !portTextBox->Visible;
 		DebugTextBox->Visible = !DebugTextBox->Visible;
-		LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible;
+		//LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible; //don't need anymore?
 		versionBox->Visible = !versionBox->Visible;
 	}
 
