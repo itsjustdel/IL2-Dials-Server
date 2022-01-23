@@ -15,8 +15,20 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_02793C550CD74FEA9C3EDA79A14690C3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1510980C92960F891605F033955A6AB1"
         "OwnerKey" = "8:_59C05B4FFE03409FB534940D4FDB46C7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_16A5FB99F5344C5C8D5CC0CB5194A9F4"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -222,6 +234,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_02793C550CD74FEA9C3EDA79A14690C3"
+            {
+            "SourcePath" = "8:..\\..\\..\\Il2ServerAppLateNight\\Icons\\greenStar.ico"
+            "TargetName" = "8:greenStar.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_FEEB621659774B4095CC91F335608EF7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1510980C92960F891605F033955A6AB1"
             {
             "SourcePath" = "8:api-ms-win-crt-stdio-l1-1-0.dll"
@@ -240,6 +272,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_16A5FB99F5344C5C8D5CC0CB5194A9F4"
+            {
+            "SourcePath" = "8:..\\..\\..\\Il2ServerAppLateNight\\Icons\\darkRedStar.ico"
+            "TargetName" = "8:darkRedStar.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_FEEB621659774B4095CC91F335608EF7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_25C2E38BA41E408CBE8F6E24FC4E868B"
@@ -446,7 +498,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.8038.34240, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:IL-2 Dials Server, Version=1.0.8058.33022, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_C17C4B234A8347258128DC09DDDCB3A1"
@@ -696,15 +748,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IL-2 Dials"
-        "ProductCode" = "8:{1F589927-E092-47D9-B6EA-6BA096E63646}"
-        "PackageCode" = "8:{6FC9E9B4-558F-4E87-957E-8B99DF520C8E}"
+        "ProductCode" = "8:{C36EF65C-A3BD-4341-9F83-07DE22366D99}"
+        "PackageCode" = "8:{8DF09A54-3B2D-4B3F-95C0-52D8C5E48E2C}"
         "UpgradeCode" = "8:{C7ECE9FB-58AB-4441-934F-6CCC1516720C}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:11.00.0000"
+        "ProductVersion" = "8:11.01.0000"
         "Manufacturer" = "8:DellyWellySoftware"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
