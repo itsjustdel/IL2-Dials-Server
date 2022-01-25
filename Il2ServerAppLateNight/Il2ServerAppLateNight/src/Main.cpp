@@ -375,6 +375,9 @@ bool ReadTurnNeedle()
 
 	if (planeType.compare("Yak-9T ser.1") == 0)
 		turnNeedleValue *= -1;
+
+	if (planeType.compare("U-2VS") == 0)
+		turnNeedleValue *= -1;
 	
 
 	return 0;
