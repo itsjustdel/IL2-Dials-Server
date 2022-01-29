@@ -13,6 +13,7 @@ char originalLineAltimeter[8];
 char originalLinePlaneType[8];
 char originalLineTurnNeedle[11];//two short then a long instructions means this is just what we have to do
 char originalLineTurnBall[5]; //perfect - only 5 bytes needed for jump and original instruction is 5 bytes
+char originalLineGerman[6];//1 nop needed?
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
 {
@@ -265,6 +266,12 @@ bool InjectionTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
+bool InjectionGermanManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+
+
+	return 1;
+}
 
 bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
@@ -550,6 +557,12 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 }
 
 
+bool CaveGermanManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+	
+	return 1;
+}
+
 
 
 bool HookCockpitInstruments(HANDLE hProcess, void* pSrc, size_t size,LPVOID codeCaveAddress)
@@ -659,6 +672,29 @@ bool HookTurnBall(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddre
 
 	//write out own process in our own allocated memory - 
 	CaveTurnBall(hProcess, src, codeCaveAddress);
+
+	//put write protections back to what they were before we injected
+	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);
+
+	//return the start of our allocated memory struct
+	return 1;
+}
+
+
+bool HookGermanManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+{
+	//save old read/write access to put back to how it was later
+	DWORD dwOld;
+
+	if (!VirtualProtectEx(hProcess, pSrc, size, PAGE_EXECUTE_READWRITE, &dwOld))
+		return 0;
+
+	uintptr_t src = (uintptr_t)pSrc;
+	//insert jump in to original code
+	InjectionGermanManifold(hProcess, src, codeCaveAddress);
+
+	//write out own process in our own allocated memory - 
+	CaveGermanManifold(hProcess, src, codeCaveAddress);
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);

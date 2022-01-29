@@ -37,6 +37,7 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
+double manifoldValue;
 //where we hold planeTpye string
 std::string planeType;
 
@@ -47,6 +48,7 @@ bool injectedAltimeter;
 bool injectedPlaneType;
 bool injectedTurnNeedle;
 bool injectedTurnBall;
+bool injectedGermanManifold;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
@@ -54,7 +56,7 @@ LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID turnNeedleAddress;
 LPCVOID turnBallAddress;
-
+LPCVOID germanManifoldAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
 
@@ -72,6 +74,7 @@ void CaveRecovered()
 	injectedPlaneType = true;
 	injectedTurnNeedle = true;
 	injectedTurnBall = true;
+	injectedGermanManifold = true;
 }
 
 //server uses Gets to grab data before sending it out
@@ -144,21 +147,27 @@ double GetRPM(int engine)
 	return cockpitValues[31 + engine];
 }
 
+double GetManifold()
+{
+	//check for country?
+	return manifoldValue;
+}
 
 
 void ResetFlags()
 {
 	//addresses of cave
 	codeCaveAddress = 0;
-	//cockpitInstrumentsAddress = 0;
+	
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	//reports
-	//injectedCockpit = false;
+	germanManifoldAddress = 0;
+	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
 	injectedTurnNeedle = false;
 	injectedTurnBall = false;
+	injectedGermanManifold = true;
 }
 
  bool GetProcessData()
@@ -419,6 +428,7 @@ void ReadTest()
 	ReadPlaneType();
 	ReadTurnNeedle();
 	ReadTurnCoordinatorBall();
+	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
 	floatArray[0] =(float)(GetAltitude());
@@ -514,6 +524,20 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+	if (germanManifoldAddress == 0)
+	{
+
+		//RSE.RSE::CPistonEngine::calcEngineTemperature
+		std::string str("calcEngineTemperature@CPistonEngine");
+		germanManifoldAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (germanManifoldAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
@@ -583,6 +607,16 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		{
 			//Hook function overwrites original code and writes to our code cave
 			worker->ReportProgress(8);
+			return 0;
+		}
+	}
+
+	if (!injectedGermanManifold)
+	{
+		injectedGermanManifold = HookGermanManifold(hProcessIL2, (void*)(turnBallAddress), size, codeCaveAddress);
+		if (!injectedGermanManifold)
+		{
+			worker->ReportProgress(9);
 			return 0;
 		}
 	}
