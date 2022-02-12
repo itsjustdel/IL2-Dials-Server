@@ -13,7 +13,7 @@ char originalLineAltimeter[8];
 char originalLinePlaneType[8];
 char originalLineTurnNeedle[11];//two short then a long instructions means this is just what we have to do
 char originalLineTurnBall[5]; //perfect - only 5 bytes needed for jump and original instruction is 5 bytes
-char originalLineGerman[6];//1 nop needed?
+char originalLineGermanManifold[7];
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
 {
@@ -268,7 +268,24 @@ bool InjectionTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool InjectionGermanManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x76);
+	size_t bytesWritten = 0;
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineGermanManifold, sizeof(originalLineGermanManifold), &bytesWritten);
 
+	BYTE jump = 0xE9;
+
+	//write jump opcode
+	WriteProcessMemory(hProcess, (LPVOID)src, &jump, sizeof(jump), &bytesWritten);
+	
+	//Relative address. Using 32bit data type due to close nature of jump
+	uintptr_t relativeAddress = (uintptr_t)toCave - src - 5;
+	LPVOID rA = (LPVOID)relativeAddress;
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
+
+	//we need to add a nope to pad out memory so we jump back at same point we left
+	BYTE nops[2] = { 0x90, 0x90 };
+	//add a nop
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);
 
 	return 1;
 }
@@ -559,7 +576,29 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CaveGermanManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	
+	//read address from rdi and save in codecave
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x76);
+	size_t totalWritten = 0;
+	size_t bytesWritten = 0;
+	//first of all write the original function back in
+	//and write orignal back in after our code
+	WriteProcessMemory(hProcess, toCave, &originalLineGermanManifold, sizeof(originalLineGermanManifold), &bytesWritten);//5 is enough for the jump plus address
+	totalWritten += bytesWritten;
+	//24CD8220007 - 48 89 3D 06000000     - mov [24CD8220015],rdi { (0) } example
+	BYTE rdiToMem[7] = {0x48, 0x89, 0x3D, 0xFC, 0x00, 0x00, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rdiToMem, sizeof(rdiToMem), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//jump to return address
+	BYTE jump = 0xE9;
+	//write 0x09 (jmp) 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &jump, sizeof(jump), &bytesWritten);
+	totalWritten += bytesWritten;
+	//bytes written takes us back to start of function
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + (totalWritten - 3)));// ...still trial and error for this amount of nops?original line size?
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
+
+	//1D1AAB1AF67
 	return 1;
 }
 

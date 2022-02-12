@@ -23,9 +23,7 @@
 #include "PointerToFunction.h"
 #include <sstream>
 
-
-
-float version = 0.42f;
+float version = 0.43f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -37,7 +35,7 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-double manifoldValue;
+double manifoldValues[4];
 //where we hold planeTpye string
 std::string planeType;
 
@@ -56,7 +54,7 @@ LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID turnNeedleAddress;
 LPCVOID turnBallAddress;
-LPCVOID germanManifoldAddress;
+LPCVOID calcEngineTemperatureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
 
@@ -147,10 +145,10 @@ double GetRPM(int engine)
 	return cockpitValues[31 + engine];
 }
 
-double GetManifold()
+double GetManifold(int engine)
 {
 	//check for country?
-	return manifoldValue;
+	return manifoldValues[engine];
 }
 
 
@@ -161,7 +159,7 @@ void ResetFlags()
 	
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	germanManifoldAddress = 0;
+	calcEngineTemperatureAddress= 0;
 	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
@@ -415,7 +413,21 @@ bool ReadTurnCoordinatorBall()
 	return 0;
 }
 
+bool ReadManifolds()
+{
+	//german
+	//read cave
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x180);		
+	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
+	LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x238);
+	const size_t sizeOfData = sizeof(double);
+	char rawData[sizeOfData];
+	ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
+	manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+
+	return 0;
+}
 
 
 void ReadTest()
@@ -524,13 +536,13 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-	if (germanManifoldAddress == 0)
+	if (calcEngineTemperatureAddress == 0)
 	{
 
 		//RSE.RSE::CPistonEngine::calcEngineTemperature
 		std::string str("calcEngineTemperature@CPistonEngine");
-		germanManifoldAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
-		if (germanManifoldAddress == 0)
+		calcEngineTemperatureAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (calcEngineTemperatureAddress == 0)
 		{
 			worker->ReportProgress(3);
 
@@ -613,7 +625,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 
 	if (!injectedGermanManifold)
 	{
-		injectedGermanManifold = HookGermanManifold(hProcessIL2, (void*)(turnBallAddress), size, codeCaveAddress);
+		injectedGermanManifold = HookGermanManifold(hProcessIL2, (void*)(calcEngineTemperatureAddress), size, codeCaveAddress);
 		if (!injectedGermanManifold)
 		{
 			worker->ReportProgress(9);
