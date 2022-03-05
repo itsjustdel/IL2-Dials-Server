@@ -46,7 +46,8 @@ bool injectedAltimeter;
 bool injectedPlaneType;
 bool injectedTurnNeedle;
 bool injectedTurnBall;
-bool injectedGermanManifold;
+//bool injectedGermanManifold;
+bool injectedManifold;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
@@ -54,9 +55,12 @@ LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID turnNeedleAddress;
 LPCVOID turnBallAddress;
-LPCVOID calcEngineTemperatureAddress;
+//LPCVOID calcEngineTemperatureAddress;
+LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
+
+std::vector <LPCVOID> engineAddresses;
 
 //process stuff
 wchar_t* exeName = (wchar_t*)L"Il-2.exe";
@@ -72,14 +76,15 @@ void CaveRecovered()
 	injectedPlaneType = true;
 	injectedTurnNeedle = true;
 	injectedTurnBall = true;
-	injectedGermanManifold = true;
+	//injectedGermanManifold = true;
+	injectedManifold = true;
 }
 
 //server uses Gets to grab data before sending it out
 
 bool GetInjected()
 {
-	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle)
+	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle && injectedManifold)
 		return true;
 	else	
 		return false;	
@@ -159,13 +164,15 @@ void ResetFlags()
 	
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	calcEngineTemperatureAddress= 0;
+	//calcEngineTemperatureAddress = 0;
+	getManifoldPressureAddress = 0;
 	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
 	injectedTurnNeedle = false;
 	injectedTurnBall = false;
-	injectedGermanManifold = true;
+	injectedManifold = false;
+
 }
 
  bool GetProcessData()
@@ -420,11 +427,38 @@ bool ReadManifolds()
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x180);		
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x238);
+	//addresses will alternate between engines as the game writes to each engine. we need to track this
+
+//if we don't find address, add it	
+	if (engineAddresses.size() == 0)
+		engineAddresses.push_back(toStruct);
+
+	if (std::find(engineAddresses.begin(), engineAddresses.end(), toStruct) != engineAddresses.end())
+	{
+		
+	}
+	else
+	{
+		engineAddresses.push_back(toStruct);
+	}
+
+
+
+
+	LPVOID _manifold= (LPVOID)((uintptr_t)(toStruct) + 0x9F8);
 	const size_t sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
-	manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+
+	//need other engines TODO
+	
+
+
+
+	for (size_t i = 0; i < engineAddresses.size(); i++)
+	{
+		//manifoldValues[i] = *reinterpret_cast<double*>(rawData);
+	}
 
 	return 0;
 }
@@ -440,6 +474,7 @@ void ReadTest()
 	ReadPlaneType();
 	ReadTurnNeedle();
 	ReadTurnCoordinatorBall();
+	ReadManifolds();
 	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
@@ -536,6 +571,20 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+
+	if (getManifoldPressureAddress == 0)
+	{
+		//1258098E9B0 - RSE.RSE::CPistonEngine::getManifoldPressure		
+		std::string str("getManifoldPressure@CPistonEngine");
+		getManifoldPressureAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (getManifoldPressureAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+	/*
 	if (calcEngineTemperatureAddress == 0)
 	{
 
@@ -549,6 +598,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
+	*/
 
 	return 1;
 }
@@ -623,10 +673,10 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-	if (!injectedGermanManifold)
+	if (!injectedManifold)
 	{
-		injectedGermanManifold = HookGermanManifold(hProcessIL2, (void*)(calcEngineTemperatureAddress), size, codeCaveAddress);
-		if (!injectedGermanManifold)
+		injectedManifold = HookManifold(hProcessIL2, (void*)(getManifoldPressureAddress), size, codeCaveAddress);
+		if (!injectedManifold)
 		{
 			worker->ReportProgress(9);
 			return 0;
@@ -716,9 +766,11 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		
 		//debugging function
 		//NeedleScan(worker);
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
+
 
 		//don't need a fast cycle on this loop
 		Sleep(100);

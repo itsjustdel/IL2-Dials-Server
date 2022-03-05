@@ -24,7 +24,7 @@ bool HookTurnNeedle(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAdd
 
 bool HookTurnBall(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
 
-bool HookGermanManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
+bool HookManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
 
 bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult, LPVOID caveStart, SIZE_T size, char *originalMemory);
 
