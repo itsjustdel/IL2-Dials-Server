@@ -60,8 +60,6 @@ LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
 
-std::vector <LPCVOID> engineAddresses;
-
 //process stuff
 wchar_t* exeName = (wchar_t*)L"Il-2.exe";
 DWORD processID = 0;
@@ -422,43 +420,23 @@ bool ReadTurnCoordinatorBall()
 
 bool ReadManifolds()
 {
-	//german
-	//read cave
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x180);		
-	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-
-	//addresses will alternate between engines as the game writes to each engine. we need to track this
-
-//if we don't find address, add it	
-	if (engineAddresses.size() == 0)
-		engineAddresses.push_back(toStruct);
-
-	if (std::find(engineAddresses.begin(), engineAddresses.end(), toStruct) != engineAddresses.end())
-	{
-		
-	}
-	else
-	{
-		engineAddresses.push_back(toStruct);
-	}
-
-
-
-
-	LPVOID _manifold= (LPVOID)((uintptr_t)(toStruct) + 0x9F8);
-	const size_t sizeOfData = sizeof(double);
-	char rawData[sizeOfData];
-	ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
-
-	//need other engines TODO
 	
-
-
-
-	for (size_t i = 0; i < engineAddresses.size(); i++)
+	for (size_t i = 0; i < 4; i++)
 	{
-		//manifoldValues[i] = *reinterpret_cast<double*>(rawData);
+		//offset in cave, four addresses to read for each plane
+		//first engine is + 0x180 from cave, 2nd 0x188..etc
+		uintptr_t offset = 0x08 * i;
+		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+ 0x180 + offset);
+		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+
+		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
+		const size_t sizeOfData = sizeof(double);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
+
+		manifoldValues[i] = *reinterpret_cast<double*>(rawData);
 	}
+	
 
 	return 0;
 }
