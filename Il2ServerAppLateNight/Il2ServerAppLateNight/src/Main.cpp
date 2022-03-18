@@ -23,7 +23,7 @@
 #include "PointerToFunction.h"
 #include <sstream>
 
-float version = 0.43f;
+float version = 0.5f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
