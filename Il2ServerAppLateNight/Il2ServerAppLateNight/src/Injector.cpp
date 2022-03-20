@@ -13,6 +13,7 @@ char originalLineAltimeter[8];
 char originalLinePlaneType[8];
 char originalLineTurnNeedle[11];//two short then a long instructions means this is just what we have to do
 char originalLineTurnBall[5]; //perfect - only 5 bytes needed for jump and original instruction is 5 bytes
+char originalLineManifold[8];
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)
 {
@@ -265,6 +266,29 @@ bool InjectionTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
+bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x76);
+	size_t bytesWritten = 0;
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);
+
+	BYTE jump = 0xE9;
+
+	//write jump opcode
+	WriteProcessMemory(hProcess, (LPVOID)src, &jump, sizeof(jump), &bytesWritten);
+	
+	//Relative address. Using 32bit data type due to close nature of jump
+	uintptr_t relativeAddress = (uintptr_t)toCave - src - 5;
+	LPVOID rA = (LPVOID)relativeAddress;
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01), &relativeAddress, sizeof(DWORD), &bytesWritten);
+
+	//we need to add a nope to pad out memory so we jump back at same point we left
+	BYTE nops[3] = { 0x90, 0x90, 0x90 };
+	//add nops
+	WriteProcessMemory(hProcess, (LPVOID)(src + 0x01 + sizeof(DWORD)), &nops, sizeof(nops), &bytesWritten);
+
+	return 1;
+}
 
 bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
@@ -338,13 +362,7 @@ bool CaveCockpitInstruments(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	DWORD returnAddress = (uintptr_t)(src - (uintptr_t)toCave - sizeof(ifEqualRbxToMem) - 5);//jump call plus ... initial overwrite?
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+sizeof(ifEqualRbxToMem) + 7 + 1), &returnAddress, sizeof(returnAddress), &bytesWritten);
-
-	//now we need to write a signature in so we can check if code cave exists - Happens on server restart but game stays active
-
-	//DellyWellyCockpit in Hex
-	//BYTE mySig[17] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x43, 0x6f, 0x63, 0x6b, 0x70, 0x69, 0x74 };
-	//WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 0x40), mySig, 17, &bytesWritten);
-
+		
 	return 1;
 }
 
@@ -374,14 +392,6 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + 7 + 2 + 4 +1 + 1));//jump call plus ... initial overwrite? (plus padding)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + 7 + sizeof(raxToMem) + sizeof(LPVOID) + sizeof(jump)), &returnAddress, sizeof(returnAddress), &bytesWritten);
-
-	
-	
-
-	//now we need to write a signature in so we can check if code cave exists - Happens on server restart but game stays active
-	//"DellyWellyAltimeter" in Hex = 44656c6c7957656c6c79416c74696d65746572 + 0x00 to pad it so next line starts on a new line of memory
-	//BYTE mySig[20] = { 0x44, 0x65, 0x6c, 0x6c, 0x79, 0x57, 0x65, 0x6c, 0x6c, 0x79, 0x41, 0x6c, 0x74, 0x69, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x00 }; //PUT AFTYER JUMP BACK
-	//WriteProcessMemory(hProcess, whereWeGotTo, mySig, 19, &bytesWritten);
 
 	return 1;
 }
@@ -490,12 +500,6 @@ bool CaveTurnNeedle(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-
-//	BYTE jumpToEnd[5] = { 0xE9, 0x07, 0x00, 0x00, 0x00 };
-//	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEnd, sizeof(jumpToEnd), &bytesWritten);
-//	totalWritten += bytesWritten;
-	
-	
 	//else, store rcx
 	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval	
 	// "rcxToMem" 
@@ -549,6 +553,86 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
+
+bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
+{
+	//read address from rcx and save in codecave
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x76);
+	size_t totalWritten = 0;
+	size_t bytesWritten = 0;
+	//first of all write the original function back in
+	//and write orignal back in after our code
+	WriteProcessMemory(hProcess, toCave, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);//5 is enough for the jump plus address
+	totalWritten += bytesWritten;
+
+	
+
+	//there can be mroe than one engine, engines are indexed in rsi 
+	//1DE53290007 - 48 83 FF 00
+	BYTE rsiEqualToZero[4] = { 0x48, 0x83, 0xFE, 0x00 };	
+	 // if not equal, do another check for the next engine index
+	BYTE rsiEqualToOne[4] = { 0x48, 0x83, 0xFE, 0x01 };	
+	//and engine no 3?
+	BYTE rsiEqualToTwo[4] = { 0x48, 0x83, 0xFE, 0x02 };	
+	//and 4?! - I don't want to do have to figure this out again!
+	BYTE rsiEqualToThree[4] = { 0x48, 0x83, 0xFE, 0x03 };
+
+	//if equal, this will set a flag to be checked on..
+	//jump short is 74, next byte is relative address
+	BYTE jumpIfNotEqual[2] = { 0x75, 0x07}; 
+
+	
+	
+	
+
+	//write these	
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToZero, sizeof(rsiEqualToZero), &bytesWritten);
+	totalWritten += bytesWritten;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xF5, 0x00, 0x00, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToOne, sizeof(rsiEqualToOne), &bytesWritten);
+	totalWritten += bytesWritten;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
+	//need to adjust target address
+	rcxToMem[3] = 0xF0;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToTwo, sizeof(rsiEqualToTwo), &bytesWritten);
+	totalWritten += bytesWritten;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
+	//need to adjust target address
+	rcxToMem[3] = 0xEB;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToThree, sizeof(rsiEqualToThree), &bytesWritten);
+	totalWritten += bytesWritten;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
+	//need to adjust target address
+	rcxToMem[3] = 0xE6;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//jump to return address
+	BYTE jump = 0xE9;
+	//write 0x09 (jmp) 
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &jump, sizeof(jump), &bytesWritten);
+	totalWritten += bytesWritten;
+	//bytes written takes us back to start of function
+	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + (totalWritten - 4)));// ...still trial and error for this amount of nops?original line size?
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
+
+	//1D1AAB1AF67
+	return 1;
+}
 
 
 
@@ -659,6 +743,29 @@ bool HookTurnBall(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddre
 
 	//write out own process in our own allocated memory - 
 	CaveTurnBall(hProcess, src, codeCaveAddress);
+
+	//put write protections back to what they were before we injected
+	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);
+
+	//return the start of our allocated memory struct
+	return 1;
+}
+
+
+bool HookManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+{
+	//save old read/write access to put back to how it was later
+	DWORD dwOld;
+
+	if (!VirtualProtectEx(hProcess, pSrc, size, PAGE_EXECUTE_READWRITE, &dwOld))
+		return 0;
+
+	uintptr_t src = (uintptr_t)pSrc;
+	//insert jump in to original code
+	InjectionManifold(hProcess, src, codeCaveAddress);
+
+	//write out own process in our own allocated memory - 
+	CaveManifold(hProcess, src, codeCaveAddress);
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, pSrc, size, dwOld, &dwOld);

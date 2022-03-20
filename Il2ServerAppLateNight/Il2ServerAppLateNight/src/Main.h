@@ -28,6 +28,8 @@ bool ReadTurnNeedle();
 
 bool ReadTurnCoordinatorBall();
 
+bool ReadManifolds();
+
 double GetHeading();
 
 double GetPitch();
@@ -44,6 +46,7 @@ double GetTurnAndBankNeedle();
 
 double GetRPM(int engine);
 
+double GetManifold(int engine);
 
 
 

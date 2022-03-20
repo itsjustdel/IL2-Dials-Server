@@ -23,9 +23,7 @@
 #include "PointerToFunction.h"
 #include <sstream>
 
-
-
-float version = 0.42f;
+float version = 0.5f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -37,6 +35,7 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
+double manifoldValues[4];
 //where we hold planeTpye string
 std::string planeType;
 
@@ -47,6 +46,8 @@ bool injectedAltimeter;
 bool injectedPlaneType;
 bool injectedTurnNeedle;
 bool injectedTurnBall;
+//bool injectedGermanManifold;
+bool injectedManifold;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
@@ -54,7 +55,8 @@ LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID turnNeedleAddress;
 LPCVOID turnBallAddress;
-
+//LPCVOID calcEngineTemperatureAddress;
+LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
 
@@ -72,13 +74,15 @@ void CaveRecovered()
 	injectedPlaneType = true;
 	injectedTurnNeedle = true;
 	injectedTurnBall = true;
+	//injectedGermanManifold = true;
+	injectedManifold = true;
 }
 
 //server uses Gets to grab data before sending it out
 
 bool GetInjected()
 {
-	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle)
+	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle && injectedManifold)
 		return true;
 	else	
 		return false;	
@@ -144,21 +148,29 @@ double GetRPM(int engine)
 	return cockpitValues[31 + engine];
 }
 
+double GetManifold(int engine)
+{
+	//check for country?
+	return manifoldValues[engine];
+}
 
 
 void ResetFlags()
 {
 	//addresses of cave
 	codeCaveAddress = 0;
-	//cockpitInstrumentsAddress = 0;
+	
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	//reports
-	//injectedCockpit = false;
+	//calcEngineTemperatureAddress = 0;
+	getManifoldPressureAddress = 0;
+	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
 	injectedTurnNeedle = false;
 	injectedTurnBall = false;
+	injectedManifold = false;
+
 }
 
  bool GetProcessData()
@@ -406,7 +418,28 @@ bool ReadTurnCoordinatorBall()
 	return 0;
 }
 
+bool ReadManifolds()
+{
+	
+	for (size_t i = 0; i < 4; i++)
+	{
+		//offset in cave, four addresses to read for each plane
+		//first engine is + 0x180 from cave, 2nd 0x188..etc
+		uintptr_t offset = 0x08 * i;
+		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+ 0x180 + offset);
+		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
+		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
+		const size_t sizeOfData = sizeof(double);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
+
+		manifoldValues[i] = *reinterpret_cast<double*>(rawData);
+	}
+	
+
+	return 0;
+}
 
 
 void ReadTest()
@@ -419,6 +452,8 @@ void ReadTest()
 	ReadPlaneType();
 	ReadTurnNeedle();
 	ReadTurnCoordinatorBall();
+	ReadManifolds();
+	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
 	floatArray[0] =(float)(GetAltitude());
@@ -514,6 +549,35 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+
+	if (getManifoldPressureAddress == 0)
+	{
+		//1258098E9B0 - RSE.RSE::CPistonEngine::getManifoldPressure		
+		std::string str("getManifoldPressure@CPistonEngine");
+		getManifoldPressureAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (getManifoldPressureAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+	/*
+	if (calcEngineTemperatureAddress == 0)
+	{
+
+		//RSE.RSE::CPistonEngine::calcEngineTemperature
+		std::string str("calcEngineTemperature@CPistonEngine");
+		calcEngineTemperatureAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (calcEngineTemperatureAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+	*/
+
 	return 1;
 }
 
@@ -587,6 +651,16 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+	if (!injectedManifold)
+	{
+		injectedManifold = HookManifold(hProcessIL2, (void*)(getManifoldPressureAddress), size, codeCaveAddress);
+		if (!injectedManifold)
+		{
+			worker->ReportProgress(9);
+			return 0;
+		}
+	}
+
 	return 1;
 
 }
@@ -612,6 +686,8 @@ void ClearAddresses()
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
+
+
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
 	lastChecked -= std::chrono::hours(1);	
@@ -670,9 +746,11 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		
 		//debugging function
 		//NeedleScan(worker);
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
+
 
 		//don't need a fast cycle on this loop
 		Sleep(100);
