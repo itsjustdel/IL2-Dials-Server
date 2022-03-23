@@ -478,11 +478,10 @@ bool CaveTurnNeedle(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), movToRax, sizeof(movToRax), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//now it will want an address to mov to rbp	 (thi si shwre plane type address is tored)
+	//now it will want an address to mov to rbp	 (this is where plane type address is stored)
 	uintptr_t relativeAddress = (uintptr_t)toCave + 0x100 - 0x39;// 0x39 for where this section of the cave starts
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
 	totalWritten += bytesWritten;
-
 
 	//compare rsi and rax
 	BYTE cmp[3] = { 0x48, 0x39, 0xC6 };
@@ -565,7 +564,39 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, toCave, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);//5 is enough for the jump plus address
 	totalWritten += bytesWritten;
 
-	
+	//first of all we need to check if this is indeed the call for the player plane
+	//if r13 matches the player plane address, we are good to go
+	//compare r13 and rax
+	//push - save temp var
+	BYTE push[1] = { 0x50 };//pop rax on to stack
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), push, sizeof(push), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//this is absolute mov instruction for rax
+	BYTE movToRax[2] = { 0x48, 0xA1 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), movToRax, sizeof(movToRax), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//now it will want an address to mov to rax	 (this is where plane type address is stored)
+	uintptr_t relativeAddress = (uintptr_t)toCave + 0x100 - 0x76;// 0x76 for where this section of the cave starts
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//compare r13 and rax
+	BYTE cmp[3] = { 0x4C, 0x39, 0xE8 };
+	//0x08 will be relative jump to code cave plus 0x100
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmp, sizeof(cmp), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//pop rax back now we're done - restore temp var
+	BYTE pop[1] = { 0x58 };//pop rax on to stack
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), pop, sizeof(pop), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//if not player plane, return 
+	BYTE jumpIfNotEqual[2] = { 0x75, 0x34 }; //0x34 is relative jump to return line
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
+	totalWritten += bytesWritten;
 
 	//there can be mroe than one engine, engines are indexed in rsi 
 	//1DE53290007 - 48 83 FF 00
@@ -578,8 +609,10 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	BYTE rsiEqualToThree[4] = { 0x48, 0x83, 0xFE, 0x03 };
 
 	//if equal, this will set a flag to be checked on..
-	//jump short is 74, next byte is relative address
-	BYTE jumpIfNotEqual[2] = { 0x75, 0x07}; 
+	//jump short is 75, next byte is relative address
+	//redefine 2nd element to in jump to 0x07
+	//
+	jumpIfNotEqual[1] =  0x07; 
 
 	
 	
@@ -590,7 +623,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xF5, 0x00, 0x00, 0x00 };
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xE4, 0x00, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -598,8 +631,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	//need to adjust target address
-	rcxToMem[3] = 0xF0;
+
+	rcxToMem[3] = 0xDF;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -607,8 +640,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	//need to adjust target address
-	rcxToMem[3] = 0xEB;
+	
+	rcxToMem[3] = 0xDA;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -616,8 +649,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	//need to adjust target address
-	rcxToMem[3] = 0xE6;
+	
+	rcxToMem[3] = 0xD5;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
