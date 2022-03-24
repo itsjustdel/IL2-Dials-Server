@@ -22,7 +22,7 @@
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 #include <sstream>
-
+#include <bitset>  
 float version = 0.503f;
 
 //how much memory to change permissions on in original code
@@ -36,6 +36,7 @@ double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
 double manifoldValues[4];
+int engineModification;
 //where we hold planeTpye string
 std::string planeType;
 
@@ -48,6 +49,7 @@ bool injectedTurnNeedle;
 bool injectedTurnBall;
 //bool injectedGermanManifold;
 bool injectedManifold;
+bool injectedEngineModification;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
@@ -59,6 +61,7 @@ LPCVOID turnBallAddress;
 LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
+LPCVOID engineModificationAddress;
 
 //process stuff
 wchar_t* exeName = (wchar_t*)L"Il-2.exe";
@@ -76,13 +79,14 @@ void CaveRecovered()
 	injectedTurnBall = true;
 	//injectedGermanManifold = true;
 	injectedManifold = true;
+	injectedEngineModification = true;
 }
 
 //server uses Gets to grab data before sending it out
 
 bool GetInjected()
 {
-	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle && injectedManifold)
+	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle && injectedManifold && injectedEngineModification)
 		return true;
 	else	
 		return false;	
@@ -154,6 +158,11 @@ double GetManifold(int engine)
 	return manifoldValues[engine];
 }
 
+int GetEngineModification()
+{
+	return engineModification;
+}
+
 
 void ResetFlags()
 {
@@ -170,6 +179,7 @@ void ResetFlags()
 	injectedTurnNeedle = false;
 	injectedTurnBall = false;
 	injectedManifold = false;
+	injectedEngineModification = false;
 
 }
 
@@ -442,6 +452,28 @@ bool ReadManifolds()
 }
 
 
+#define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
+#define LO_NIBBLE(b) ((b) & 0x0F)
+
+bool ReadEngineModification()
+{	
+	//engine mods stored in a bitset in game, rebuild bitset and read first byte
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x1A0);
+	char rawData;
+	ReadProcessMemory(hProcessIL2, addressToRead, &rawData, sizeof(char), NULL);
+
+	//use bit shift to split byte in half so we can 1s and 0s
+	//nibble high -byte is made up of two nibbles
+	unsigned short part1 = rawData & 0xF; // bits 0..3
+	//nibble low
+	bool part2 = (rawData >> 4) & 0xF; // bits 4..7
+	//using integers for engines, unknown amount of engine options - 0 is default
+	part2 ? engineModification = 1 : engineModification = 0;
+
+	return 0;
+}
+
+
 void ReadTest()
 {
 	//we represent the data with floats in the app, so let's convert now and save network traffic
@@ -453,6 +485,7 @@ void ReadTest()
 	ReadTurnNeedle();
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
+	ReadEngineModification();
 	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
@@ -562,6 +595,21 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
+
+
+	if (engineModificationAddress == 0)
+	{
+		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
+		std::string str("initModification@CEngine");
+		engineModificationAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (engineModificationAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
 	/*
 	if (calcEngineTemperatureAddress == 0)
 	{
@@ -655,6 +703,16 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 	{
 		injectedManifold = HookManifold(hProcessIL2, (void*)(getManifoldPressureAddress), size, codeCaveAddress);
 		if (!injectedManifold)
+		{
+			worker->ReportProgress(9);
+			return 0;
+		}
+	}
+
+	if (!injectedEngineModification)
+	{
+		injectedEngineModification = HookEngineModification(hProcessIL2, (void*)(engineModificationAddress), size, codeCaveAddress);
+		if (!injectedEngineModification)
 		{
 			worker->ReportProgress(9);
 			return 0;

@@ -134,15 +134,16 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        float floatArray[17];
+        float floatArray[18];
 
-        //read memory only when requested
+        //read memory only when requested - could be refactored in to the getters
         ReadPlaneType();
         ReadCockpitInstruments();
         ReadAltimeter();
         ReadTurnNeedle();
         ReadTurnCoordinatorBall();
         ReadManifolds();
+        ReadEngineModification();
         
         //packing differecnt data types in to one char array for sending (serialisation)
         //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
@@ -194,6 +195,8 @@ int serverListen() {
             {                
                 floatArray[13 + i] = (float)(GetManifold(i));
             }
+            //engine mod
+            floatArray[17] = (float)(GetEngineModification());
         }
 
         // The buffer we will be writing bytes into

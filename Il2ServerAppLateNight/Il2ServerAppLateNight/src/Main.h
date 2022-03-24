@@ -4,7 +4,7 @@ bool GetInjected();
 
 void CaveRecovered();
 
-void GetProcessData();
+//void GetProcessData();
 
 int Injector(System::ComponentModel::BackgroundWorker^);
 
@@ -30,13 +30,15 @@ bool ReadTurnCoordinatorBall();
 
 bool ReadManifolds();
 
+bool ReadEngineModification();
+
 double GetHeading();
 
 double GetPitch();
 
 double GetRoll();
 
-double GetYaw();
+//double GetYaw();
 
 double GetVSI();
 
@@ -47,6 +49,8 @@ double GetTurnAndBankNeedle();
 double GetRPM(int engine);
 
 double GetManifold(int engine);
+
+int GetEngineModification();
 
 
 
