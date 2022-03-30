@@ -157,6 +157,7 @@
     <ClInclude Include="src\Injector.h" />
     <ClInclude Include="src\IPHelper.h" />
     <ClInclude Include="src\Main.h" />
+    <ClInclude Include="src\Manifold.h" />
     <ClInclude Include="src\PointerToFunction.h" />
     <ClInclude Include="src\ProcessTools.h" />
     <ClInclude Include="src\Scan.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="src\Injector.cpp" />
     <ClCompile Include="src\IPHelper.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Manifold.cpp" />
     <ClCompile Include="src\PointerToFunction.cpp" />
     <ClCompile Include="src\ProcessTools.cpp" />
     <ClCompile Include="src\Scan.cpp" />

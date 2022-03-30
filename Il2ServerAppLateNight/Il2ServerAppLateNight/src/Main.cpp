@@ -21,9 +21,9 @@
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
-#include <sstream>
-#include <bitset>  
-float version = 0.504f;
+#include "../src/Manifold.h"
+
+float version = 0.505f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -35,7 +35,8 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-double manifoldValues[4];
+//double manifoldValues[4];
+std::vector<double> manifoldValues(4);
 int engineModification;
 //where we hold planeTpye string
 std::string planeType;
@@ -45,7 +46,7 @@ std::string planeType;
 //bool injectedCockpit;
 bool injectedAltimeter;
 bool injectedPlaneType;
-bool injectedTurnNeedle;
+bool injectedDynamicBody;
 bool injectedTurnBall;
 //bool injectedGermanManifold;
 bool injectedManifold;
@@ -55,7 +56,7 @@ bool injectedEngineModification;
 //LPCVOID cockpitInstrumentsAddress;
 LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
-LPCVOID turnNeedleAddress;
+LPCVOID dynamicBodyAddress;
 LPCVOID turnBallAddress;
 //LPCVOID calcEngineTemperatureAddress;
 LPCVOID getManifoldPressureAddress;
@@ -75,7 +76,7 @@ void CaveRecovered()
 	//injectedCockpit = true;
 	injectedAltimeter = true;	
 	injectedPlaneType = true;
-	injectedTurnNeedle = true;
+	injectedDynamicBody = true;
 	injectedTurnBall = true;
 	//injectedGermanManifold = true;
 	injectedManifold = true;
@@ -86,7 +87,7 @@ void CaveRecovered()
 
 bool GetInjected()
 {
-	if (injectedAltimeter && injectedPlaneType && injectedTurnNeedle && injectedTurnNeedle && injectedManifold && injectedEngineModification)
+	if (injectedAltimeter && injectedPlaneType && injectedDynamicBody && injectedTurnBall && injectedManifold && injectedEngineModification)
 		return true;
 	else	
 		return false;	
@@ -155,7 +156,11 @@ double GetRPM(int engine)
 double GetManifold(int engine)
 {
 	//check for country?
+	//is Ger plane? (and US?)
+	
 	return manifoldValues[engine];
+	//else
+	//read per plane offsets
 }
 
 int GetEngineModification()
@@ -176,7 +181,7 @@ void ResetFlags()
 	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
-	injectedTurnNeedle = false;
+	injectedDynamicBody = false;
 	injectedTurnBall = false;
 	injectedManifold = false;
 	injectedEngineModification = false;
@@ -430,30 +435,16 @@ bool ReadTurnCoordinatorBall()
 
 bool ReadManifolds()
 {
-	
-	for (size_t i = 0; i < 4; i++)
+	if (IsUSPlane(planeType))
 	{
-		//offset in cave, four addresses to read for each plane
-		//first engine is + 0x180 from cave, 2nd 0x188..etc
-		uintptr_t offset = 0x08 * i;
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+ 0x180 + offset);
-		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-
-		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
-		const size_t sizeOfData = sizeof(double);
-		char rawData[sizeOfData];
-		ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
-
-		manifoldValues[i] = *reinterpret_cast<double*>(rawData);
+		manifoldValues = USManifolds(codeCaveAddress, hProcessIL2, planeType);
 	}
-	
+	else
+		manifoldValues = GermanManifolds(codeCaveAddress, hProcessIL2);
+
 
 	return 0;
 }
-
-
-#define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
-#define LO_NIBBLE(b) ((b) & 0x0F)
 
 bool ReadEngineModification()
 {	
@@ -547,7 +538,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 
 
 	//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
-	if (turnNeedleAddress == 0)
+	if (dynamicBodyAddress == 0)
 	{
 		//CCockpitInstruments::simulation is full name after compilation but name is scrambled slightly in dll export list
 		//Any function with eg. RSE::exampleNameSpace::ExampleMethod needs to be reformatted like this
@@ -555,8 +546,8 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		// https://www.codeproject.com/Articles/28969/HowTo-Export-C-classes-from-a-DLL - for an example in a table
 
 		std::string str("simulation@CCockpitInstruments");
-		turnNeedleAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
-		if (turnNeedleAddress == 0)
+		dynamicBodyAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (dynamicBodyAddress == 0)
 		{
 			worker->ReportProgress(3);
 
@@ -676,10 +667,10 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 
 
 	//inject turn needle
-	if (!injectedTurnNeedle)
+	if (!injectedDynamicBody)
 	{
-		injectedTurnNeedle = HookTurnNeedle(hProcessIL2, (void*)(turnNeedleAddress), size, codeCaveAddress);
-		if (!injectedTurnNeedle)
+		injectedDynamicBody = HookTurnNeedle(hProcessIL2, (void*)(dynamicBodyAddress), size, codeCaveAddress);
+		if (!injectedDynamicBody)
 		{
 			//Hook function overwrites original code and writes to our code cave
 			worker->ReportProgress(7);
@@ -726,7 +717,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 int NeedleScan(System::ComponentModel::BackgroundWorker^ worker)
 {
 	//debugging function to find offsets
-	LPCVOID needleOffset = TurnNeedleScanner(turnNeedleAddress, hProcessIL2, injectedTurnNeedle, codeCaveAddress, hProcessIL2);
+	LPCVOID needleOffset = TurnNeedleScanner(dynamicBodyAddress, hProcessIL2, injectedDynamicBody, codeCaveAddress, hProcessIL2);
 	if (needleOffset != 0)
 		//convert to int and send
 		worker->ReportProgress((uintptr_t)needleOffset);
@@ -738,13 +729,14 @@ void ClearAddresses()
 {
 	setPlayerPresenceAddress = 0;
 	altimeterAddress = 0;
-	turnNeedleAddress = 0;
-	turnBallAddress = 0;
+	dynamicBodyAddress = 0;
+	turnBallAddress = 0;	
+	engineModificationAddress = 0;
+	getManifoldPressureAddress = 0;
 }
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
-
 
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
@@ -804,7 +796,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		
 		//debugging function
 		//NeedleScan(worker);
-		ReadTest();
+		//ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
