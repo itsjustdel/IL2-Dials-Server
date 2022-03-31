@@ -10,11 +10,10 @@ bool IsUSPlane(std::string name)
 	v = "P-40E-1";
 	if (name.compare(v) == 0)
 		return true;
-	/*
+	
 	v = "A-20B";
 	if (name.compare(v) == 0)
-		return true;
-	*/
+		return true;	
 
 	v = "P-39L-1";
 	if (name.compare(v) == 0)

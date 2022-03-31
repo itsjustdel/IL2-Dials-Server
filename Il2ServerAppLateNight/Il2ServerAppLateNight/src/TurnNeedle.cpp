@@ -56,17 +56,16 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	if (planeType.compare("P-51B-5") == 0)
 		return 0XCD8;
 
+	//grab the a-20 here before us plane check - it has default
+	if (planeType.compare("A-20B") == 0)
+		return 0xAF0;
 
-	if (IsUSPlane(planeType))
+	if ( IsUSPlane(planeType))
 	{
-
-
 		if (IsTwoEngine(planeType))
 			return 0xD78;
 		else
 			return 0xCF0;
-
-
 	}
 
 	//default
