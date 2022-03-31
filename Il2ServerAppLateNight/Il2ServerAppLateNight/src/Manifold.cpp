@@ -105,3 +105,58 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 }
 
 
+std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string name)
+{
+	std::vector<double> manifoldValues(4);
+
+	//buffer
+	char rawData[sizeof(double)];
+	//read address saved in code cave
+	LPCVOID targetAddress;
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x140), &targetAddress, sizeof(LPCVOID), 0);
+		
+
+	std::string v = "Spitfire Mk.IXe";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Spitfire Mk.Vb";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCF8), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Tempest Mk.V ser.2";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD08), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Hurricane Mk.II";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD00), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Spitfire Mk.XIV";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE50), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Typhoon Mk.Ib";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD68), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	return manifoldValues;
+}

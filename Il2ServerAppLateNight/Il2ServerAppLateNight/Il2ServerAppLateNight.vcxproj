@@ -162,6 +162,7 @@
     <ClInclude Include="src\ProcessTools.h" />
     <ClInclude Include="src\Scan.h" />
     <ClInclude Include="src\Server.h" />
+    <ClInclude Include="src\UKPlanes.h" />
     <ClInclude Include="src\USPlanes.h" />
     <ClInclude Include="TurnNeedle.h" />
   </ItemGroup>
@@ -176,6 +177,7 @@
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\TurnNeedle.cpp" />
+    <ClCompile Include="src\UKPlanes.cpp" />
     <ClCompile Include="src\USPlanes.cpp" />
     <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="WinformsProject.cpp" />

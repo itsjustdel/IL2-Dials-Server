@@ -16,6 +16,7 @@
 #include "ProcessTools.h"
 #include "Injector.h"
 #include "USPlanes.h"
+#include "UKPlanes.h"
 //#include "TurnNeedle.h"
 #include "../TurnNeedle.h"
 #include "Server.h"
@@ -438,6 +439,10 @@ bool ReadManifolds()
 	if (IsUSPlane(planeType))
 	{
 		manifoldValues = USManifolds(codeCaveAddress, hProcessIL2, planeType);
+	}
+	else if (IsUKPlane(planeType))
+	{
+		manifoldValues = UKManifolds(codeCaveAddress, hProcessIL2, planeType);
 	}
 	else
 		manifoldValues = GermanManifolds(codeCaveAddress, hProcessIL2);

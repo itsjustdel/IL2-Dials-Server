@@ -47,6 +47,9 @@
     <ClInclude Include="src\Manifold.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\UKPlanes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -89,6 +92,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="src\Manifold.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UKPlanes.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
