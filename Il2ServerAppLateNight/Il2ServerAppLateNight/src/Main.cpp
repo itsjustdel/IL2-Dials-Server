@@ -17,14 +17,14 @@
 #include "Injector.h"
 #include "USPlanes.h"
 #include "UKPlanes.h"
-//#include "TurnNeedle.h"
+#include "RUPlanes.h"
 #include "../TurnNeedle.h"
 #include "Server.h"
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 #include "../src/Manifold.h"
 
-float version = 0.505f;
+float version = 0.506f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -436,7 +436,13 @@ bool ReadTurnCoordinatorBall()
 
 bool ReadManifolds()
 {
-	if (IsUSPlane(planeType))
+
+	//note not all russian planes are able to map this way, most default to German method
+	if (IsYak9(planeType))
+	{
+		manifoldValues = RUManifolds(codeCaveAddress, hProcessIL2, planeType);
+	}
+	else if (IsUSPlane(planeType))
 	{
 		manifoldValues = USManifolds(codeCaveAddress, hProcessIL2, planeType);
 	}

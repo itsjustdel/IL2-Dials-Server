@@ -160,3 +160,41 @@ std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 
 	return manifoldValues;
 }
+
+std::vector<double> RUManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string name)
+{
+	std::vector<double> manifoldValues(4);
+
+	//buffer
+	char rawData[sizeof(double)];
+	//read address saved in code cave
+	LPCVOID targetAddress;
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x140), &targetAddress, sizeof(LPCVOID), 0);
+
+
+	std::string v = "Yak-7B ser.36";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC60), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+	}
+
+	v = "Yak-9 ser.1";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC60), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+	}
+
+	v = "Yak-9T ser.1";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xc68), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+	}
+
+	//bring in line with german manifold scale
+	manifoldValues[0] *= 100;
+
+	return manifoldValues;
+}

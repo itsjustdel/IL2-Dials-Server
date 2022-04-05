@@ -9,4 +9,6 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 
 std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string planeType);
 
+std::vector<double> RUManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string planeType);
+
 
