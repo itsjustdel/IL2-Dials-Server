@@ -24,7 +24,7 @@
 #include "PointerToFunction.h"
 #include "../src/Manifold.h"
 
-float version = 0.506f;
+float version = 0.51f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?

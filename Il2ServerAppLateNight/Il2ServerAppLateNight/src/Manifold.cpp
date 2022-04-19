@@ -52,10 +52,10 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	v = "A-20B";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD08), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD10), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
 	
