@@ -7,69 +7,86 @@
 uintptr_t OffsetToTurnNeedle(std::string planeType)
 {
 
-
+	uintptr_t offset = 0;
 	//unique offsets for some planes
 	if (planeType.compare("P-47D-28") == 0)
-		return 0XCA8;
+		offset = 0XCA8;
 
-	if (planeType.compare("Yak-7B ser.36") == 0)			
-		return 0xC50;	
+	else if (planeType.compare("Yak-7B ser.36") == 0)
+		offset = 0xC50;
 
-	if (planeType.compare("Tempest Mk.V ser.2") == 0)
-		return 0XCE8;
+	else if (planeType.compare("Tempest Mk.V ser.2") == 0)
+		offset = 0XCE8;
 
-	if (planeType.compare("Spitfire Mk.IXe") == 0)
-		return 0XD10;
+	else if (planeType.compare("Spitfire Mk.IXe") == 0)
+		offset = 0XD10;
 
-	if (planeType.compare("Hurricane Mk.II") == 0)
-		return 0XCE0;
+	else if (planeType.compare("Hurricane Mk.II") == 0)
+		offset = 0XCE0;
 
 	//yak9 s1 0xC48
-	if (planeType.compare("Yak-9 ser.1") == 0)
-		return 0XC48;
+	else if (planeType.compare("Yak-9 ser.1") == 0)
+		offset = 0XC48;
 
 	//9t 0xC50
-	if (planeType.compare("Yak-9T ser.1") == 0)
-		return 0XC50;
+	else if (planeType.compare("Yak-9T ser.1") == 0)
+		offset = 0XC50;
 
 	//hs 129 = 0xCA8
-	if (planeType.compare("Hs 129 B-2") == 0)
-		return 0XCA8;
+	else if (planeType.compare("Hs 129 B-2") == 0)
+		offset = 0XCA8;
 
 	//Typhoon Mk.Ib	
-	if (planeType.compare("Typhoon Mk.Ib") == 0)
-		return 0XD48;
+	else if (planeType.compare("Typhoon Mk.Ib") == 0)
+		offset = 0XD48;
 
 	//"U-2VS"
-	if (planeType.compare("U-2VS") == 0)
-		return 0X10B8;
+	else if (planeType.compare("U-2VS") == 0)
+		offset = 0X10B8;
 
 	//P-47D-22
-	if (planeType.compare("P-47D-22") == 0)
-		return 0XCA0;
+	else if (planeType.compare("P-47D-22") == 0)
+		offset = 0XCA0;
 
 	//Spitfire Mk.XIV
-	if (planeType.compare("Spitfire Mk.XIV") == 0)
-		return 0XE30;
+	else if (planeType.compare("Spitfire Mk.XIV") == 0)
+		offset = 0XE30;
 
 	//P-51B-5
-	if (planeType.compare("P-51B-5") == 0)
-		return 0XCD8;
+	else if (planeType.compare("P-51B-5") == 0)
+		offset = 0XCD8;
 
 	//grab the a-20 here before us plane check - it has default
-	if (planeType.compare("A-20B") == 0)
-		return 0xAF0;
+	else if (planeType.compare("A-20B") == 0)
+		offset = 0xAF0;
 
-	if ( IsUSPlane(planeType))
+	//p38
+	//"P-38J-25";
+	else if (planeType.compare("P-38J-25") == 0)
 	{
-		if (IsTwoEngine(planeType))
-			return 0xD78;
-		else
-			return 0xCF0;
+		offset = 0xDB0;
+		return offset;
 	}
 
-	//default
-	return 0xAF0;
+
+	else if (planeType.compare("P-51D-15") == 0)
+		offset = 0xCE0;
+
+	else if (IsUSPlane(planeType))
+	{
+		offset = 0xD28; //patch was +38
+		return offset;
+	}
+	else
+	{
+		//default
+		offset = 0xAF0;
+	}
+	
+	//patch
+	offset += 0x38;
+
+	return offset;
 }
 
 
@@ -145,3 +162,81 @@ LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTur
 
 }
 
+/*
+#pragma once
+#include <Windows.h>
+#include "USPlanes.h"
+#include <string>
+#include "Injector.h"
+
+uintptr_t OffsetToTurnNeedle(std::string planeType)
+{
+
+
+	//unique offsets for some planes
+	if (planeType.compare("P-47D-28") == 0)
+		return 0XCA8;
+
+	if (planeType.compare("Yak-7B ser.36") == 0)
+		return 0xC88;// 0xC50; +38?
+
+	if (planeType.compare("Tempest Mk.V ser.2") == 0)
+		return 0XCE8;
+
+	if (planeType.compare("Spitfire Mk.IXe") == 0)
+		return 0XD10;
+
+	if (planeType.compare("Hurricane Mk.II") == 0)
+		return 0XCE0;
+
+	//yak9 s1 0xC48
+	if (planeType.compare("Yak-9 ser.1") == 0)
+		return 0xC80;// XC48;
+
+	//9t 0xC50
+	if (planeType.compare("Yak-9T ser.1") == 0)
+		return 0xC88;// 0XC50;
+
+	//hs 129 = 0xCA8
+	if (planeType.compare("Hs 129 B-2") == 0)
+		return 0XCA8;
+
+	//Typhoon Mk.Ib
+	if (planeType.compare("Typhoon Mk.Ib") == 0)
+		return 0XD48;
+
+	//"U-2VS"
+	if (planeType.compare("U-2VS") == 0)
+		return 0X10B8;
+
+	//P-47D-22
+	if (planeType.compare("P-47D-22") == 0)
+		return 0XCA0;
+
+	//Spitfire Mk.XIV
+	if (planeType.compare("Spitfire Mk.XIV") == 0)
+		return 0XE30;
+
+	//P-51B-5
+	if (planeType.compare("P-51B-5") == 0)
+		return 0XCD8;
+
+	//grab the a-20 here before us plane check - it has default
+	if (planeType.compare("A-20B") == 0)
+		return 0xAF0;
+
+	//p38
+	//"P-38J-25";
+	if (planeType.compare("P-38J-25") == 0)
+		return 0xDB0;
+
+	if ( IsUSPlane(planeType))
+	{
+		return 0xD28;// 0xCF0; //patch was +38
+	}
+
+	//default
+	return 0xB28;// 0xAF0;
+}
+
+*/

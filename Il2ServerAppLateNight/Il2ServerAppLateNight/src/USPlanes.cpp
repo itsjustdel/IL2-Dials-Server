@@ -58,17 +58,4 @@ bool IsP38(std::string name)
 	return false;
 }
 
-bool IsTwoEngine(std::string name)
-{
-	std::string v = "P-38J-25";
-	if (name.compare(v) == 0)
-		return true;
 
-	v = "A-20B";
-	if (name.compare(v) == 0)
-		return true;
-
-
-	//else it is not US plane
-	return false;
-}

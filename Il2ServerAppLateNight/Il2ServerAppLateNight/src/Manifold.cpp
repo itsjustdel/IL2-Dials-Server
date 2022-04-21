@@ -42,10 +42,10 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	std::string v = "P-38J-25";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDD8), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA8), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);	
 	}
 
@@ -62,42 +62,42 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	v = "P-40E-1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD10), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-39L-1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD10), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 		
 	v = "P-47D-28";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCE0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD18), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 	
 	v = "P-51D-15";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD00), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-47D-22";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCD0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD08), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-51B-5";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCF8), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
@@ -119,42 +119,42 @@ std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	std::string v = "Spitfire Mk.IXe";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30 + 0x38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Spitfire Mk.Vb";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCF8), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCF8 + 0x38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Tempest Mk.V ser.2";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD08), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Hurricane Mk.II";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD00), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Spitfire Mk.XIV";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE50), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE88), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Typhoon Mk.Ib";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD68), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
@@ -175,21 +175,21 @@ std::vector<double> RUManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	std::string v = "Yak-7B ser.36";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC60), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC98), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 
 	v = "Yak-9 ser.1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC60), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC98), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 
 	v = "Yak-9T ser.1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xc68), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 

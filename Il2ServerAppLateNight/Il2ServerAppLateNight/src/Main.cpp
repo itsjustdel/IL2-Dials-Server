@@ -24,7 +24,7 @@
 #include "PointerToFunction.h"
 #include "../src/Manifold.h"
 
-float version = 0.51f;
+float version = 0.52f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -371,7 +371,7 @@ bool ReadTurnNeedle()
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t offset = OffsetToTurnNeedle(planeType);
+	uintptr_t offset = OffsetToTurnNeedle(planeType);	
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
 	
@@ -806,7 +806,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		
 		//debugging function
-		//NeedleScan(worker);
+		NeedleScan(worker);
 		//ReadTest();
 
 		//we got here, good, tell the interface
