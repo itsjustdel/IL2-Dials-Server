@@ -1,4 +1,4 @@
-#include <wtypes.h>
+#include <windows.h>
 char originalLineTurnBall[5]; //perfect - only 5 bytes needed for jump and original instruction is 5 bytes
 
 bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)

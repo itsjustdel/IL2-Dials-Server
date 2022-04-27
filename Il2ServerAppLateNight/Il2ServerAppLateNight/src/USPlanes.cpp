@@ -1,4 +1,3 @@
-#include "USPlanes.h"
 #include <string>
 
 bool IsUSPlane(std::string name)

@@ -153,6 +153,7 @@
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="OilTemp.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Altimeter.h" />
     <ClInclude Include="src\DynamicBody.h" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="OilTemp.cpp" />
     <ClCompile Include="src\Altimeter.cpp" />
     <ClCompile Include="src\DynamicBody.cpp" />
     <ClCompile Include="src\EngineMod.cpp" />

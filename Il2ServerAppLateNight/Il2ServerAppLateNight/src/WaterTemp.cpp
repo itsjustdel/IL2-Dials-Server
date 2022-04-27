@@ -1,6 +1,5 @@
 #include <Windows.h>
 #include <vector>
-#include "WaterTemp.h"
 
 char originalLine[8];
 
@@ -126,31 +125,4 @@ bool HookWaterTemp(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddr
 
 	//return the start of our allocated memory struct
 	return 1;
-}
-
-std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
-{
-	std::vector<double> values(4);
-
-	//code cave adress line
-	LPVOID offset = 0x00;
-	for (size_t i = 0; i < 4; i++)
-	{
-
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+(0x1C0 + &offset));
-		
-		LPVOID targetAddress;
-		//read what address to read
-		ReadProcessMemory(hProcess, addressToRead, &targetAddress, sizeof(char), NULL);
-
-		char rawData;
-		//read data from final target address
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress), &rawData, sizeof(double), 0);
-		values[i] = *reinterpret_cast<double*>(rawData);
-
-		offset = (LPVOID)(uintptr_t)(&offset + 0x04);
-
-	}
-
-	return values;
 }

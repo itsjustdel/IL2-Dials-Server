@@ -29,7 +29,7 @@
 #include "DynamicBody.h"
 #include "TurnBall.h"
 #include "EngineMod.h"
-#include "Main.h"
+//#include "../OilTemp.h"
 
 float version = 0.52f;
 
@@ -642,6 +642,19 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+	if (oilTempAddress == 0)
+	{
+		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
+		std::string str("getOilTemperature@COilSystem");
+		oilTempAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (oilTempAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
 	/*
 	if (calcEngineTemperatureAddress == 0)
 	{
@@ -751,7 +764,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-
 	if (!injectedWaterTemp)
 	{
 		injectedWaterTemp = HookWaterTemp(hProcessIL2, (void*)(waterTempAddress), size, codeCaveAddress);
@@ -761,7 +773,17 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
+	/*
+	if (!injectedOilTemp)
+	{
+		injectedOilTemp = HookOilTemp(hProcessIL2, (void*)(oilTempAddress), size, codeCaveAddress);
+		if (!injectedOilTemp)
+		{
+			worker->ReportProgress(9);
+			return 0;
+		}
+	}
+	*/
 	return 1;
 
 }

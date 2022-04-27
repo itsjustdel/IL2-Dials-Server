@@ -1,6 +1,4 @@
 #include <string>
-#include "UKPlanes.h"
-
 
 bool IsUKPlane(std::string planeName)
 {

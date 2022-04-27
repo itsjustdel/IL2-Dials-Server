@@ -1,14 +1,17 @@
 #pragma once
 
+#include <windows.h>
+
 bool GetInjected();
 
 void CaveRecovered();
 
 HANDLE GetIL2Handle();
 
-LPVOID GetCodeCaveAddress();
 
-//void GetProcessData();
+//LPVOID GetCodeCaveAddress();
+
+bool GetProcessData();
 
 int Injector(System::ComponentModel::BackgroundWorker^);
 

@@ -71,6 +71,9 @@
     <ClInclude Include="src\Altimeter.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="OilTemp.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -134,6 +137,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="src\Altimeter.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="OilTemp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

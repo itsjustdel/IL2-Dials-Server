@@ -1,4 +1,3 @@
-#include "RUPlanes.h"
 #include <string>
 
 bool IsYak9(std::string name)

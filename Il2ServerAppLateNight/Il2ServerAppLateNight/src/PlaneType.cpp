@@ -1,5 +1,4 @@
-#include <wtypes.h>
-#include "PlaneType.h"
+#include <windows.h>
 
 char originalLinePlaneType[8];
 

@@ -1,4 +1,4 @@
 #pragma once
-#include <wtypes.h>
+#include <windows.h>
 
 bool HookDynamicBody(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);

@@ -1,4 +1,4 @@
-#include <wtypes.h>
+#include <windows.h>
 
 char originalLineEngineModification[6];
 
