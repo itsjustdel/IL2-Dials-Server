@@ -53,6 +53,24 @@
     <ClInclude Include="src\RUPlanes.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\WaterTemp.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlaneType.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicBody.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TurnBall.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EngineMod.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Altimeter.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -91,9 +109,6 @@
     <ClCompile Include="src\TurnNeedle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TCPServer.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="src\Manifold.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -101,6 +116,24 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="src\RUPlanes.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WaterTemp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlaneType.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicBody.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TurnBall.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineMod.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Altimeter.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

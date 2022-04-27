@@ -23,6 +23,13 @@
 #include "IPHelper.h"
 #include "PointerToFunction.h"
 #include "../src/Manifold.h"
+#include "../src/WaterTemp.h"
+#include "PlaneType.h"
+#include "Altimeter.h"
+#include "DynamicBody.h"
+#include "TurnBall.h"
+#include "EngineMod.h"
+#include "Main.h"
 
 float version = 0.52f;
 
@@ -38,9 +45,11 @@ double turnNeedleValue;
 double turnBallValue;
 //double manifoldValues[4];
 std::vector<double> manifoldValues(4);
+std::vector<double> waterTempValues(4);
 int engineModification;
 //where we hold planeTpye string
 std::string planeType;
+
 
 
 //main process flags
@@ -52,6 +61,8 @@ bool injectedTurnBall;
 //bool injectedGermanManifold;
 bool injectedManifold;
 bool injectedEngineModification;
+bool injectedWaterTemp;
+bool injectedOilTemp;
 
 //functionAddresses
 //LPCVOID cockpitInstrumentsAddress;
@@ -64,6 +75,8 @@ LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
 LPCVOID engineModificationAddress;
+LPCVOID waterTempAddress;
+LPCVOID oilTempAddress;
 
 //process stuff
 wchar_t* exeName = (wchar_t*)L"Il-2.exe";
@@ -82,18 +95,35 @@ void CaveRecovered()
 	//injectedGermanManifold = true;
 	injectedManifold = true;
 	injectedEngineModification = true;
+	injectedWaterTemp = true;
+	injectedOilTemp = true;
 }
 
 //server uses Gets to grab data before sending it out
 
+HANDLE GetIL2Handle()
+{
+	return hProcessIL2;
+}
+
+LPVOID GetCodeCaveAddress()
+{
+	return codeCaveAddress;
+}
+
 bool GetInjected()
 {
-	if (injectedAltimeter && injectedPlaneType && injectedDynamicBody && injectedTurnBall && injectedManifold && injectedEngineModification)
+	if (injectedAltimeter 
+			&& injectedPlaneType 
+				&& injectedDynamicBody 
+					&& injectedTurnBall 
+						&& injectedManifold 
+							&& injectedEngineModification 
+								&& injectedWaterTemp)
 		return true;
 	else	
 		return false;	
 }
-
 
 float GetIL2DialsVersion()
 {
@@ -155,18 +185,18 @@ double GetRPM(int engine)
 }
 
 double GetManifold(int engine)
-{
-	//check for country?
-	//is Ger plane? (and US?)
-	
+{	
 	return manifoldValues[engine];
-	//else
-	//read per plane offsets
 }
 
 int GetEngineModification()
 {
 	return engineModification;
+}
+
+double GetWaterTemp(int engine)
+{
+	return waterTempValues[engine];
 }
 
 
@@ -186,10 +216,11 @@ void ResetFlags()
 	injectedTurnBall = false;
 	injectedManifold = false;
 	injectedEngineModification = false;
-
+	injectedWaterTemp = false;
+	injectedOilTemp = false;
 }
 
- bool GetProcessData()
+bool GetProcessData()
 {
 	
 	//Get Process ID by enumerating the processes using tlhelp32snapshot	
@@ -219,8 +250,6 @@ void ResetFlags()
 
 	return true;
 }
-
-
 
 bool CockpitInstrumentsDataStruct(LPVOID structStart) 
 {
@@ -279,7 +308,6 @@ bool AltimeterDataStruct(LPVOID structStart)
 	return 1;
 }
 
-
 bool PlaneTypeDataStruct(LPVOID structStart)
 {
 	//string starts at 7b from pointer 
@@ -306,29 +334,26 @@ bool PlaneTypeDataStruct(LPVOID structStart)
 	return 1;
 }
 
-
 bool ReadPlaneType()
 {
 
 	//injection saves alt. pointer at code cave's address + 0x100
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x100);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 	LPVOID toPlaneType = PointerToDataStruct(hProcessIL2, addressToRead);
 	if (toPlaneType!= 0)
 	{
 		PlaneTypeDataStruct(toPlaneType);
+		return 1;
 	}
-	return 1;
-	
 
 	return 0;
 }
-
 
 bool ReadCockpitInstruments()
 {
 
 	//injection saves cockpit pointer at code cave's address + 0x100 ( this is from setPlayerPresence - but it ahs the address we need)
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x100);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 	LPVOID toPlaneTypeStruct = PointerToDataStruct(hProcessIL2, addressToRead );
 	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, (LPVOID)((uintptr_t)(toPlaneTypeStruct) + 0x60));
 
@@ -343,10 +368,8 @@ bool ReadCockpitInstruments()
 
 bool ReadAltimeter()
 {
-
-
 	//injection saves alt. pointer at code cave's address + 0xxx
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x120);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x220);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
 	
 	if (toAltimeter != 0)
@@ -360,14 +383,13 @@ bool ReadAltimeter()
 
 bool ReadTurnNeedle()
 {
-
 	//How to find new offsets-
 	//Find value in debugger by ising +140 offset in cave. Needle is clamped number after NaNs e.g 24, 31
 	//watch value and check offsets of found instructions (or use turn needle scanner!)
 
 	//injection saves alt. pointer at code cave's address + 0xxx
 	//pointer start of struct in our cave
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x140);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240);
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
@@ -411,14 +433,13 @@ bool ReadTurnNeedle()
 	return 0;
 }
 
-
 bool ReadTurnCoordinatorBall()
 {
 
 
 	//injection saves pointer at code cave's address + 0xxx
 	//pointer start of struct in our cave
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x160);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x260);
 	//read
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 	//needle value at +D0
@@ -460,7 +481,7 @@ bool ReadManifolds()
 bool ReadEngineModification()
 {	
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x1A0);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x2A0);
 	char rawData;
 	ReadProcessMemory(hProcessIL2, addressToRead, &rawData, sizeof(char), NULL);
 
@@ -475,7 +496,6 @@ bool ReadEngineModification()
 	return 0;
 }
 
-
 void ReadTest()
 {
 	//we represent the data with floats in the app, so let's convert now and save network traffic
@@ -488,6 +508,7 @@ void ReadTest()
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
 	ReadEngineModification();
+	ReadWaterTemps(hProcessIL2, codeCaveAddress);
 	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
@@ -544,11 +565,6 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-
-	//turn and bank needle seems to be in "DynamicBody" section in RSE.dll
-
-
-	//find "AF0" by manually locating needle numbers (IL2 clamped at 24 degrees(for il2 1941) and finding relative address
 	if (dynamicBodyAddress == 0)
 	{
 		//CCockpitInstruments::simulation is full name after compilation but name is scrambled slightly in dll export list
@@ -612,6 +628,20 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
+
+	if (waterTempAddress == 0)
+	{
+		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
+		std::string str("getWaterTemperature@CCoolingSystem");
+		waterTempAddress = PointerToFunction(str, hProcessIL2, moduleRSE);
+		if (waterTempAddress == 0)
+		{
+			worker->ReportProgress(3);
+
+			return 0;
+		}
+	}
+
 	/*
 	if (calcEngineTemperatureAddress == 0)
 	{
@@ -663,7 +693,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 		}
 	}
 
-
+	
 	//inject altimeter		
 	if (!injectedAltimeter)
 	{
@@ -680,7 +710,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 	//inject turn needle
 	if (!injectedDynamicBody)
 	{
-		injectedDynamicBody = HookTurnNeedle(hProcessIL2, (void*)(dynamicBodyAddress), size, codeCaveAddress);
+		injectedDynamicBody = HookDynamicBody(hProcessIL2, (void*)(dynamicBodyAddress), size, codeCaveAddress);
 		if (!injectedDynamicBody)
 		{
 			//Hook function overwrites original code and writes to our code cave
@@ -710,11 +740,22 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
+		
 	if (!injectedEngineModification)
 	{
 		injectedEngineModification = HookEngineModification(hProcessIL2, (void*)(engineModificationAddress), size, codeCaveAddress);
 		if (!injectedEngineModification)
+		{
+			worker->ReportProgress(9);
+			return 0;
+		}
+	}
+
+
+	if (!injectedWaterTemp)
+	{
+		injectedWaterTemp = HookWaterTemp(hProcessIL2, (void*)(waterTempAddress), size, codeCaveAddress);
+		if (!injectedWaterTemp)
 		{
 			worker->ReportProgress(9);
 			return 0;
@@ -744,6 +785,7 @@ void ClearAddresses()
 	turnBallAddress = 0;	
 	engineModificationAddress = 0;
 	getManifoldPressureAddress = 0;
+	waterTempAddress = 0;
 }
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
@@ -806,7 +848,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		
 		//debugging function
-		NeedleScan(worker);
+		//NeedleScan(worker);
 		//ReadTest();
 
 		//we got here, good, tell the interface

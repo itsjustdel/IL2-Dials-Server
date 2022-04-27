@@ -154,34 +154,45 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="src\Altimeter.h" />
+    <ClInclude Include="src\DynamicBody.h" />
+    <ClInclude Include="src\EngineMod.h" />
     <ClInclude Include="src\Injector.h" />
     <ClInclude Include="src\IPHelper.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\Manifold.h" />
+    <ClInclude Include="src\PlaneType.h" />
     <ClInclude Include="src\PointerToFunction.h" />
     <ClInclude Include="src\ProcessTools.h" />
     <ClInclude Include="src\RUPlanes.h" />
     <ClInclude Include="src\Scan.h" />
     <ClInclude Include="src\Server.h" />
+    <ClInclude Include="src\TurnBall.h" />
     <ClInclude Include="src\UKPlanes.h" />
     <ClInclude Include="src\USPlanes.h" />
+    <ClInclude Include="src\WaterTemp.h" />
     <ClInclude Include="TurnNeedle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="src\Altimeter.cpp" />
+    <ClCompile Include="src\DynamicBody.cpp" />
+    <ClCompile Include="src\EngineMod.cpp" />
     <ClCompile Include="src\Injector.cpp" />
     <ClCompile Include="src\IPHelper.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Manifold.cpp" />
+    <ClCompile Include="src\PlaneType.cpp" />
     <ClCompile Include="src\PointerToFunction.cpp" />
     <ClCompile Include="src\ProcessTools.cpp" />
     <ClCompile Include="src\RUPlanes.cpp" />
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\TurnBall.cpp" />
     <ClCompile Include="src\TurnNeedle.cpp" />
     <ClCompile Include="src\UKPlanes.cpp" />
     <ClCompile Include="src\USPlanes.cpp" />
-    <ClCompile Include="TCPServer.cpp" />
+    <ClCompile Include="src\WaterTemp.cpp" />
     <ClCompile Include="WinformsProject.cpp" />
     <ClCompile Include="Form1.cpp" />
   </ItemGroup>
