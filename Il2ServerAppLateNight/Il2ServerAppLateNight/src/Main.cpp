@@ -478,7 +478,7 @@ bool ReadManifolds()
 
 void ReadWaterTemps()
 {
-	ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
+	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
 }
 
 bool ReadEngineModification()
