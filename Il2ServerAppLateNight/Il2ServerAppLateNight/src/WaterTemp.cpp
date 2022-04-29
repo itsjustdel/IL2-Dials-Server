@@ -4,7 +4,7 @@
 
 char originalLineWaterTemp[8];
 
-std::vector<double> ReadWaterTemps(LPCVOID codeCaveAddress, HANDLE hProcess)
+std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 {
 	//two engines
 	std::vector<double> values(2);
@@ -14,7 +14,7 @@ std::vector<double> ReadWaterTemps(LPCVOID codeCaveAddress, HANDLE hProcess)
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2A0 + i*8), &targetAddress, sizeof(LPCVOID), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2C0 + i*8), &targetAddress, sizeof(LPCVOID), 0);
 
 		//pointer +178 is offset for water temp in kelvin
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x178), &rawData, sizeof(double), 0);

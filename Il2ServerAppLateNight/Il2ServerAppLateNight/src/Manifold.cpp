@@ -30,7 +30,7 @@ std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 	return manifoldValues;
 }
 
-std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string name)
+std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
 	
 	std::vector<double> manifoldValues(4);
@@ -108,7 +108,7 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 }
 
 
-std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string name)
+std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
 	std::vector<double> manifoldValues(4);
 
@@ -164,7 +164,7 @@ std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	return manifoldValues;
 }
 
-std::vector<double> RUManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::string name)
+std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
 	std::vector<double> manifoldValues(4);
 
