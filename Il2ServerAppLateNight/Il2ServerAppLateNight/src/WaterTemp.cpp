@@ -1,7 +1,8 @@
+#pragma once
 #include <Windows.h>
 #include <vector>
 
-char originalLine[8];
+char originalLineWaterTemp[8];
 
 std::vector<double> ReadWaterTemps(LPCVOID codeCaveAddress, HANDLE hProcess)
 {
@@ -29,7 +30,7 @@ bool InjectionWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0xCE);
 
 	size_t bytesWritten = 0;
-	ReadProcessMemory(hProcess, (LPVOID)src, &originalLine, sizeof(originalLine), &bytesWritten);//5 is enough for jump plus address
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineWaterTemp, sizeof(originalLineWaterTemp), &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -64,32 +65,57 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
-	WriteProcessMemory(hProcess, toCave, &originalLine, sizeof(originalLine), &bytesWritten);
+	WriteProcessMemory(hProcess, toCave, &originalLineWaterTemp, sizeof(originalLineWaterTemp), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//r14 has the engine number (up to 2) - will have to review for 3 or 4 engine plane. The ju52 doesn't have water temps (a 3 engine plane)
 	//compare and jump if not equal
-	BYTE cmpR14ToZeroAndJump[6] = { 0x49, 0x83, 0xFE, 0x00, 0x75, 0x09 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToZeroAndJump, sizeof(cmpR14ToZeroAndJump), &bytesWritten);
+	BYTE cmpR14ToZero[4] = { 0x49, 0x83, 0xFE, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToZero, sizeof(cmpR14ToZero), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	BYTE jumpEngineOneA[2] = { 0x75, 0x0F };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpEngineOneA, sizeof(jumpEngineOneA), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	BYTE cmpR9ToZero[4] = { 0x49, 0x83, 0xF9, 0x00 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR9ToZero, sizeof(cmpR9ToZero), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	BYTE jumpEngineOneB[2] = {  0x75, 0x1C };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpEngineOneB, sizeof(jumpEngineOneB), &bytesWritten);
 	totalWritten += bytesWritten;
 	
 	//if equal, write rax to me
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xBD, 0x01, 0x00, 0x00 };
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xD7, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//and jump to exit
-	BYTE jumpToEnd[2] = { 0xEB, 0x0D };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEnd, sizeof(jumpToEnd), &bytesWritten);
+	BYTE jumpToEndA[2] = { 0xEB, 0x13 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEndA, sizeof(jumpToEndA), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//if we didn't jump, check for r14 == 1, if not true, jump to exit line
-	BYTE cmpR14ToOneAndJump[6] = { 0x49, 0x83, 0xFE, 0x01, 0x75, 0x07 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToOneAndJump, sizeof(cmpR14ToOneAndJump), &bytesWritten);
+	//if we didn't jump
+	BYTE cmpR14ToOne[4] = { 0x49, 0x83, 0xFE, 0x01 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToOne, sizeof(cmpR14ToOne), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//and jump to exit if not equal
+	BYTE jumpToEndB[2] = { 0x75, 0x0D };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEndB, sizeof(jumpToEndB), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	//cmp r9 to zero again - re-use byte array
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR9ToZero, sizeof(cmpR9ToZero), &bytesWritten);
+	totalWritten += bytesWritten;
+
+	BYTE jumpEngineTwo[2] = { 0x75, 0x07 };
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpEngineTwo, sizeof(jumpEngineTwo), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//if true, we write this, if false we jump over this
-	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xB6, 0x01, 0x00, 0x00 };
+	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xCA, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMemSecondEngine, sizeof(rcxToMemSecondEngine), &bytesWritten);
 	totalWritten += bytesWritten;
 		

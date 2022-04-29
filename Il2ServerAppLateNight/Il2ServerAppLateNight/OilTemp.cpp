@@ -1,15 +1,15 @@
-#include <wtypes.h>
-/*
+#pragma once
+#include <windows.h>
 
-char originalLine[8];
+char originalLineOilTemp[8];
 
 bool InjectionOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xCE);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xF7);
 
 	size_t bytesWritten = 0;
-	ReadProcessMemory(hProcess, (LPVOID)src, &originalLine, sizeof(originalLine), &bytesWritten);//5 is enough for jump plus address
+	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
 	BYTE jump = 0xE9;
@@ -37,14 +37,14 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	size_t totalWritten = 0;
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xCE);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xF7);
 
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
-	WriteProcessMemory(hProcess, toCave, &originalLine, sizeof(originalLine), &bytesWritten);
+	WriteProcessMemory(hProcess, toCave, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//r14 has the engine number (up to 2) - will have to review for 3 or 4 engine plane. The ju52 doesn't have water temps (a 3 engine plane)
@@ -106,4 +106,3 @@ bool HookOilTemp(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddres
 	//return the start of our allocated memory struct
 	return 1;
 }
-*/

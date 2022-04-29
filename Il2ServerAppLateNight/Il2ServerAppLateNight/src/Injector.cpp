@@ -2,10 +2,8 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <string>
-#include <sstream>   
-
+#include <sstream>
 #include "Main.h";
-#include "Injector.h"
 
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)

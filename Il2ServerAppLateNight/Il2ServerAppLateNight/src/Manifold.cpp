@@ -6,6 +6,8 @@
 
 char originalLineManifold[8];
 
+BYTE manifoldCaveOffset = 0x280;
+
 std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
 	std::vector<double> manifoldValues(4);
@@ -14,7 +16,7 @@ std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 		//offset in cave, four addresses to read for each plane
 		//first engine is + 0x180 from cave, 2nd 0x188..etc
 		uintptr_t offset = 0x08 * i;
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x280 + offset);
+		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+manifoldCaveOffset + offset);
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
@@ -38,7 +40,7 @@ std::vector<double> USManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
 
 	std::string v = "P-38J-25";
 	if (name.compare(v) == 0)
@@ -114,7 +116,7 @@ std::vector<double> UKManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
 		
 
 	std::string v = "Spitfire Mk.IXe";
@@ -170,7 +172,7 @@ std::vector<double> RUManifolds(LPCVOID codeCaveAddress, HANDLE hProcess, std::s
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
 
 
 	std::string v = "Yak-7B ser.36";
@@ -271,7 +273,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xD0, 0x01, 0x00, 0x00 };
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xF0, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -280,7 +282,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xCB;
+	rcxToMem[3] = 0xEB;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -289,7 +291,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xC6;
+	rcxToMem[3] = 0xE6;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -298,7 +300,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xC1;
+	rcxToMem[3] = 0xE1;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 

@@ -21,7 +21,7 @@ bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	// "rbxToMem" - relative jump
 	//48 89 15 DB 00 00 00
-	BYTE rbxToMem[7] = { 0x48, 0x89, 0x15, 0xB7, 0x01, 0x00, 0x00 };
+	BYTE rbxToMem[7] = { 0x48, 0x89, 0x15, 0xD7, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rbxToMem, sizeof(rbxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 

@@ -12,8 +12,6 @@
 
 #include "Main.h"
 #include "IPHelper.h"
-#include "WaterTemp.h"
-
 
 using namespace System::Diagnostics;
 
@@ -138,7 +136,8 @@ int serverListen() {
         float floatArray[20];
 
         //read memory only when requested - could be refactored in to the getters
-        HANDLE hProcess = GetIL2Handle();
+        //HANDLE hProcess = GetIL2Handle();
+        //LPVOID codeCaveAddress = GetCodeCaveAddress();
         ReadPlaneType();
         ReadCockpitInstruments();
         ReadAltimeter();
@@ -147,7 +146,7 @@ int serverListen() {
         ReadManifolds();
         ReadEngineModification();
         //water temps read in water temps class - TO DO, refactor for above
-        //ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
+        ReadWaterTemps();
         
         //packing differecnt data types in to one char array for sending (serialisation)
         //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li

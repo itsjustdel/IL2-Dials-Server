@@ -1,17 +1,8 @@
 #pragma once
 
-#include <windows.h>
-
 bool GetInjected();
 
 void CaveRecovered();
-
-HANDLE GetIL2Handle();
-
-
-//LPVOID GetCodeCaveAddress();
-
-bool GetProcessData();
 
 int Injector(System::ComponentModel::BackgroundWorker^);
 
@@ -38,6 +29,8 @@ bool ReadTurnCoordinatorBall();
 bool ReadManifolds();
 
 bool ReadEngineModification();
+
+void ReadWaterTemps();
 
 double GetHeading();
 

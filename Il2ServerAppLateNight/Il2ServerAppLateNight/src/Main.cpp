@@ -1,8 +1,7 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
 #include <tchar.h>
 #include <iostream>
-#include <Windows.h>
 #include <TlHelp32.h>
 #include <tchar.h>
 #include <Psapi.h>
@@ -29,7 +28,7 @@
 #include "DynamicBody.h"
 #include "TurnBall.h"
 #include "EngineMod.h"
-//#include "../OilTemp.h"
+#include "../OilTemp.h"
 
 float version = 0.52f;
 
@@ -251,6 +250,7 @@ bool GetProcessData()
 	return true;
 }
 
+
 bool CockpitInstrumentsDataStruct(LPVOID structStart) 
 {
 	//set player presence gives us the address we passed at "structStart"
@@ -340,7 +340,7 @@ bool ReadPlaneType()
 	//injection saves alt. pointer at code cave's address + 0x100
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 	LPVOID toPlaneType = PointerToDataStruct(hProcessIL2, addressToRead);
-	if (toPlaneType!= 0)
+	if (toPlaneType != 0)
 	{
 		PlaneTypeDataStruct(toPlaneType);
 		return 1;
@@ -435,8 +435,6 @@ bool ReadTurnNeedle()
 
 bool ReadTurnCoordinatorBall()
 {
-
-
 	//injection saves pointer at code cave's address + 0xxx
 	//pointer start of struct in our cave
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x260);
@@ -478,6 +476,11 @@ bool ReadManifolds()
 	return 0;
 }
 
+void ReadWaterTemps()
+{
+	ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
+}
+
 bool ReadEngineModification()
 {	
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
@@ -508,7 +511,7 @@ void ReadTest()
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
 	ReadEngineModification();
-	ReadWaterTemps(hProcessIL2, codeCaveAddress);
+	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress);
 	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
@@ -641,7 +644,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
+	/*
 	if (oilTempAddress == 0)
 	{
 		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
@@ -654,6 +657,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
+	*/
 
 	/*
 	if (calcEngineTemperatureAddress == 0)
@@ -871,7 +875,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		
 		//debugging function
 		//NeedleScan(worker);
-		//ReadTest();
+		ReadTest();
 
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
