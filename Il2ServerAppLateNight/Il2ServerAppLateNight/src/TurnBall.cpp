@@ -6,7 +6,7 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	size_t totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x59);//65 is where we got to with other functions
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x5C);
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
 
@@ -16,7 +16,7 @@ bool CaveTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval	
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xFB, 0x01, 0x00, 0x00 }; 
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xF8, 0x01, 0x00, 0x00 }; 
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -36,7 +36,7 @@ bool InjectionTurnBall(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 
 	//note, replicated in cave code
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x59);//turn ball is plus ??
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x5C);
 
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineTurnBall, sizeof(originalLineTurnBall), &bytesWritten);//5 is enough for jump plus address

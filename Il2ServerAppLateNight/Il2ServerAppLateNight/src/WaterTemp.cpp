@@ -27,7 +27,7 @@ std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 bool InjectionWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xCE);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xD1);
 
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineWaterTemp, sizeof(originalLineWaterTemp), &bytesWritten);//5 is enough for jump plus address
@@ -58,7 +58,7 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	size_t totalWritten = 0;
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xCE);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xD1);
 
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
@@ -86,8 +86,8 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpEngineOneB, sizeof(jumpEngineOneB), &bytesWritten);
 	totalWritten += bytesWritten;
 	
-	//if equal, write rax to me
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xD7, 0x01, 0x00, 0x00 };
+	//if equal, write rcx to mem
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xD4, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -115,7 +115,7 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 	//if true, we write this, if false we jump over this
-	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xCA, 0x01, 0x00, 0x00 };
+	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xC7, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMemSecondEngine, sizeof(rcxToMemSecondEngine), &bytesWritten);
 	totalWritten += bytesWritten;
 		

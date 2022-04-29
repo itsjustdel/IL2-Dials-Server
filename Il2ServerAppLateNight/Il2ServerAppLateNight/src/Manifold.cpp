@@ -16,7 +16,7 @@ std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 		//offset in cave, four addresses to read for each plane
 		//first engine is + 0x180 from cave, 2nd 0x188..etc
 		uintptr_t offset = 0x08 * i;
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+manifoldCaveOffset + offset);
+		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x280 + offset);
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
@@ -206,7 +206,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//read address from rcx and save in codecave
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x6A);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x6D);
 	size_t totalWritten = 0;
 	size_t bytesWritten = 0;
 	//first of all write the original function back in
@@ -228,7 +228,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 	//now it will want an address to mov to rax	 (this is where plane type address is stored)
-	uintptr_t relativeAddress = (uintptr_t)toCave + 0x200 - 0x6A;// 0x76 for where this section of the cave starts
+	uintptr_t relativeAddress = (uintptr_t)toCave + 0x200 - 0x6D;// 0x76 for where this section of the cave starts
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -273,7 +273,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xF0, 0x01, 0x00, 0x00 };
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xED, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -282,7 +282,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xEB;
+	rcxToMem[3] = 0xE8;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -291,7 +291,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xE6;
+	rcxToMem[3] = 0xE3;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -300,7 +300,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	rcxToMem[3] = 0xE1;
+	rcxToMem[3] = 0xDE;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -320,7 +320,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x6A);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x6D);
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);
 

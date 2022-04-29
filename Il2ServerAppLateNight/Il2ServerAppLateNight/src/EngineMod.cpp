@@ -7,7 +7,7 @@ bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	size_t totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xBC);//C8 is where we got to with other functions
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xBF);//C8 is where we got to with other functions
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
 
@@ -21,7 +21,7 @@ bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	// "rbxToMem" - relative jump
 	//48 89 15 DB 00 00 00
-	BYTE rbxToMem[7] = { 0x48, 0x89, 0x15, 0xD7, 0x01, 0x00, 0x00 };
+	BYTE rbxToMem[7] = { 0x48, 0x89, 0x15, 0xDB, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rbxToMem, sizeof(rbxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -39,7 +39,7 @@ bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool InjectionEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xBC);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0xBF);
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineEngineModification, sizeof(originalLineEngineModification), &bytesWritten);
 

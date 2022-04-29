@@ -41,19 +41,21 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	size_t totalWritten = 0;
 	size_t bytesWritten = 0;
 
-	//first of all write the original function back in
-	//and write orignal back in after our code
 	WriteProcessMemory(hProcess, toCave, &originalLineAltimeter, 7, &bytesWritten);//7 is without ret
 	totalWritten += bytesWritten;
 
-	//the pointer value we want is stored in rcx, so move rax to point in our cave for later retrieval
-	BYTE raxToMem[7] = { 0x48, 0x89, 0x0D, 0xF8, 0x01, 0x00, 0x00 };
+	//the pointer value we want is stored in rax, so move rax to point in our cave for later retrieval
+	BYTE raxToMem[2] = { 0x48, 0xA3 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + totalWritten), raxToMem, sizeof(raxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
+	//note rax doesn't have a relative mov instrution 
+	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x1A + 0x220);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + totalWritten), &targetAddress, sizeof(LPVOID), &bytesWritten);;
+	totalWritten += bytesWritten;
+
 	//jump to return address
-	BYTE jump = 0xE9;
-	//write 0x09 (jmp) 
+	BYTE jump = 0xE9;	
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &jump, sizeof(jump), &bytesWritten);//HERE JUMP GOIONG IN WRONG PLACE?
 	totalWritten += bytesWritten;
 
