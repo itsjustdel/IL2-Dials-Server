@@ -6,7 +6,7 @@
 
 char originalLineManifold[8];
 
-BYTE manifoldCaveOffset = 0x280;
+
 
 std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
@@ -40,7 +40,7 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)(codeCaveAddress) + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 
 	std::string v = "P-38J-25";
 	if (name.compare(v) == 0)
@@ -116,7 +116,7 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		
 
 	std::string v = "Spitfire Mk.IXe";
@@ -172,7 +172,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + manifoldCaveOffset), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 
 
 	std::string v = "Yak-7B ser.36";
