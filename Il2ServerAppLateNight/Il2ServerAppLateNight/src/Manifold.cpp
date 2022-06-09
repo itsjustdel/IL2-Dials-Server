@@ -232,8 +232,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//compare r13 and rax
-	BYTE cmp[3] = { 0x4C, 0x39, 0xE8 };
+	//compare r12 and rax
+	BYTE cmp[3] = { 0x4C, 0x39, 0xE0 };
 	//0x08 will be relative jump to code cave plus 0x100
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmp, sizeof(cmp), &bytesWritten);
 	totalWritten += bytesWritten;
