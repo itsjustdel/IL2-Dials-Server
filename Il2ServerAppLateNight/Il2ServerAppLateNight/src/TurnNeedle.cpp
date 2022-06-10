@@ -6,9 +6,11 @@
 
 uintptr_t OffsetToTurnNeedle(std::string planeType)
 {
-
 	uintptr_t offset = 0;
 	//unique offsets for some planes
+	if (planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)
+		offset = 0XDC8;//RSE.RSE::CAeroplane_Mosquito_FB_Mk_VI_s2::simulation+4202 - F2 0F10 0D CED67B00   - movsd xmm1,[RSE.RSE::CTogglesPanel::`vftable'+CD20] { (-40.00) }
+
 	if (planeType.compare("P-47D-28") == 0)
 		offset = 0XCA8;
 
@@ -67,7 +69,6 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 		offset = 0xDB0;
 		return offset;
 	}
-
 
 	else if (planeType.compare("P-51D-15") == 0)
 		offset = 0xCE0;
