@@ -30,7 +30,7 @@
 #include "EngineMod.h"
 #include "../OilTemp.h"
 
-float version = 0.53f;
+float version = 0.6f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -428,7 +428,9 @@ bool ReadTurnNeedle()
 
 	if (planeType.compare("U-2VS") == 0)
 		turnNeedleValue *= -1;
-	
+
+	if(planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)//+		planeType	"Mosquito F.B. Mk.VI ser.2"	std::string
+		turnNeedleValue *= -1;	
 
 	return 0;
 }
@@ -484,17 +486,33 @@ void ReadWaterTemps()
 bool ReadEngineModification()
 {	
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x2A0);
-	char rawData;
-	ReadProcessMemory(hProcessIL2, addressToRead, &rawData, sizeof(char), NULL);
-
-	//use bit shift to split byte in half so we can 1s and 0s
-	//nibble high -byte is made up of two nibbles
-	unsigned short part1 = rawData & 0xF; // bits 0..3
-	//nibble low
-	bool part2 = (rawData >> 4) & 0xF; // bits 4..7
-	//using integers for engines, unknown amount of engine options - 0 is default
-	part2 ? engineModification = 1 : engineModification = 0;
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x2A0);	
+	
+	//8 bytes to store our info
+	//read to unsigned 8 int (byte)
+	BYTE bytes[8];
+	size_t bytesRead;
+	//Then once you read your value(255) into there, you can print it this way:
+	ReadProcessMemory(hProcessIL2, addressToRead, &bytes, sizeof(bytes), &bytesRead);
+	
+	//last byte in the array has the info we need
+	uint8_t modInfo = bytes[7];
+	
+	//mosquito 150 fuel // p51 150 fuel
+	if (modInfo == 0x81)
+	{
+		//set int to send to the client so it knows to switch a dial or not
+		engineModification = 1;
+	}
+	//k4 engine mode
+	else if (modInfo == 0x11)
+	{
+		engineModification = 1;
+	}
+	else 
+	{
+		engineModification = 0;
+	}
 
 	return 0;
 }
@@ -533,6 +551,8 @@ void ReadTest()
 	//needle t and b
 	floatArray[8] = (float)(GetTurnAndBankNeedle());
 
+
+	ReadEngineModification();
 }
 
 void SendTest()

@@ -26,6 +26,10 @@ bool IsUKPlane(std::string planeName)
 	if (planeName.compare(v) == 0)
 		return true;
 
+	v = "Mosquito F.B. Mk.VI ser.2";
+	if (planeName.compare(v) == 0)
+		return true;
+
 	
 	return false;
 }

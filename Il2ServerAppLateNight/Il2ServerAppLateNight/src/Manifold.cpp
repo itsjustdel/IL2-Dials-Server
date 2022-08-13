@@ -161,6 +161,16 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
+	v = "Mosquito F.B. Mk.VI ser.2";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF8), &rawData, sizeof(double), 0);
+		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
+	}
+
 	return manifoldValues;
 }
 
