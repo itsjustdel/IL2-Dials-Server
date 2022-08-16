@@ -476,12 +476,12 @@ bool ReadManifolds()
 	return 0;
 }
 
-void ReadWaterTemps()
+void UpdateWaterTempValues()
 {
 	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
 }
 
-void ReadOilTemps()
+void UpdateOilTempValues()
 {
 	oilTempValues = ReadOilTemps(GetIL2Handle(), GetCodeCaveAddress());
 }

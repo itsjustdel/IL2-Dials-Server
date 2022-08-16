@@ -12,6 +12,7 @@
 
 #include "Main.h"
 #include "IPHelper.h"
+#include "../OilTemp.h"
 
 using namespace System::Diagnostics;
 
@@ -146,8 +147,8 @@ int serverListen() {
         ReadManifolds();
         ReadEngineModification();
         //water temps read in water temps class - TO DO, refactor for above
-        ReadWaterTemps();
-        ReadOilTemps();
+        UpdateWaterTempValues();
+        UpdateOilTempValues();
         
         //packing differecnt data types in to one char array for sending (serialisation)
         //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li

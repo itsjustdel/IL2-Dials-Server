@@ -53,3 +53,7 @@ int GetEngineModification();
 double GetWaterTemp(int engine);
 
 double GetOilTemp(int engine);
+
+void UpdateWaterTempValues();
+
+void UpdateOilTempValues();

@@ -68,30 +68,26 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, toCave, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//r14 has the engine number (up to 2) - will have to review for 3 or 4 engine plane. The ju52 doesn't have water temps (a 3 engine plane)
-	//compare and jump if not equal
-	BYTE cmpR14ToZeroAndJump[6] = { 0x49, 0x83, 0xFE, 0x00, 0x75, 0x09 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToZeroAndJump, sizeof(cmpR14ToZeroAndJump), &bytesWritten);
-	totalWritten += bytesWritten;
+	//cmp r8, 01
+	BYTE bytes[34] = { 0x49, 0x83, 0xF8, 0x01,
+		//jne to end
+		0x75, 0x1C,
+		//cmp r14, 00
+		0x49, 0x83, 0xFE, 0x00,
+		//jne to newxt r14 check
+		0x75, 0x09,
+		//rcx to mem
+		0x48, 0x89, 0x0D, 0xC5, 0x01, 0x00, 0x00,
+		//jmp
+		0xEB, 0x00,
+		//cmpr14, 64 (cmp to 01 also works but the 64 call is called more often so less lag on load)
+		0x49, 0x83, 0xFE, 0x64,
+		//jne
+		0x75, 0x07,
+		//rcx to mem
+		0x48, 0x89, 0x0D, 0xBE, 0x01, 0x00, 0x00 };
 
-	//if equal, write rax to me
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xCB, 0x01, 0x00, 0x00 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
-	totalWritten += bytesWritten;
-
-	//and jump to exit
-	BYTE jumpToEnd[2] = { 0xEB, 0x0D };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpToEnd, sizeof(jumpToEnd), &bytesWritten);
-	totalWritten += bytesWritten;
-
-	//if we didn't jump, check for r14 == 1, if not true, jump to exit line
-	BYTE cmpR14ToOneAndJump[6] = { 0x49, 0x83, 0xFE, 0x01, 0x75, 0x07 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmpR14ToOneAndJump, sizeof(cmpR14ToOneAndJump), &bytesWritten);
-	totalWritten += bytesWritten;
-
-	//if true, we write this, if false we jump over this
-	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xC4, 0x01, 0x00, 0x00 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMemSecondEngine, sizeof(rcxToMemSecondEngine), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &bytes, sizeof(bytes), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//jump to return address
