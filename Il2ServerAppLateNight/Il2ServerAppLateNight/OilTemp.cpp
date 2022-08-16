@@ -1,12 +1,33 @@
 #pragma once
-#include <windows.h>
+#include <Windows.h>
+#include <vector>
 
 char originalLineOilTemp[8];
+
+std::vector<double> ReadOilTemps(HANDLE hProcess, LPVOID codeCaveAddress)
+{
+	//two engines
+	std::vector<double> values(2);
+	for (size_t i = 0; i < 2; i++)
+	{
+		//buffer
+		char rawData[sizeof(double)];
+		//read address saved in code cave
+		LPCVOID targetAddress;
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+
+		//pointer +1E0 is offset for water temp in kelvin
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
+		values[i] = *reinterpret_cast<double*>(rawData);
+	}
+
+	return values;
+}
 
 bool InjectionOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xF7);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x100);
 
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);//5 is enough for jump plus address
@@ -37,7 +58,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	size_t totalWritten = 0;
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0xF7);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x100);
 
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
@@ -54,7 +75,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 	//if equal, write rax to me
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xBD, 0x01, 0x00, 0x00 };
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xCB, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -69,7 +90,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	totalWritten += bytesWritten;
 
 	//if true, we write this, if false we jump over this
-	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xB6, 0x01, 0x00, 0x00 };
+	BYTE rcxToMemSecondEngine[7] = { 0x48, 0x89, 0x0D, 0xC4, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMemSecondEngine, sizeof(rcxToMemSecondEngine), &bytesWritten);
 	totalWritten += bytesWritten;
 

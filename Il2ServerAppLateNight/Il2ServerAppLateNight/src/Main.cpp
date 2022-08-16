@@ -45,31 +45,25 @@ double turnBallValue;
 //double manifoldValues[4];
 std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
+std::vector<double> oilTempValues(4);
 int engineModification;
-//where we hold planeTpye string
+//where we hold planeType string
 std::string planeType;
 
-
-
-//main process flags
-//bool injectedCockpit;
 bool injectedAltimeter;
 bool injectedPlaneType;
 bool injectedDynamicBody;
 bool injectedTurnBall;
-//bool injectedGermanManifold;
 bool injectedManifold;
 bool injectedEngineModification;
 bool injectedWaterTemp;
 bool injectedOilTemp;
 
 //functionAddresses
-//LPCVOID cockpitInstrumentsAddress;
 LPCVOID altimeterAddress;
 LPCVOID setPlayerPresenceAddress;
 LPCVOID dynamicBodyAddress;
 LPCVOID turnBallAddress;
-//LPCVOID calcEngineTemperatureAddress;
 LPCVOID getManifoldPressureAddress;
 //address of our memory cave we create
 LPVOID codeCaveAddress = 0;
@@ -119,9 +113,9 @@ bool GetInjected()
 						&& injectedManifold 
 							&& injectedEngineModification 
 								&& injectedWaterTemp)
-		return true;
-	else	
-		return false;	
+										return true;
+									else	
+										return false;	
 }
 
 float GetIL2DialsVersion()
@@ -196,6 +190,10 @@ int GetEngineModification()
 double GetWaterTemp(int engine)
 {
 	return waterTempValues[engine];
+}
+double GetOilTemp(int engine)
+{
+	return oilTempValues[engine];
 }
 
 
@@ -483,6 +481,11 @@ void ReadWaterTemps()
 	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
 }
 
+void ReadOilTemps()
+{
+	oilTempValues = ReadOilTemps(GetIL2Handle(), GetCodeCaveAddress());
+}
+
 bool ReadEngineModification()
 {	
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
@@ -664,7 +667,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	/*
+	
 	if (oilTempAddress == 0)
 	{
 		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
@@ -677,7 +680,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	*/
+	
 
 	/*
 	if (calcEngineTemperatureAddress == 0)
@@ -797,7 +800,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	/*
+	
 	if (!injectedOilTemp)
 	{
 		injectedOilTemp = HookOilTemp(hProcessIL2, (void*)(oilTempAddress), size, codeCaveAddress);
@@ -807,7 +810,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	*/
+	
 	return 1;
 
 }

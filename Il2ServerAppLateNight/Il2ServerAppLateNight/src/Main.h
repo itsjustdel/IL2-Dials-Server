@@ -38,8 +38,6 @@ double GetPitch();
 
 double GetRoll();
 
-//double GetYaw();
-
 double GetVSI();
 
 double GetTurnAndBankBall();
@@ -54,7 +52,4 @@ int GetEngineModification();
 
 double GetWaterTemp(int engine);
 
-
-
-
-
+double GetOilTemp(int engine);
