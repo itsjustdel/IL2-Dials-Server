@@ -67,25 +67,36 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//and write orignal back in after our code
 	WriteProcessMemory(hProcess, toCave, &originalLineWaterTemp, sizeof(originalLineWaterTemp), &bytesWritten);
 	totalWritten += bytesWritten;
+
+	uintptr_t relAddress = (uintptr_t)toCave + 0x200 - 0xD1;// 0xD1 for where this section of the cave starts	
+	//unpack to bytes
+	BYTE relBytes[8];
+	for (size_t i = 0; i < 8; i++)	
+		relBytes[i] = relAddress >> (i * 8);	
 	
-						//cmp r8, 01
-	BYTE bytes[34] = {	0x49, 0x83, 0xF8, 0x01,
-						//jne to end
-						0x75, 0x1C, 
-						//cmp r14, 00
-						0x49, 0x83, 0xFE, 0x00,
-						//jne to newxt r14 check
-						0x75, 0x09,
-						//rcx to mem
-						0x48, 0x89, 0x0D, 0xD4, 0x01, 0x00, 0x00,
-						//jmp
-						0xEB, 0x00, 
-						//cmpr14, 64 (cmp to 01 also works but the 64 call is called more often so less lag on load)
-						0x49, 0x83, 0xFE, 0x64, 
-						//jne
-						0x75, 0x07, 
-						//rcx to mem
-						0x48, 0x89, 0x0D, 0xCD, 0x01, 0x00, 0x00 };
+	BYTE bytes[45] = {	0x50,
+						// move plane type struct to rax
+						0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
+						// cmp rax, r12
+						0x4C, 0x39, 0xE0,
+						// pop rax
+						0x58,						
+						// jne [addy]
+						0x75, 0x1C,
+						// cmp rsi, 00
+						0x48, 0x83, 0xFE, 0x00,
+						// jne
+						0x75, 0x16,
+						// rcx to mem
+						0x48, 0x89, 0x0D, 0xC9, 0x01, 0x00, 0x00,
+						// jmp to end
+						0xEB, 0x0D,
+						// cmp rsi, 01
+						0x48, 0x83, 0xFE, 0x01,
+						// jne [addy]
+						0x75, 0x07,
+						// rcx,[addy]
+						0x48, 0x89, 0x0D, 0xC2, 0x01, 0x00, 0x00 };
 
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &bytes, sizeof(bytes), &bytesWritten);
 	totalWritten += bytesWritten;
@@ -98,17 +109,6 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//bytes written takes us back to start of function
 	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + (totalWritten - 4)));// ...still trial and error for this amount of nops?original line size?
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
-
-
-
-	//on the il2.exe stack
-	// if r8 == 1
-	//	{
-	//		if r14 == 0 or 1
-	//		{
-	//			read rcx 		
-	//		{
-	//	}
 
 	return 1;
 }
