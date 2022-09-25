@@ -27,7 +27,7 @@ std::vector<double> ReadOilTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 bool InjectionOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x100);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x10B);
 
 	size_t bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);//5 is enough for jump plus address
@@ -58,7 +58,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	size_t totalWritten = 0;
 	//position in cave where we will start to write
-	toCave = (LPVOID)((uintptr_t)(toCave)+0x100);
+	toCave = (LPVOID)((uintptr_t)(toCave)+0x10B);
 
 	//cave - where we put our own code alongside the original
 	size_t bytesWritten = 0;
@@ -68,24 +68,35 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, toCave, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//cmp r8, 01
-	BYTE bytes[34] = { 0x49, 0x83, 0xF8, 0x01,
-		//jne to end
+	uintptr_t relAddress = (uintptr_t)toCave + 0x200 - 0x10B;// 0xD1 for where this section of the cave starts	
+	//unpack to bytes
+	BYTE relBytes[8];
+	for (size_t i = 0; i < 8; i++)
+		relBytes[i] = relAddress >> (i * 8);
+
+	BYTE bytes[45] = { 0x50,
+		// move plane type struct to rax
+		0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
+		// cmp rax, r12
+		0x4C, 0x39, 0xE0,
+		// pop rax
+		0x58,
+		// jne [addy]
 		0x75, 0x1C,
-		//cmp r14, 00
-		0x49, 0x83, 0xFE, 0x00,
-		//jne to newxt r14 check
-		0x75, 0x09,
-		//rcx to mem
-		0x48, 0x89, 0x0D, 0xC5, 0x01, 0x00, 0x00,
-		//jmp
-		0xEB, 0x00,
-		//cmpr14, 64 (cmp to 01 also works but the 64 call is called more often so less lag on load)
-		0x49, 0x83, 0xFE, 0x64,
-		//jne
+		// cmp rsi, 00
+		0x48, 0x83, 0xFE, 0x00,
+		// jne
+		0x75, 0x16,
+		// rcx to mem
+		0x48, 0x89, 0x0D, 0xAF, 0x01, 0x00, 0x00,
+		// jmp to end
+		0xEB, 0x0D,
+		// cmp rsi, 01
+		0x48, 0x83, 0xFE, 0x01,
+		// jne [addy]
 		0x75, 0x07,
-		//rcx to mem
-		0x48, 0x89, 0x0D, 0xBE, 0x01, 0x00, 0x00 };
+		// rcx to mem
+		0x48, 0x89, 0x0D, 0xA8, 0x01, 0x00, 0x00 };
 
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &bytes, sizeof(bytes), &bytesWritten);
 	totalWritten += bytesWritten;
