@@ -54,6 +54,8 @@ double GetWaterTemp(int engine);
 
 double GetOilTemp(int engine);
 
+double GetOilTempB(int engine);
+
 void UpdateWaterTempValues();
 
 void UpdateOilTempValues();

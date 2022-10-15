@@ -1,10 +1,19 @@
 #pragma once
 #include <Windows.h>
 #include <vector>
-
+#include <string>
 char originalLineOilTemp[8];
 
-std::vector<double> ReadOilTemps(HANDLE hProcess, LPVOID codeCaveAddress)
+bool Intake(std::string planeName)
+{
+	std::string v = "FW 190 A3";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
 	//two engines
 	std::vector<double> values(2);
@@ -14,10 +23,70 @@ std::vector<double> ReadOilTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+		
+		
+		
+		/*
+		//planes with "intake" temp
+		if (Intake(planeName)) 
+		{
+			//pointer +1E0 is offset for water temp in kelvin
+			
+			
+			//ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &rawData, sizeof(double), 0);
+		}
+		else
+		{
+		*/
+			//pointer +1E0 is offset for water temp in kelvin
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
+			
+		//}
+	
+		
+		values[i] = *reinterpret_cast<double*>(rawData);
+	}
 
+	return values;
+}
+
+std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
+{
+	//two engines
+	std::vector<double> values(2);
+	for (size_t i = 0; i < 2; i++)
+	{
+		//buffer
+		char rawData[sizeof(double)];
+		//read address saved in code cave
+		LPCVOID targetAddress;
+
+
+
+		/*
+		//planes with "intake" temp
+		if (Intake(planeName))
+		{
+			//pointer +1E0 is offset for water temp in kelvin
+
+
+			//ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &rawData, sizeof(double), 0);
+		}
+		else
+		{
+		*/
 		//pointer +1E0 is offset for water temp in kelvin
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E8), &rawData, sizeof(double), 0);
+
+		//}
+
+
 		values[i] = *reinterpret_cast<double*>(rawData);
 	}
 
@@ -86,7 +155,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 		// cmp rsi, 00
 		0x48, 0x83, 0xFE, 0x00,
 		// jne
-		0x75, 0x16,
+		0x75, 0x09,
 		// rcx to mem
 		0x48, 0x89, 0x0D, 0xAF, 0x01, 0x00, 0x00,
 		// jmp to end

@@ -46,6 +46,7 @@ double turnBallValue;
 std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
+std::vector<double> oilTempValuesB(4);
 int engineModification;
 //where we hold planeType string
 std::string planeType;
@@ -194,6 +195,11 @@ double GetWaterTemp(int engine)
 double GetOilTemp(int engine)
 {
 	return oilTempValues[engine];
+}
+
+double GetOilTempB(int engine)
+{
+	return oilTempValuesB[engine];
 }
 
 
@@ -483,7 +489,8 @@ void UpdateWaterTempValues()
 
 void UpdateOilTempValues()
 {
-	oilTempValues = ReadOilTemps(GetIL2Handle(), GetCodeCaveAddress());
+	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(),planeType);
+	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
 bool ReadEngineModification()

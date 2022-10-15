@@ -134,7 +134,7 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        float floatArray[22];
+        float floatArray[24];
 
         //read memory only when requested - could be refactored in to the getters
         //HANDLE hProcess = GetIL2Handle();
@@ -208,10 +208,15 @@ int serverListen() {
             {                
                 floatArray[18 + i] = (float)(GetWaterTemp(i));
             }
-            //water temp
+            //oil temp A - not sure for name atm
             for (size_t i = 0; i < 2; i++)//2 engines suppported for water
             {                
                 floatArray[20 + i] = (float)(GetOilTemp(i));
+            }
+            //oil temp B
+            for (size_t i = 0; i < 2; i++)//2 engines suppported for water
+            {
+                floatArray[22 + i] = (float)(GetOilTempB(i));
             }
         }
 
