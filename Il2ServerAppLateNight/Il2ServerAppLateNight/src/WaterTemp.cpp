@@ -7,8 +7,8 @@ char originalLineWaterTemp[8];
 std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 {
 	//two engines
-	std::vector<double> values(2);
-	for (size_t i = 0; i < 2; i++)
+	std::vector<double> values(4);
+	for (size_t i = 0; i < 4; i++)
 	{
 		//buffer
 		char rawData[sizeof(double)];
@@ -74,7 +74,7 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	for (size_t i = 0; i < 8; i++)	
 		relBytes[i] = relAddress >> (i * 8);	
 	
-	BYTE bytes[45] = {	0x50,
+	BYTE bytes[75] = {	0x50,
 						// move plane type struct to rax
 						0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
 						// cmp rax, r12
@@ -82,7 +82,7 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 						// pop rax
 						0x58,						
 						// jne [addy]
-						0x75, 0x1C,
+						0x75, 0x3A,
 						// cmp rsi, 00
 						0x48, 0x83, 0xFE, 0x00,
 						// jne
@@ -90,13 +90,30 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 						// rcx to mem
 						0x48, 0x89, 0x0D, 0xC9, 0x01, 0x00, 0x00,
 						// jmp to end
-						0xEB, 0x0D,
+						0xEB, 0x2B,
 						// cmp rsi, 01
 						0x48, 0x83, 0xFE, 0x01,
 						// jne [addy]
-						0x75, 0x07,
+						0x75, 0x09,
 						// rcx,[addy]
-						0x48, 0x89, 0x0D, 0xC2, 0x01, 0x00, 0x00 };
+						0x48, 0x89, 0x0D, 0xC2, 0x01, 0x00, 0x00,
+						// jmp to end
+						0xEB, 0x1C,
+						// cmp rsi, 02
+						0x48, 0x83, 0xFE, 0x02,
+						// jne
+						0x75, 0x09,
+						// rcx to mem
+						0x48, 0x89, 0x0D, 0xBB, 0x01, 0x00, 0x00,
+						// jmp to end
+						0xEB, 0x0D,
+						// cmp rsi, 03
+						0x48, 0x83, 0xFE, 0x03,
+						// jne
+						0x75, 0x07,
+						// rcx to mem
+						0x48, 0x89, 0x0D, 0xB4, 0x01, 0x00, 0x00,						
+	};
 
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &bytes, sizeof(bytes), &bytesWritten);
 	totalWritten += bytesWritten;
