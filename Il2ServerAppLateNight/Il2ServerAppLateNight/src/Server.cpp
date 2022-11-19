@@ -134,7 +134,7 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        float floatArray[24];
+        float floatArray[30];
 
         //read memory only when requested - could be refactored in to the getters
         //HANDLE hProcess = GetIL2Handle();
@@ -163,7 +163,7 @@ int serverListen() {
         {
             planeType = "No Game Process/ Injection";
 
-            for (size_t i = 0; i < 17; i++)
+            for (size_t i = 0; i < 30; i++)
             {
                 floatArray[i] = 0;
             }
@@ -204,19 +204,19 @@ int serverListen() {
             floatArray[17] = (float)(GetEngineModification());
 
             //water temp
-            for (size_t i = 0; i < 2; i++)//2 engines suppported for water
+            for (size_t i = 0; i < 4; i++)
             {                
                 floatArray[18 + i] = (float)(GetWaterTemp(i));
             }
             //oil temp A - not sure for name atm
-            for (size_t i = 0; i < 2; i++)//2 engines suppported for water
+            for (size_t i = 0; i < 4; i++)
             {                
-                floatArray[20 + i] = (float)(GetOilTemp(i));
+                floatArray[22 + i] = (float)(GetOilTemp(i));
             }
             //oil temp B
-            for (size_t i = 0; i < 2; i++)//2 engines suppported for water
+            for (size_t i = 0; i < 4; i++)
             {
-                floatArray[22 + i] = (float)(GetOilTempB(i));
+                floatArray[26 + i] = (float)(GetOilTempB(i));
             }
         }
 
