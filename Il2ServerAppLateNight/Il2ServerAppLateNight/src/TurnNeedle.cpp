@@ -9,85 +9,78 @@ uintptr_t OffsetToTurnNeedle(std::string planeType)
 	uintptr_t offset = 0;
 	//unique offsets for some planes
 	if (planeType.compare("P-47D-28") == 0)
-		offset = 0XCA8;
-
-	else if (planeType.compare("Yak-7B ser.36") == 0)
-		offset = 0xC50;
-
-	else if (planeType.compare("Tempest Mk.V ser.2") == 0)
 		offset = 0XCE8;
 
+	else if (planeType.compare("Yak-7B ser.36") == 0)
+		offset = 0xC90;
+
+	else if (planeType.compare("Tempest Mk.V ser.2") == 0)
+		offset = 0XD28;
+
 	else if (planeType.compare("Spitfire Mk.IXe") == 0)
-		offset = 0XD10;
+		offset = 0XD50;
 
 	else if (planeType.compare("Hurricane Mk.II") == 0)
-		offset = 0XCE0;
+		offset = 0XD20;
 
 	//yak9 s1 0xC48
 	else if (planeType.compare("Yak-9 ser.1") == 0)
-		offset = 0XC48;
+		offset = 0XC88;
 
 	//9t 0xC50
 	else if (planeType.compare("Yak-9T ser.1") == 0)
-		offset = 0XC50;
+		offset = 0XC90;
 
 	//hs 129 = 0xCA8
 	else if (planeType.compare("Hs 129 B-2") == 0)
-		offset = 0XCA8;
+		offset = 0XCE8;
 
 	//Typhoon Mk.Ib	
 	else if (planeType.compare("Typhoon Mk.Ib") == 0)
-		offset = 0XD48;
+		offset = 0XD88;
 
 	//"U-2VS"
 	else if (planeType.compare("U-2VS") == 0)
-		offset = 0X10B8;
+		offset = 0X10f8;
 
 	//P-47D-22
 	else if (planeType.compare("P-47D-22") == 0)
-		offset = 0XCA0;
+		offset = 0XCE0;
 
 	//Spitfire Mk.XIV
 	else if (planeType.compare("Spitfire Mk.XIV") == 0)
-		offset = 0XE30;
+		offset = 0XE70;
 
 	//P-51B-5
 	else if (planeType.compare("P-51B-5") == 0)
-		offset = 0XCD8;
+		offset = 0XD18;
 
 	//grab the a-20 here before us plane check - it has default
 	else if (planeType.compare("A-20B") == 0)
-		offset = 0xAF0;
+		offset = 0xB30;
 
 	//p38
 	//"P-38J-25";
-	else if (planeType.compare("P-38J-25") == 0)
-	{
-		offset = 0xDB0;
-		return offset;
-	}
+	else if (planeType.compare("P-38J-25") == 0)	
+		offset = 0xDB8;		
 
+	//p51D
 	else if (planeType.compare("P-51D-15") == 0)
-		offset = 0xCE0;
+		offset = 0xD20;
 
 	else if (planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)	
-		return 0xDC8;
+		offset = 0xDD0;
+
+	else if (planeType.compare("C-47A") == 0)
+		offset = 0x11F8;
+
+	else if (IsUSPlane(planeType))	
+		offset = 0xD30;		
 	
-
-	else if (IsUSPlane(planeType))
-	{
-		offset = 0xD28; //patch was +38
-		return offset;
-	}
-
-	else
-	{
+	else	
 		//default
-		offset = 0xAF0;
-	}
+		offset = 0xB30;
 	
-	//patch
-	offset += 0x38;
 
 	return offset;
 }
