@@ -30,7 +30,7 @@
 #include "EngineMod.h"
 #include "../OilTemp.h"
 
-float version = 0.6f;
+float version = 0.61f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -388,7 +388,7 @@ bool ReadAltimeter()
 bool ReadTurnNeedle()
 {
 	//How to find new offsets-
-	//Find value in debugger by ising +140 offset in cave. Needle is clamped number after NaNs e.g 24, 31
+	//Find value in debugger by ising +240 offset in cave. Needle is clamped number after NaNs e.g 24, 31
 	//watch value and check offsets of found instructions (or use turn needle scanner!)
 
 	//injection saves alt. pointer at code cave's address + 0xxx
@@ -435,6 +435,9 @@ bool ReadTurnNeedle()
 
 	if(planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)//+		planeType	"Mosquito F.B. Mk.VI ser.2"	std::string
 		turnNeedleValue *= -1;	
+
+	if (planeType.compare("Typhoon Mk.Ib") == 0)
+		turnNeedleValue *= -1;
 
 	return 0;
 }
@@ -846,6 +849,7 @@ void ClearAddresses()
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
+	
 
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
@@ -917,3 +921,4 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 	return 0;
 }
+

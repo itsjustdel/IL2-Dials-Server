@@ -45,63 +45,73 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	std::string v = "P-38J-25";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDD8), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE8), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);	
 	}
 
 	v = "A-20B";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
 	
 	v = "P-40E-1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-39L-1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 		
 	v = "P-47D-28";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD18), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD20), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 	
 	v = "P-51D-15";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-47D-22";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD08), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD10), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "P-51B-5";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "C-47A";
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1220), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1228), &rawData, sizeof(double), 0);
+		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
 
 	return manifoldValues;
@@ -122,52 +132,59 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	std::string v = "Spitfire Mk.IXe";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30 + 0x38), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD70), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Spitfire Mk.Vb";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCF8 + 0x38), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Tempest Mk.V ser.2";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD48), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Hurricane Mk.II";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD40), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Spitfire Mk.XIV";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE88), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE90), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+	}
+
+	v = "Spitfire Mk.XIVe"; //released?
+	if (name.compare(v) == 0)
+	{
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD38), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Typhoon Mk.Ib";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA8), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Mosquito F.B. Mk.VI ser.2";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF8), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF8), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE00), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
 
@@ -188,21 +205,21 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	std::string v = "Yak-7B ser.36";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC98), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 
 	v = "Yak-9 ser.1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xC98), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 
 	v = "Yak-9T ser.1";
 	if (name.compare(v) == 0)
 	{
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA8), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
 
@@ -242,8 +259,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &relativeAddress, sizeof(LPCVOID), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	//compare r12 and rax
-	BYTE cmp[3] = { 0x4C, 0x39, 0xE0 };
+	//compare r13 and rax
+	BYTE cmp[3] = { 0x4C, 0x39, 0xE8 };
 	//0x08 will be relative jump to code cave plus 0x100
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), cmp, sizeof(cmp), &bytesWritten);
 	totalWritten += bytesWritten;
@@ -260,13 +277,13 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	//there can be mroe than one engine, engines are indexed in rsi 
 	//1DE53290007 - 48 83 FF 00
-	BYTE rsiEqualToZero[4] = { 0x48, 0x83, 0xFE, 0x00 };
+	BYTE r14EqualToZero[4] = { 0x49, 0x83, 0xFE, 0x00 };
 	// if not equal, do another check for the next engine index
-	BYTE rsiEqualToOne[4] = { 0x48, 0x83, 0xFE, 0x01 };
+	BYTE r14EqualToOne[4] = { 0x49, 0x83, 0xFE, 0x01 };
 	//and engine no 3?
-	BYTE rsiEqualToTwo[4] = { 0x48, 0x83, 0xFE, 0x02 };
+	BYTE r14EqualToTwo[4] = { 0x49, 0x83, 0xFE, 0x02 };
 	//and 4?! - I don't want to do have to figure this out again!
-	BYTE rsiEqualToThree[4] = { 0x48, 0x83, 0xFE, 0x03 };
+	BYTE r14EqualToThree[4] = { 0x49, 0x83, 0xFE, 0x03 };
 
 	//if equal, this will set a flag to be checked on..
 	//jump short is 75, next byte is relative address
@@ -279,7 +296,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 
 	//write these	
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToZero, sizeof(rsiEqualToZero), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), r14EqualToZero, sizeof(r14EqualToZero), &bytesWritten);
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
@@ -287,7 +304,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToOne, sizeof(rsiEqualToOne), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), r14EqualToOne, sizeof(r14EqualToOne), &bytesWritten);
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
@@ -296,7 +313,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToTwo, sizeof(rsiEqualToTwo), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), r14EqualToTwo, sizeof(r14EqualToTwo), &bytesWritten);
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
@@ -305,7 +322,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rsiEqualToThree, sizeof(rsiEqualToThree), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), r14EqualToThree, sizeof(r14EqualToThree), &bytesWritten);
 	totalWritten += bytesWritten;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), jumpIfNotEqual, sizeof(jumpIfNotEqual), &bytesWritten);
 	totalWritten += bytesWritten;
