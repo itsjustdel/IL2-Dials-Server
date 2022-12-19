@@ -847,20 +847,6 @@ void ClearAddresses()
 	waterTempAddress = 0;
 }
 
-static bool exists(const int ints[], int size, int k) {
-	int left = 0, right = size - 1;
-
-	while (right - left > 1) {
-		int middle = (right + left) / 2;
-
-		if (ints[middle] > k) right = middle;
-		else left = middle;
-	}
-
-	if (ints[right] == k || ints[left] == k) return true;
-	return false;
-}
-
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
 	
