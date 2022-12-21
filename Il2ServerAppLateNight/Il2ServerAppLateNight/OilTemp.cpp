@@ -13,6 +13,24 @@ bool Intake(std::string planeName)
 	return false;
 }
 
+bool isBF109K4(std::string planeName)
+{
+	std::string v = "Bf 109 K-4";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+bool isBF110E2(std::string planeName)
+{
+	std::string v = "Bf-110 E2";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
 	//two engines
@@ -23,37 +41,29 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		
-		
-		
-		/*
 		//planes with "intake" temp
-		if (Intake(planeName)) 
-		{
-			//pointer +1E0 is offset for water temp in kelvin
-			
-			
-			//ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &rawData, sizeof(double), 0);
-		}
+		if (isBF109K4(planeName)) 
+		{				
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCD8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}		
 		else
-		{
-		*/
+		{		
 			//pointer +1E0 is offset for water temp in kelvin
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
-			
-		//}
-	
-		
-		values[i] = *reinterpret_cast<double*>(rawData);
+			values[i] = *reinterpret_cast<double*>(rawData);
+		}
 	}
 
 	return values;
 }
 
-std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
+std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //in?
 {
 	//two engines
 	std::vector<double> values(4);
@@ -63,31 +73,22 @@ std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-
-
-
-		/*
-		//planes with "intake" temp
-		if (Intake(planeName))
+		if (isBF110E2(planeName))
 		{
-			//pointer +1E0 is offset for water temp in kelvin
-
-
-			//ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &rawData, sizeof(double), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
 		}
 		else
 		{
-		*/
-		//pointer +1E0 is offset for water temp in kelvin
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E8), &rawData, sizeof(double), 0);
-
-		//}
-
-
-		values[i] = *reinterpret_cast<double*>(rawData);
+			//pointer +1E0 is offset for water temp in kelvin
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E8), &rawData, sizeof(double), 0);
+			values[i] = *reinterpret_cast<double*>(rawData);
+		}
 	}
 
 	return values;
