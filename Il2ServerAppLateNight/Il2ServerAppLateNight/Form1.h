@@ -419,7 +419,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(38, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.61a";
+			this->versionBox->Text = L"v0.61b";
 			this->versionBox->Visible = false;
 			// 
 			// DebugTextBox2
