@@ -44,8 +44,8 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		//planes with "intake" temp
 		if (isBF109K4(planeName)) 
 		{				
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCD8), &rawData, sizeof(double), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE8 + i * 8), &rawData, sizeof(double), 0);
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			double t = *reinterpret_cast<double*>(rawData);
 			t += 273.15;
