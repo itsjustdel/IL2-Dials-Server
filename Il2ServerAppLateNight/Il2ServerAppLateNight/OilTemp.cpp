@@ -31,6 +31,15 @@ bool isBF110E2(std::string planeName)
 	return false;
 }
 
+bool isBF110G2(std::string planeName)
+{
+	std::string v = "Bf-110 G2";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //out
 {
 	//two engines
@@ -41,8 +50,8 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		//planes with "intake" temp
-		if (isBF110E2(planeName))
+		
+		if (isBF110E2(planeName) || isBF110G2(planeName))
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0 + i * 8), &rawData, sizeof(double), 0);
@@ -82,7 +91,7 @@ std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		if (isBF110E2(planeName))
+		if (isBF110E2(planeName) || isBF110G2(planeName))
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
