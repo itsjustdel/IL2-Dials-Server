@@ -49,7 +49,26 @@ bool isHS129B2(std::string planeName)
 	return false;
 }
 
-std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //out
+bool isJU88A4(std::string planeName)
+{
+	std::string v = "Ju-88 A4";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+bool isJU88C6(std::string planeName)
+{
+	std::string v = "Ju-88 C6";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+//Outbound
+std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
 	//two engines
 	std::vector<double> values(4);
@@ -78,6 +97,24 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 			t += 273.15;
 			values[i] = t;
 		}
+		else if (isJU88A4(planeName))
+		{
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD98 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isJU88C6(planeName))
+		{
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDA0 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
 		else if (isBF109K4(planeName)) 
 		{				
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
@@ -99,6 +136,7 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 	return values;
 }
 
+//Inbound
 std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //in
 {
 	//two engines
