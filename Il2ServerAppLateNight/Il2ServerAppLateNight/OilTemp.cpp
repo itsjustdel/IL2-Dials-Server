@@ -40,6 +40,15 @@ bool isBF110G2(std::string planeName)
 	return false;
 }
 
+bool isHS129B2(std::string planeName)
+{
+	std::string v = "Hs 129 B-2";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //out
 {
 	//two engines
@@ -55,6 +64,15 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isHS129B2(planeName))
+		{
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD30 + i * 8), &rawData, sizeof(double), 0);
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			double t = *reinterpret_cast<double*>(rawData);
 			t += 273.15;
