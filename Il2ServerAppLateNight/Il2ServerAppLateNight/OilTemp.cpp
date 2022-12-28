@@ -184,8 +184,8 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	BYTE bytes[75] = { 0x50,
 		// move plane type struct to rax
 		0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
-		// cmp rax, r13
-		0x4C, 0x39, 0xE8,
+		// cmp rax, r12
+		0x4C, 0x39, 0xE0,
 		// pop rax
 		0x58,
 		// jne [addy]
