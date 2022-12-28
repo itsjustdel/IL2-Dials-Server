@@ -31,7 +31,7 @@ bool isBF110E2(std::string planeName)
 	return false;
 }
 
-std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
+std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //out
 {
 	//two engines
 	std::vector<double> values(4);
@@ -42,10 +42,19 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		//read address saved in code cave
 		LPCVOID targetAddress;
 		//planes with "intake" temp
-		if (isBF109K4(planeName)) 
-		{				
+		if (isBF110E2(planeName))
+		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE8 + i * 8), &rawData, sizeof(double), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isBF109K4(planeName)) 
+		{				
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCD8), &rawData, sizeof(double), 0);
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			double t = *reinterpret_cast<double*>(rawData);
 			t += 273.15;
@@ -63,7 +72,7 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 	return values;
 }
 
-std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //in?
+std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //in
 {
 	//two engines
 	std::vector<double> values(4);
