@@ -67,6 +67,15 @@ bool isJU88C6(std::string planeName)
 	return false;
 }
 
+bool isJU52(std::string planeName)
+{
+	std::string v = "Ju-52/3m g4e";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
 //Outbound
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
@@ -79,7 +88,16 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		//read address saved in code cave
 		LPCVOID targetAddress;
 		
-		if (isBF110E2(planeName) || isBF110G2(planeName))
+		if (isJU52(planeName))
+		{
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isBF110E2(planeName) || isBF110G2(planeName))
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDF0 + i * 8), &rawData, sizeof(double), 0);
@@ -133,6 +151,14 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		}
 	}
 
+	//adjust ju52 order, organise engines left to right for client
+	if (isJU52(planeName)) {
+		//values[3] is spare so jsut use that for the temp
+		values[3] = values[1];
+		values[1] = values[2];
+		values[2] = values[3];
+	}
+
 	return values;
 }
 
@@ -147,7 +173,16 @@ std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		if (isBF110E2(planeName) || isBF110G2(planeName))
+		if (isJU52(planeName))
+		{
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDC8 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isBF110E2(planeName) || isBF110G2(planeName))
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
@@ -163,6 +198,14 @@ std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E8), &rawData, sizeof(double), 0);
 			values[i] = *reinterpret_cast<double*>(rawData);
 		}
+	}
+
+	//adjust ju52 order, organise engines left to right for client
+	if (isJU52(planeName)) {
+		//values[3] is spare so jsut use that for the temp
+		values[3] = values[1];
+		values[1] = values[2];
+		values[2] = values[3];
 	}
 
 	return values;
