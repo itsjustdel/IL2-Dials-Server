@@ -30,7 +30,7 @@
 #include "EngineMod.h"
 #include "../OilTemp.h"
 
-float version = 0.61f;
+float version = 0.62f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -487,7 +487,7 @@ bool ReadManifolds()
 
 void UpdateWaterTempValues()
 {
-	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress());
+	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
 void UpdateOilTempValues()
@@ -542,7 +542,7 @@ void ReadTest()
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
 	ReadEngineModification();
-	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress);
+	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress, planeType);
 	
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
