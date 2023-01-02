@@ -76,6 +76,42 @@ bool isJU52(std::string planeName)
 	return false;
 }
 
+bool isHurricane(std::string planeName)
+{
+	std::string v = "Hurricane Mk.II";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+bool isTempest(std::string planeName)
+{
+	std::string v = "Tempest Mk.V ser.2";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+bool isTyphoon(std::string planeName)
+{
+	std::string v = "Typhoon Mk.Ib";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
+bool isMosquito(std::string planeName)
+{
+	std::string v = "Mosquito F.B. Mk.VI ser.2";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
+
 //Outbound
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
@@ -87,8 +123,39 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		char rawData[sizeof(double)];
 		//read address saved in code cave
 		LPCVOID targetAddress;
-		
-		if (isJU52(planeName))
+		if (isMosquito(planeName)) {
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xE18 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isTyphoon(planeName)) {
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDB8 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isTempest(planeName)) {
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD58 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isHurricane(planeName)) {
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50 + i * 8), &rawData, sizeof(double), 0);
+			//most planes send temp data in kelvin so adjust now so we have consistency
+			double t = *reinterpret_cast<double*>(rawData);
+			t += 273.15;
+			values[i] = t;
+		}
+		else if (isJU52(planeName))
 		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
@@ -144,6 +211,7 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		}		
 		else
 		{		
+			//generic offset from engine struct
 			//pointer +1E0 is offset for water temp in kelvin
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
