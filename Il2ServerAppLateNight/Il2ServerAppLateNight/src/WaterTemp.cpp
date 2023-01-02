@@ -1,10 +1,11 @@
 #pragma once
 #include <Windows.h>
 #include <vector>
+#include <string>
 
 char originalLineWaterTemp[8];
 
-std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
+std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {
 	//two engines
 	std::vector<double> values(4);
@@ -18,7 +19,26 @@ std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress)
 
 		//pointer +178 is offset for water temp in kelvin
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x178), &rawData, sizeof(double), 0);
+
 		values[i] = *reinterpret_cast<double*>(rawData);
+
+		//Bf 109 K4 Has it's own way to calc water temp
+		std::string v = "Bf 109 K-4";
+		if (planeName.compare(v) == 0)
+		{
+			LPCVOID targetAddress;
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2C0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+
+			//a little calculation made by the game for the k4 water
+			//the function "getOil" gives us this number
+			char oilData[sizeof(double)];
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &oilData, sizeof(double), 0);
+			double oil = *reinterpret_cast<double*>(oilData);
+			// ((water - "GetOil")*0.20) - worked out from from il2 assembly
+			values[i] -= (values[i] - oil) * 0.20;
+			//can return values, 1 engine plane
+			return values;
+		}		
 	}
 
 	return values;
