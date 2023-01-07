@@ -144,6 +144,14 @@ bool isP38J(std::string planeName)
 
 	return false;
 }
+bool isA20B(std::string planeName)
+{
+	std::string v = "A-20B";
+	if (planeName.compare(v) == 0)
+		return true;
+
+	return false;
+}
 //Outbound
 std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
 {

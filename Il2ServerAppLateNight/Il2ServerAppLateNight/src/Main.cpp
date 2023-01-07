@@ -466,7 +466,7 @@ bool ReadManifolds()
 {
 
 	//note not all russian planes are able to map this way, most default to German method
-	if (IsYak9(planeType))
+	if (IsRUPlane(planeType))
 	{
 		manifoldValues = RUManifolds(codeCaveAddress, hProcessIL2, planeType);
 	}
