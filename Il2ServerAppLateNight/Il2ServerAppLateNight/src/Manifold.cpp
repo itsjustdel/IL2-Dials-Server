@@ -200,13 +200,15 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	
-
-	if (isMig3(planeName)) {
+	if (IsMig3(name)) {
 		// mig uses "german" address but a unique offset
 		LPCVOID targetAddress;
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xA08), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
+
+		//return now, number in correct format
+		return manifoldValues;
 	}
 
 	std::string v = "Yak-7B ser.36";

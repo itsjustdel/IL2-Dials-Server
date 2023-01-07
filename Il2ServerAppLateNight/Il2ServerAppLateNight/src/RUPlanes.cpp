@@ -22,7 +22,7 @@ bool IsMig3(std::string name)
 	return false;
 }
 
-bool isRUPlane(std::string name) {
+bool IsRUPlane(std::string name) {
 	if (IsYak9(name))
 		return true;
 	else if (IsMig3(name))
