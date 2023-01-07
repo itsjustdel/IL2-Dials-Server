@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
+#include "RUPlanes.h"
 
 char originalLineManifold[8];
 
@@ -198,13 +199,23 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	//buffer
 	char rawData[sizeof(double)];
 	//read address saved in code cave
-	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+	
+	if (IsMig3(name)) {
+		// mig uses "german" address but a unique offset
+		LPCVOID targetAddress;
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x280), &targetAddress, sizeof(LPCVOID), 0);
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xA08), &rawData, sizeof(double), 0);
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
+		//return now, number in correct format
+		return manifoldValues;
+	}
 
 	std::string v = "Yak-7B ser.36";
 	if (name.compare(v) == 0)
 	{
+		LPCVOID targetAddress;
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
@@ -212,6 +223,8 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	v = "Yak-9 ser.1";
 	if (name.compare(v) == 0)
 	{
+		LPCVOID targetAddress;
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
@@ -219,6 +232,8 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	v = "Yak-9T ser.1";
 	if (name.compare(v) == 0)
 	{
+		LPCVOID targetAddress;
+		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA8), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
 	}
