@@ -3,7 +3,7 @@
 #include <TlHelp32.h>
 #include <string>
 #include <sstream>
-#include "Main.h";
+#include "../../src/Main/Main.h";
 
 
 LPVOID AllocateMemory(HANDLE hProcess, uintptr_t src)

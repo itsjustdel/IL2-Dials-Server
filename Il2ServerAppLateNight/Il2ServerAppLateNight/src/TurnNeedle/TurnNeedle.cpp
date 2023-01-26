@@ -1,8 +1,8 @@
 #pragma once
 #include <Windows.h>
-#include "USPlanes.h"
+#include "../USPlanes/USPlanes.h"
 #include <string>
-#include "Injector.h"
+#include "../Injector/Injector.h"
 
 uintptr_t OffsetToTurnNeedle(std::string planeType)
 {

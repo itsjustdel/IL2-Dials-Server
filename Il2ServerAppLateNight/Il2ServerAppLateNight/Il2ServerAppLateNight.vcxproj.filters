@@ -14,64 +14,64 @@
     <ClInclude Include="Form1.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\Injector.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IPHelper.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ProcessTools.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scan.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Server.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Main.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PointerToFunction.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\USPlanes.h">
+    <ClInclude Include="src\Altimeter\Altimeter.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="TurnNeedle.h">
+    <ClInclude Include="src\DynamicBody\DynamicBody.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\Manifold.h">
+    <ClInclude Include="src\EngineMod\EngineMod.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\UKPlanes.h">
+    <ClInclude Include="src\Injector\Injector.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\RUPlanes.h">
+    <ClInclude Include="src\IPHelper\IPHelper.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\WaterTemp.h">
+    <ClInclude Include="src\Main\Main.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\PlaneType.h">
+    <ClInclude Include="src\Manifold\Manifold.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\DynamicBody.h">
+    <ClInclude Include="src\OilTemp\OilTemp.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\TurnBall.h">
+    <ClInclude Include="src\PlaneType\PlaneType.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\EngineMod.h">
+    <ClInclude Include="src\PointerToFunction\PointerToFunction.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\Altimeter.h">
+    <ClInclude Include="src\ProcessTools\ProcessTools.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="OilTemp.h">
+    <ClInclude Include="src\RUPlanes\RUPlanes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scan\Scan.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Server\Server.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TurnBall\TurnBall.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TurnNeedle\TurnNeedle.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UKPlanes\UKPlanes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\USPlanes\USPlanes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WaterTemp\WaterTemp.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -85,61 +85,61 @@
     <ClCompile Include="WinformsProject.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Injector.cpp">
+    <ClCompile Include="src\Altimeter\Altimeter.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\IPHelper.cpp">
+    <ClCompile Include="src\DynamicBody\DynamicBody.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\ProcessTools.cpp">
+    <ClCompile Include="src\EngineMod\EngineMod.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scan.cpp">
+    <ClCompile Include="src\Injector\Injector.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Server.cpp">
+    <ClCompile Include="src\IPHelper\IPHelper.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\Main\Main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\PointerToFunction.cpp">
+    <ClCompile Include="src\Manifold\Manifold.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\USPlanes.cpp">
+    <ClCompile Include="src\OilTemp\OilTemp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\TurnNeedle.cpp">
+    <ClCompile Include="src\PlaneType\PlaneType.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Manifold.cpp">
+    <ClCompile Include="src\PointerToFunction\PointerToFunction.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\UKPlanes.cpp">
+    <ClCompile Include="src\ProcessTools\ProcessTools.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\RUPlanes.cpp">
+    <ClCompile Include="src\RUPlanes\RUPlanes.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\WaterTemp.cpp">
+    <ClCompile Include="src\Scan\Scan.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\PlaneType.cpp">
+    <ClCompile Include="src\Server\Server.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\DynamicBody.cpp">
+    <ClCompile Include="src\TurnBall\TurnBall.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\TurnBall.cpp">
+    <ClCompile Include="src\TurnNeedle\TurnNeedle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\EngineMod.cpp">
+    <ClCompile Include="src\UKPlanes\UKPlanes.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Altimeter.cpp">
+    <ClCompile Include="src\USPlanes\USPlanes.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="OilTemp.cpp">
+    <ClCompile Include="src\WaterTemp\WaterTemp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
