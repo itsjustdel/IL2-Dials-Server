@@ -10,9 +10,9 @@
 //#include <codecvt> //use to convert PCWSTR
 #include <sstream>
 
-#include "Main.h"
-#include "IPHelper.h"
-#include "../OilTemp.h"
+#include "../Main/Main.h"
+#include "../IPHelper/IPHelper.h"
+#include "../OilTemp/OilTemp.h"
 
 using namespace System::Diagnostics;
 

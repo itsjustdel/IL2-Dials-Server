@@ -1,9 +1,9 @@
 #include "Manifold.h"
-#include "injector.h"
+#include "../Injector/Injector.h"
 #include <Windows.h>
 #include <vector>
 #include <string>
-#include "RUPlanes.h"
+#include "../RUPlanes/RUPlanes.h"
 
 char originalLineManifold[8];
 

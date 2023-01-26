@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "src/Server.h";
-#include "src/Main.h";
+#include "src/Server/Server.h";
+#include "src/Main/Main.h";
 #include <chrono>;
 #include <string>;
 
