@@ -719,9 +719,7 @@ int FindCodeCave(System::ComponentModel::BackgroundWorker^ worker)
 }
 
 int Injections(System::ComponentModel::BackgroundWorker^ worker) 
-{
-
-	
+{	
 	//inject getplanetype
 	if (!injectedPlaneType)
 	{
@@ -733,7 +731,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
 	
 	//inject altimeter		
 	if (!injectedAltimeter)
@@ -746,7 +743,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
 
 	//inject turn needle
 	if (!injectedDynamicBody)
@@ -813,7 +809,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 	}
 	
 	return 1;
-
 }
 
 int NeedleScan(System::ComponentModel::BackgroundWorker^ worker)
