@@ -81,12 +81,10 @@ bool processFoundCurrent;
 
 void CaveRecovered()
 {
-	//injectedCockpit = true;
 	injectedAltimeter = true;	
 	injectedPlaneType = true;
 	injectedDynamicBody = true;
 	injectedTurnBall = true;
-	//injectedGermanManifold = true;
 	injectedManifold = true;
 	injectedEngineModification = true;
 	injectedWaterTemp = true;
@@ -202,12 +200,10 @@ double GetOilTempB(int engine)
 	return oilTempValuesB[engine];
 }
 
-
 void ResetFlags()
 {
 	//addresses of cave
-	codeCaveAddress = 0;
-	
+	codeCaveAddress = 0;	
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
 	//calcEngineTemperatureAddress = 0;
@@ -224,8 +220,7 @@ void ResetFlags()
 }
 
 bool GetProcessData()
-{
-	
+{	
 	//Get Process ID by enumerating the processes using tlhelp32snapshot	
 	processID = GetProcID(exeName);
 
@@ -238,12 +233,10 @@ bool GetProcessData()
 		return false;
 	}
 
-
 	//Get handle by OpenProcess
 	hProcessIL2 = OpenProcess(PROCESS_ALL_ACCESS, false, processID); //PROCESS_ALL_ACCESS needed to create code cave
 	if (hProcessIL2 == 0)
 		return false;
-		
 
 	//RSE.dll
 	moduleRSE = GetModule(processID, (wchar_t*)L"RSE.dll");
@@ -280,8 +273,6 @@ bool CockpitInstrumentsDataStruct(LPVOID structStart)
 		//interpret byte array as double and put in array
 		cockpitValues[dCount] = *reinterpret_cast<double*>(temp);
 	}
-
-	//fail state?
 
 	return 1;
 }
@@ -849,19 +840,12 @@ void ClearAddresses()
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
 {	
-	
-
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
 	lastChecked -= std::chrono::hours(1);	
 	
 	while (true)
 	{
-		//false data
-		//SendTest();
-		//continue;
-
-
 		//check if game is running 
 		//after found once, only check this every so often, causes too much cpu usage
 		//if we haven't received anything, start a timout timer
@@ -907,13 +891,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		if (Injections(worker) == 0)
 			continue;
 		
-		//debugging function
-		//NeedleScan(worker);
-		//ReadTest();
-
 		//we got here, good, tell the interface
 		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
-
 
 		//don't need a fast cycle on this loop
 		Sleep(100);
