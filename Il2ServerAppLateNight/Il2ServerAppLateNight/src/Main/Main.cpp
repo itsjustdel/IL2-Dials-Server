@@ -29,6 +29,7 @@
 #include "../TurnBall/TurnBall.h"
 #include "../EngineMod/EngineMod.h"
 #include "../OilTemp/OilTemp.h"
+#include "../CylinderTemp/CylinderHead.h"
 
 float version = 0.62f;
 
@@ -47,6 +48,7 @@ std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
 std::vector<double> oilTempValuesB(4);
+std::vector<double> cylinderHeadTemps(4);
 int engineModification;
 //where we hold planeType string
 std::string planeType;
@@ -81,7 +83,7 @@ bool processFoundCurrent;
 
 void CaveRecovered()
 {
-	injectedAltimeter = true;	
+	injectedAltimeter = true;	 // dont need bools for each dial, type just foreach injection/hook
 	injectedPlaneType = true;
 	injectedDynamicBody = true;
 	injectedTurnBall = true;
@@ -198,6 +200,11 @@ double GetOilTemp(int engine)
 double GetOilTempB(int engine)
 {
 	return oilTempValuesB[engine];
+}
+
+double GetCylinderHeadTemp(int engine)
+{
+	return cylinderHeadTemps[engine];
 }
 
 void ResetFlags()
@@ -485,6 +492,10 @@ void UpdateOilTempValues()
 {
 	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(),planeType);
 	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
+}
+
+void UpdateCylinderHeadTemps() {
+	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2);
 }
 
 bool ReadEngineModification()

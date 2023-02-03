@@ -59,3 +59,7 @@ double GetOilTempB(int engine);
 void UpdateWaterTempValues();
 
 void UpdateOilTempValues();
+
+void UpdateCylinderHeadTemps();
+
+double GetCylinderHeadTemp(int engine);
