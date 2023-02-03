@@ -856,7 +856,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			lastChecked = std::chrono::system_clock::now();
 		}
 
-
 		//if we don't find our target exe
 		if (!processFoundCurrent)
 		{
@@ -887,7 +886,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 			continue;
 		
 		//we got here, good, tell the interface
-		worker->ReportProgress(9); //--change messageErrorLimit variable in Form1.h if this changes
+		worker->ReportProgress(9);
 
 		//don't need a fast cycle on this loop
 		Sleep(100);
