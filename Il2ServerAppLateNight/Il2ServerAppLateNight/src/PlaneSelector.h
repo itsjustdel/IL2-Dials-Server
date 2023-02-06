@@ -21,4 +21,4 @@ bool isP51B5(std::string planeName);
 bool isP51D15(std::string planeName);
 bool isP38J(std::string planeName);
 bool isA20B(std::string planeName);
-bool iscC47(std::string planeName);
+bool isC47(std::string planeName);

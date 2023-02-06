@@ -13,8 +13,8 @@ std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2,std:
 	{
 		//offset in cave, four addresses to read for each plane
 		//first engine is + 0x240 from cave, 2nd 0x188..etc
-		uintptr_t offset = 0x08 * i;
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240 + offset);
+		uintptr_t engineOffset = 0x08 * i;
+		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240);
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 		//two engines
@@ -24,30 +24,31 @@ std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2,std:
 			offsetToTemp = 0xE30;
 		}
 		// p39 0xD70
-		if (isP39(planeName)) 
+		else if (isP39(planeName)) 
 			offsetToTemp = 0xD70;		
 		// p47 22 0xD30 
-		if(isP47D22)
+		else if(isP47D22(planeName))
 			offsetToTemp = 0xD30;
 		// p47 28 0xD40
-		if (isP47D28)
+		else if (isP47D28(planeName))
 			offsetToTemp = 0xD40;
 		// p51B 0xD60
-		if (isP51B5)
+		else if (isP51B5)
 			offsetToTemp = 0xD60;
 		// p51D 0xD68
-		if (isP51D15)
+		else if (isP51D15(planeName))
 			offsetToTemp = 0xD68;
 		// a20 0xD88,0xD90
-		if (isA20B) {
+		else if (isA20B(planeName)) {
 			offsetToTemp = 0xD88;
 		}		
 		// c47 0x1260, 0x1268
-		if (iscC47) {
+		else if (isC47(planeName)) {
 			offsetToTemp = 0x1260;
 		}
+		offsetToTemp += i * 8;
 		//all 2 engine planes have temps next to each other (so far)
-		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offsetToTemp + i*8);
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offsetToTemp);
 		const size_t sizeOfData = sizeof(double);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);

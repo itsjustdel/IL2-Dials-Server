@@ -162,7 +162,7 @@ bool isA20B(std::string planeName)
 	return false;
 }
 
-bool iscC47(std::string planeName)
+bool isC47(std::string planeName)
 {
 	std::string v = "C-47A";
 	if (planeName.compare(v) == 0)
