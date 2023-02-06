@@ -181,6 +181,7 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="src\Altimeter\Altimeter.cpp" />
     <ClCompile Include="src\CarbMixTemp\CarbMixTemp.cpp" />
+    <ClCompile Include="src\CarbMixTemp\PlaneSelector.cpp" />
     <ClCompile Include="src\CylinderTemp\CylinderHead.cpp" />
     <ClCompile Include="src\DynamicBody\DynamicBody.cpp" />
     <ClCompile Include="src\EngineMod\EngineMod.cpp" />

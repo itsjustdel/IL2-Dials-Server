@@ -157,6 +157,9 @@
     <ClCompile Include="src\CarbMixTemp\CarbMixTemp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="src\CarbMixTemp\PlaneSelector.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Il2Dials.rc" />
