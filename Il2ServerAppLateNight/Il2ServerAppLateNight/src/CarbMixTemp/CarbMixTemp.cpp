@@ -6,7 +6,7 @@
 #include "../Injector/Injector.h"
 #include "../PlaneSelector.h"
 
-std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2,std::string planeName)
+std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeName)
 {
 	std::vector<double> values(4);
 	for (size_t i = 0; i < 4; i++)
@@ -20,32 +20,30 @@ std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2,std:
 		//two engines
 		uintptr_t offsetToTemp = 0x00;
 		// p38 0xE30,0xE38
-		if (isP38J(planeName)) {
+		if (isP38J(planeName))
 			offsetToTemp = 0xE30;
-		}
 		// p39 0xD70
-		else if (isP39(planeName)) 
-			offsetToTemp = 0xD70;		
+		else if (isP39(planeName))
+			offsetToTemp = 0xD70;
 		// p47 22 0xD30 
-		else if(isP47D22(planeName))
+		else if (isP47D22(planeName))
 			offsetToTemp = 0xD30;
 		// p47 28 0xD40
 		else if (isP47D28(planeName))
 			offsetToTemp = 0xD40;
 		// p51B 0xD60
-		else if (isP51B5)
+		else if (isP51B5(planeName))
 			offsetToTemp = 0xD60;
 		// p51D 0xD68
 		else if (isP51D15(planeName))
 			offsetToTemp = 0xD68;
 		// a20 0xD88,0xD90
-		else if (isA20B(planeName)) {
+		else if (isA20B(planeName))
 			offsetToTemp = 0xD88;
-		}		
 		// c47 0x1260, 0x1268
-		else if (isC47(planeName)) {
+		else if (isC47(planeName))
 			offsetToTemp = 0x1260;
-		}
+
 		offsetToTemp += i * 8;
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offsetToTemp);
