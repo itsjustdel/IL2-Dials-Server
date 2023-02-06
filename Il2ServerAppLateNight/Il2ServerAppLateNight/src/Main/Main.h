@@ -63,3 +63,7 @@ void UpdateOilTempValues();
 void UpdateCylinderHeadTemps();
 
 double GetCylinderHeadTemp(int engine);
+
+void UpdateCarbMixTemps();
+
+double GetCarbMixTemp(int engine);

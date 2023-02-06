@@ -77,6 +77,12 @@
     <ClInclude Include="src\CylinderTemp\CylinderHead.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\PlaneSelector.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">

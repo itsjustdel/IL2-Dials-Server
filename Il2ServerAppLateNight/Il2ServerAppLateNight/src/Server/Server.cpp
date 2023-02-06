@@ -14,6 +14,7 @@
 #include "../IPHelper/IPHelper.h"
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp//CylinderHead.h"
+#include "../CarbMixTemp/CarbMixTemp.h"
 
 using namespace System::Diagnostics;
 
@@ -133,7 +134,7 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        const int total = 34;
+        const int total = 38;
         float floatArray[total];
 
         //read memory only when requested - could be refactored in to the getters
@@ -150,6 +151,8 @@ int serverListen() {
         UpdateWaterTempValues();
         UpdateOilTempValues();
         UpdateCylinderHeadTemps();
+        UpdateCarbMixTemps();
+
         
         //packing differecnt data types in to one char array for sending (serialisation)
         //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
@@ -223,6 +226,11 @@ int serverListen() {
             for (size_t i = 0; i < 4; i++)
             {
                 floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
+            }
+            //carb mix temp
+            for (size_t i = 0; i < 4; i++)
+            {
+                floatArray[34 + i] = (float)(GetCarbMixTemp(i));
             }
         }
 

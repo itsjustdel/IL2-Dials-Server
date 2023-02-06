@@ -155,6 +155,7 @@
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Altimeter\Altimeter.h" />
+    <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h" />
     <ClInclude Include="src\CylinderTemp\CylinderHead.h" />
     <ClInclude Include="src\DynamicBody\DynamicBody.h" />
     <ClInclude Include="src\EngineMod\EngineMod.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="src\Main\Main.h" />
     <ClInclude Include="src\Manifold\Manifold.h" />
     <ClInclude Include="src\OilTemp\OilTemp.h" />
+    <ClInclude Include="src\PlaneSelector.h" />
     <ClInclude Include="src\PlaneType\PlaneType.h" />
     <ClInclude Include="src\PointerToFunction\PointerToFunction.h" />
     <ClInclude Include="src\ProcessTools\ProcessTools.h" />
