@@ -165,7 +165,7 @@ int serverListen() {
         //send blanks if no game found/injected
         if (GetInjected() == false)
         {
-            planeType = "No Game Process/ Injection";
+            planeType = "No Plane";
 
             for (size_t i = 0; i < total; i++)
             {
