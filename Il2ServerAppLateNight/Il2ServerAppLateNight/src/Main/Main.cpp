@@ -44,7 +44,6 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-//double manifoldValues[4];
 std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
@@ -115,7 +114,8 @@ bool GetInjected()
 		&& injectedTurnBall
 		&& injectedManifold
 		&& injectedEngineModification
-		&& injectedWaterTemp)
+		&& injectedWaterTemp
+		&& injectedOilTemp)
 		return true;
 	else
 		return false;
@@ -211,17 +211,21 @@ double GetCylinderHeadTemp(int engine)
 
 double GetCarbMixTemp(int engine)
 {
-	return cylinderHeadTemps[engine];
+	return carbMixTemps[engine];
 }
 
 void ResetFlags()
 {
-	//addresses of cave
 	codeCaveAddress = 0;
+
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	//calcEngineTemperatureAddress = 0;
+	dynamicBodyAddress = 0;
+	turnBallAddress = 0;
 	getManifoldPressureAddress = 0;
+	engineModificationAddress = 0;
+	waterTempAddress = 0;
+	oilTempAddress = 0;
 	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
@@ -506,7 +510,7 @@ void UpdateCylinderHeadTemps() {
 }
 
 void UpdateCarbMixTemps() {
-	cylinderHeadTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
+	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
 bool ReadEngineModification()
@@ -726,7 +730,6 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 
 int FindCodeCave(System::ComponentModel::BackgroundWorker^ worker)
 {
-
 	//create or recover code cave	
 	if (codeCaveAddress == 0)
 	{
@@ -853,6 +856,7 @@ void ClearAddresses()
 	engineModificationAddress = 0;
 	getManifoldPressureAddress = 0;
 	waterTempAddress = 0;
+	oilTempAddress = 0;
 }
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
