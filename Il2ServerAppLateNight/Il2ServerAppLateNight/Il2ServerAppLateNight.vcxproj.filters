@@ -74,6 +74,15 @@
     <ClInclude Include="src\WaterTemp\WaterTemp.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\CylinderTemp\CylinderHead.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlaneSelector.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -140,6 +149,15 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="src\WaterTemp\WaterTemp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CylinderTemp\CylinderHead.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CarbMixTemp\CarbMixTemp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CarbMixTemp\PlaneSelector.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

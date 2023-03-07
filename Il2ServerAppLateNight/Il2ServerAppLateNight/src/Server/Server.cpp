@@ -13,12 +13,12 @@
 #include "../Main/Main.h"
 #include "../IPHelper/IPHelper.h"
 #include "../OilTemp/OilTemp.h"
+#include "../CylinderTemp//CylinderHead.h"
+#include "../CarbMixTemp/CarbMixTemp.h"
 
 using namespace System::Diagnostics;
 
-int nServerPort = 11200;           
-//how many ms between sends
-int sendInterval = 30;
+int nServerPort = 11200;
 
 void SetPortNumber(int t)
 {
@@ -134,7 +134,8 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        float floatArray[30];
+        const int total = 38;
+        float floatArray[total];
 
         //read memory only when requested - could be refactored in to the getters
         //HANDLE hProcess = GetIL2Handle();
@@ -149,6 +150,9 @@ int serverListen() {
         //water temps read in water temps class - TO DO, refactor for above
         UpdateWaterTempValues();
         UpdateOilTempValues();
+        UpdateCylinderHeadTemps();
+        UpdateCarbMixTemps();
+
         
         //packing differecnt data types in to one char array for sending (serialisation)
         //https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
@@ -161,9 +165,9 @@ int serverListen() {
         //send blanks if no game found/injected
         if (GetInjected() == false)
         {
-            planeType = "No Game Process/ Injection";
+            planeType = "No Plane";
 
-            for (size_t i = 0; i < 30; i++)
+            for (size_t i = 0; i < total; i++)
             {
                 floatArray[i] = 0;
             }
@@ -217,6 +221,16 @@ int serverListen() {
             for (size_t i = 0; i < 4; i++)
             {
                 floatArray[26 + i] = (float)(GetOilTempB(i));
+            }
+            //cylinder head temp
+            for (size_t i = 0; i < 4; i++)
+            {
+                floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
+            }
+            //carb mix temp
+            for (size_t i = 0; i < 4; i++)
+            {
+                floatArray[34 + i] = (float)(GetCarbMixTemp(i));
             }
         }
 

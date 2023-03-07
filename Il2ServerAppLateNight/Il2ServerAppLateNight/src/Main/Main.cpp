@@ -29,8 +29,10 @@
 #include "../TurnBall/TurnBall.h"
 #include "../EngineMod/EngineMod.h"
 #include "../OilTemp/OilTemp.h"
+#include "../CylinderTemp/CylinderHead.h"
+#include "../CarbMixTemp/CarbMixTemp.h"
 
-float version = 0.62f;
+float version = 0.63f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -42,11 +44,12 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-//double manifoldValues[4];
 std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
 std::vector<double> oilTempValuesB(4);
+std::vector<double> cylinderHeadTemps(4);
+std::vector<double> carbMixTemps(4);
 int engineModification;
 //where we hold planeType string
 std::string planeType;
@@ -81,7 +84,7 @@ bool processFoundCurrent;
 
 void CaveRecovered()
 {
-	injectedAltimeter = true;	
+	injectedAltimeter = true;	 // dont need bools for each dial, type just foreach injection/hook
 	injectedPlaneType = true;
 	injectedDynamicBody = true;
 	injectedTurnBall = true;
@@ -105,16 +108,17 @@ LPVOID GetCodeCaveAddress()
 
 bool GetInjected()
 {
-	if (injectedAltimeter 
-			&& injectedPlaneType 
-				&& injectedDynamicBody 
-					&& injectedTurnBall 
-						&& injectedManifold 
-							&& injectedEngineModification 
-								&& injectedWaterTemp)
-										return true;
-									else	
-										return false;	
+	if (injectedAltimeter
+		&& injectedPlaneType
+		&& injectedDynamicBody
+		&& injectedTurnBall
+		&& injectedManifold
+		&& injectedEngineModification
+		&& injectedWaterTemp
+		&& injectedOilTemp)
+		return true;
+	else
+		return false;
 }
 
 float GetIL2DialsVersion()
@@ -177,7 +181,7 @@ double GetRPM(int engine)
 }
 
 double GetManifold(int engine)
-{	
+{
 	return manifoldValues[engine];
 }
 
@@ -200,14 +204,28 @@ double GetOilTempB(int engine)
 	return oilTempValuesB[engine];
 }
 
+double GetCylinderHeadTemp(int engine)
+{
+	return cylinderHeadTemps[engine];
+}
+
+double GetCarbMixTemp(int engine)
+{
+	return carbMixTemps[engine];
+}
+
 void ResetFlags()
 {
-	//addresses of cave
-	codeCaveAddress = 0;	
+	codeCaveAddress = 0;
+
 	altimeterAddress = 0;
 	setPlayerPresenceAddress = 0;
-	//calcEngineTemperatureAddress = 0;
+	dynamicBodyAddress = 0;
+	turnBallAddress = 0;
 	getManifoldPressureAddress = 0;
+	engineModificationAddress = 0;
+	waterTempAddress = 0;
+	oilTempAddress = 0;
 	//reports	
 	injectedAltimeter = false;
 	injectedPlaneType = false;
@@ -220,7 +238,7 @@ void ResetFlags()
 }
 
 bool GetProcessData()
-{	
+{
 	//Get Process ID by enumerating the processes using tlhelp32snapshot	
 	processID = GetProcID(exeName);
 
@@ -242,27 +260,27 @@ bool GetProcessData()
 	moduleRSE = GetModule(processID, (wchar_t*)L"RSE.dll");
 	if (moduleRSE.dwSize == 0)
 		return false;
-		
+
 
 	return true;
 }
 
 
-bool CockpitInstrumentsDataStruct(LPVOID structStart) 
+bool CockpitInstrumentsDataStruct(LPVOID structStart)
 {
 	//set player presence gives us the address we passed at "structStart"
 	//The pointer to the cockpit insturments struct is at structStart + 0x60
-	
+
 
 	//we need to read the data and get what values we need from it
 	//need to finalise numbers
 	const size_t sizeOfData = cockpitValuesLength * 8;
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, structStart, &rawData, sizeOfData, NULL);
-	
+
 	//step through data read 8 bytes at a time and grab double
 	size_t dCount = 0;
-	for (size_t i = 0; i < sizeOfData; i+=8, dCount++)//8 bytes to get double (?)
+	for (size_t i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
 	{
 		char temp[8];
 		for (size_t j = 0; j < 8; j++)
@@ -279,7 +297,7 @@ bool CockpitInstrumentsDataStruct(LPVOID structStart)
 
 bool AltimeterDataStruct(LPVOID structStart)
 {
-	
+
 	//we need to read the data and get what values we need from it
 	//need to finalise numbers
 	const size_t sizeOfData = 10 * 8;
@@ -315,7 +333,7 @@ bool PlaneTypeDataStruct(LPVOID structStart)
 	std::string planeName;
 
 	for (size_t i = 0; i < 64; i++)
-	{	
+	{
 		//look for null terminated string
 		if (rawData[i] == 0x00)
 			break;
@@ -349,15 +367,15 @@ bool ReadCockpitInstruments()
 
 	//injection saves cockpit pointer at code cave's address + 0x100 ( this is from setPlayerPresence - but it ahs the address we need)
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
-	LPVOID toPlaneTypeStruct = PointerToDataStruct(hProcessIL2, addressToRead );
-	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, (LPVOID)((uintptr_t)(toPlaneTypeStruct) + 0x60));
+	LPVOID toPlaneTypeStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+	LPVOID toCockpitInstruments = PointerToDataStruct(hProcessIL2, (LPVOID)((uintptr_t)(toPlaneTypeStruct)+0x60));
 
 	if (toCockpitInstruments != 0)
-	{		
+	{
 		CockpitInstrumentsDataStruct(toCockpitInstruments);
 		return 1;
 	}
-	 
+
 	return 0;
 }
 
@@ -366,7 +384,7 @@ bool ReadAltimeter()
 	//injection saves alt. pointer at code cave's address + 0xxx
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x220);
 	LPVOID toAltimeter = PointerToDataStruct(hProcessIL2, addressToRead);
-	
+
 	if (toAltimeter != 0)
 	{
 		AltimeterDataStruct(toAltimeter);
@@ -388,11 +406,11 @@ bool ReadTurnNeedle()
 	//read
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t offset = OffsetToTurnNeedle(planeType);	
+	uintptr_t offset = OffsetToTurnNeedle(planeType);
 
 	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
-	
-	LPVOID toTurnNeedle = (LPVOID)(target); 
+
+	LPVOID toTurnNeedle = (LPVOID)(target);
 
 	const size_t sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
@@ -403,13 +421,13 @@ bool ReadTurnNeedle()
 
 
 	//some are mirrored
-	if (planeType.compare("Yak-7B ser.36") == 0 )
+	if (planeType.compare("Yak-7B ser.36") == 0)
 		turnNeedleValue *= -1;
 
 	if (planeType.compare("Tempest Mk.V ser.2") == 0)
 		turnNeedleValue *= -1;
-	
-	if (planeType.compare("Spitfire Mk.IXe") == 0)	
+
+	if (planeType.compare("Spitfire Mk.IXe") == 0)
 		turnNeedleValue *= -1;
 
 	if (planeType.compare("Hurricane Mk.II") == 0)
@@ -424,8 +442,8 @@ bool ReadTurnNeedle()
 	if (planeType.compare("U-2VS") == 0)
 		turnNeedleValue *= -1;
 
-	if(planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)//+		planeType	"Mosquito F.B. Mk.VI ser.2"	std::string
-		turnNeedleValue *= -1;	
+	if (planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)//+		planeType	"Mosquito F.B. Mk.VI ser.2"	std::string
+		turnNeedleValue *= -1;
 
 	if (planeType.compare("Typhoon Mk.Ib") == 0)
 		turnNeedleValue *= -1;
@@ -483,25 +501,33 @@ void UpdateWaterTempValues()
 
 void UpdateOilTempValues()
 {
-	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(),planeType);
+	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
+void UpdateCylinderHeadTemps() {
+	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2);
+}
+
+void UpdateCarbMixTemps() {
+	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
+}
+
 bool ReadEngineModification()
-{	
+{
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x2A0);	
-	
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x2A0);
+
 	//8 bytes to store our info
 	//read to unsigned 8 int (byte)
 	BYTE bytes[8];
 	size_t bytesRead;
 	//Then once you read your value(255) into there, you can print it this way:
 	ReadProcessMemory(hProcessIL2, addressToRead, &bytes, sizeof(bytes), &bytesRead);
-	
+
 	//last byte in the array has the info we need
 	uint8_t modInfo = bytes[7];
-	
+
 	//mosquito 150 fuel // p51 150 fuel
 	if (modInfo == 0x81)
 	{
@@ -513,7 +539,7 @@ bool ReadEngineModification()
 	{
 		engineModification = 1;
 	}
-	else 
+	else
 	{
 		engineModification = 0;
 	}
@@ -534,10 +560,10 @@ void ReadTest()
 	ReadManifolds();
 	ReadEngineModification();
 	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress, planeType);
-	
+
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-	floatArray[0] =(float)(GetAltitude());
+	floatArray[0] = (float)(GetAltitude());
 	//mgh
 	floatArray[1] = (float)(GetMMHg());
 	//airspeed
@@ -668,7 +694,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	
+
 	if (oilTempAddress == 0)
 	{
 		//RSE.RSE::CEngine::initModification - 48 83 EC 38           - sub rsp,38 { 56 }
@@ -681,7 +707,7 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	
+
 
 	/*
 	if (calcEngineTemperatureAddress == 0)
@@ -704,7 +730,6 @@ int FindFunctions(System::ComponentModel::BackgroundWorker^ worker)
 
 int FindCodeCave(System::ComponentModel::BackgroundWorker^ worker)
 {
-
 	//create or recover code cave	
 	if (codeCaveAddress == 0)
 	{
@@ -718,8 +743,8 @@ int FindCodeCave(System::ComponentModel::BackgroundWorker^ worker)
 	return 1;
 }
 
-int Injections(System::ComponentModel::BackgroundWorker^ worker) 
-{	
+int Injections(System::ComponentModel::BackgroundWorker^ worker)
+{
 	//inject getplanetype
 	if (!injectedPlaneType)
 	{
@@ -731,7 +756,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	
+
 	//inject altimeter		
 	if (!injectedAltimeter)
 	{
@@ -777,7 +802,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-		
+
 	if (!injectedEngineModification)
 	{
 		injectedEngineModification = HookEngineModification(hProcessIL2, (void*)(engineModificationAddress), size, codeCaveAddress);
@@ -797,7 +822,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	
+
 	if (!injectedOilTemp)
 	{
 		injectedOilTemp = HookOilTemp(hProcessIL2, (void*)(oilTempAddress), size, codeCaveAddress);
@@ -807,7 +832,7 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-	
+
 	return 1;
 }
 
@@ -827,18 +852,19 @@ void ClearAddresses()
 	setPlayerPresenceAddress = 0;
 	altimeterAddress = 0;
 	dynamicBodyAddress = 0;
-	turnBallAddress = 0;	
+	turnBallAddress = 0;
 	engineModificationAddress = 0;
 	getManifoldPressureAddress = 0;
 	waterTempAddress = 0;
+	oilTempAddress = 0;
 }
 
 int Injector(System::ComponentModel::BackgroundWorker^ worker)
-{	
+{
 	auto lastChecked = std::chrono::system_clock::now();
 	//put this time in the past so first check fires instantly
-	lastChecked -= std::chrono::hours(1);	
-	
+	lastChecked -= std::chrono::hours(1);
+
 	while (true)
 	{
 		//check if game is running 
@@ -884,7 +910,7 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		//Inject code
 		if (Injections(worker) == 0)
 			continue;
-		
+
 		//we got here, good, tell the interface
 		worker->ReportProgress(9);
 
