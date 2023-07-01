@@ -31,6 +31,7 @@
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp/CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
+#include "../Fuel/Fuel.h"
 
 float version = 0.63f;
 
@@ -44,12 +45,15 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
+//direct values
 std::vector<double> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
 std::vector<double> oilTempValuesB(4);
 std::vector<double> cylinderHeadTemps(4);
 std::vector<double> carbMixTemps(4);
+//percentage values of needle position on dial
+std::vector<float> fuel(4);
 int engineModification;
 //where we hold planeType string
 std::string planeType;
@@ -513,6 +517,10 @@ void UpdateCarbMixTemps() {
 	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
+void UpdateFuel() {
+	fuel = Fuel(codeCaveAddress, hProcessIL2, planeType);
+}
+
 bool ReadEngineModification()
 {
 	//engine mods stored in a bitset in game, rebuild bitset and read first byte
@@ -560,7 +568,7 @@ void ReadTest()
 	ReadManifolds();
 	ReadEngineModification();
 	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress, planeType);
-
+	UpdateFuel();
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
 	floatArray[0] = (float)(GetAltitude());
@@ -583,6 +591,7 @@ void ReadTest()
 
 
 	ReadEngineModification();
+
 }
 
 void SendTest()
@@ -916,6 +925,8 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 
 		//don't need a fast cycle on this loop
 		Sleep(100);
+
+		ReadTest();
 	}
 
 	return 0;

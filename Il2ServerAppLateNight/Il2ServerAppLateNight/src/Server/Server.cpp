@@ -16,6 +16,7 @@
 #include "../CylinderTemp//CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
 
+
 using namespace System::Diagnostics;
 
 int nServerPort = 11200;
@@ -134,7 +135,7 @@ int serverListen() {
 
         ////////////////Package//////////////////////
         //we represent the data with floats in the app, so let's convert now and save network traffic
-        const int total = 38;
+        const int total = 42;
         float floatArray[total];
 
         //read memory only when requested - could be refactored in to the getters
@@ -152,6 +153,7 @@ int serverListen() {
         UpdateOilTempValues();
         UpdateCylinderHeadTemps();
         UpdateCarbMixTemps();
+        UpdateFuel();
 
         
         //packing differecnt data types in to one char array for sending (serialisation)
@@ -231,6 +233,11 @@ int serverListen() {
             for (size_t i = 0; i < 4; i++)
             {
                 floatArray[34 + i] = (float)(GetCarbMixTemp(i));
+            }
+            //fuel
+            for (size_t i = 0; i < 4; i++)
+            {
+                floatArray[38 + i] = (float)(GetFuel(i));
             }
         }
 

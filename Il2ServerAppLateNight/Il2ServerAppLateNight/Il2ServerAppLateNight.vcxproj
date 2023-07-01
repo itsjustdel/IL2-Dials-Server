@@ -159,6 +159,7 @@
     <ClInclude Include="src\CylinderTemp\CylinderHead.h" />
     <ClInclude Include="src\DynamicBody\DynamicBody.h" />
     <ClInclude Include="src\EngineMod\EngineMod.h" />
+    <ClInclude Include="src\Fuel\Fuel.h" />
     <ClInclude Include="src\Injector\Injector.h" />
     <ClInclude Include="src\IPHelper\IPHelper.h" />
     <ClInclude Include="src\Main\Main.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="src\CylinderTemp\CylinderHead.cpp" />
     <ClCompile Include="src\DynamicBody\DynamicBody.cpp" />
     <ClCompile Include="src\EngineMod\EngineMod.cpp" />
+    <ClCompile Include="src\Fuel\Fuel.cpp" />
     <ClCompile Include="src\Injector\Injector.cpp" />
     <ClCompile Include="src\IPHelper\IPHelper.cpp" />
     <ClCompile Include="src\Main\Main.cpp" />
