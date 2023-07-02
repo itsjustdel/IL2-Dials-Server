@@ -218,6 +218,11 @@ double GetCarbMixTemp(int engine)
 	return carbMixTemps[engine];
 }
 
+float GetFuel(int engine)
+{
+	return fuel[engine];
+}
+
 void ResetFlags()
 {
 	codeCaveAddress = 0;
@@ -926,7 +931,6 @@ int Injector(System::ComponentModel::BackgroundWorker^ worker)
 		//don't need a fast cycle on this loop
 		Sleep(100);
 
-		ReadTest();
 	}
 
 	return 0;

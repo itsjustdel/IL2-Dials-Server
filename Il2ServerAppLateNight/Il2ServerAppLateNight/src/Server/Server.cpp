@@ -237,7 +237,7 @@ int serverListen() {
             //fuel
             for (size_t i = 0; i < 4; i++)
             {
-                floatArray[38 + i] = (float)(GetFuel(i));
+                floatArray[38 + i] = GetFuel(i);
             }
         }
 

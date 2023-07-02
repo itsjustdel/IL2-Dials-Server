@@ -70,4 +70,4 @@ double GetCarbMixTemp(int engine);
 
 void UpdateFuel();
 
-double GetFuel(int engine);
+float GetFuel(int engine);
