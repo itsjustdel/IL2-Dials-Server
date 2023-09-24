@@ -7,8 +7,62 @@
 
 char originalLineManifold[8];
 
+std::vector<float> GetLimits(std::string name)
+{
+	// RU Manifold A // RU Manifold B
+	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
+		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name) || IsLa5fns2(name))
+	{
+		return std::vector<float> { 30, 160 };
+	}
 
+	// RU Manifold C
+	if (IsPe2(name))
+	{
+		return std::vector<float> { 30, 160 };
+	}
 
+	// to do, other countries
+
+	return std::vector<float> { 0, 0 };
+}
+
+std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
+{
+	std::vector<float> limits = GetLimits(name);
+	float range = limits[1] - limits[0];
+	for (size_t i = 0; i < 4; i++)
+	{
+		float p = limits[0] + percentages[i] * range;
+		percentages[i] = p;
+	}
+	return percentages;
+}
+
+std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType)
+{
+	std::vector<float> values(4);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+
+	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+	for (size_t i = 0; i < 4; i++)
+	{
+		uintptr_t engineOffset = 0x190 * i;
+		uintptr_t offset = 0x3da8 + (engineOffset);
+
+		//all 2 engine planes have temps next to each other (so far)
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+		const size_t sizeOfData = sizeof(float);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
+
+		values[i] = *reinterpret_cast<float*>(rawData);
+	}
+
+	return PercentageConversion(values, planeType);
+}
+
+//old
 std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
 	std::vector<double> manifoldValues(4);
@@ -30,18 +84,18 @@ std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 
 	return manifoldValues;
 }
-
+//old
 std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
-	
+
 	std::vector<double> manifoldValues(4);
-	
-	
+
+
 	//buffer
 	char rawData[sizeof(double)];
 	//read address saved in code cave
 	LPCVOID targetAddress;
-	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)(codeCaveAddress) + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)(codeCaveAddress)+0x240), &targetAddress, sizeof(LPCVOID), 0);
 
 	std::string v = "P-38J-25";
 	if (name.compare(v) == 0)
@@ -50,7 +104,7 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE8), &rawData, sizeof(double), 0);
-		manifoldValues[1] = *reinterpret_cast<double*>(rawData);	
+		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "A-20B";
@@ -62,7 +116,7 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50), &rawData, sizeof(double), 0);
 		manifoldValues[1] = *reinterpret_cast<double*>(rawData);
 	}
-	
+
 	v = "P-40E-1";
 	if (name.compare(v) == 0)
 	{
@@ -76,14 +130,14 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD50), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
-		
+
 	v = "P-47D-28";
 	if (name.compare(v) == 0)
 	{
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD20), &rawData, sizeof(double), 0);
 		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
-	
+
 	v = "P-51D-15";
 	if (name.compare(v) == 0)
 	{
@@ -117,8 +171,7 @@ std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 
 	return manifoldValues;
 }
-
-
+//old
 std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
 	std::vector<double> manifoldValues(4);
@@ -128,7 +181,7 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	//read address saved in code cave
 	LPCVOID targetAddress;
 	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
-		
+
 
 	std::string v = "Spitfire Mk.IXe";
 	if (name.compare(v) == 0)
@@ -191,7 +244,7 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 
 	return manifoldValues;
 }
-
+//old
 std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string name)
 {
 	std::vector<double> manifoldValues(4);
@@ -199,7 +252,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	//buffer
 	char rawData[sizeof(double)];
 	//read address saved in code cave
-	
+
 	if (IsMig3(name)) {
 		// mig uses "german" address but a unique offset
 		LPCVOID targetAddress;
@@ -217,7 +270,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		LPCVOID targetAddress;
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
-		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Yak-9 ser.1";
@@ -226,7 +279,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		LPCVOID targetAddress;
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA0), &rawData, sizeof(double), 0);
-		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	v = "Yak-9T ser.1";
@@ -235,7 +288,7 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 		LPCVOID targetAddress;
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCA8), &rawData, sizeof(double), 0);
-		manifoldValues[0] = *reinterpret_cast<double*>(rawData);		
+		manifoldValues[0] = *reinterpret_cast<double*>(rawData);
 	}
 
 	//bring in line with german manifold scale
@@ -243,7 +296,6 @@ std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 
 	return manifoldValues;
 }
-
 
 bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
@@ -359,7 +411,6 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-
 bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x6D);
@@ -383,7 +434,6 @@ bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 	return 1;
 }
-
 
 bool HookManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
 {

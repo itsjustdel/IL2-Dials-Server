@@ -46,7 +46,7 @@ double GetTurnAndBankNeedle();
 
 double GetRPM(int engine);
 
-double GetManifold(int engine);
+float GetManifold(int engine);
 
 int GetEngineModification();
 

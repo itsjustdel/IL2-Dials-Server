@@ -44,7 +44,7 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-std::vector<double> manifoldValues(4);
+std::vector<float> manifoldValues(4);
 std::vector<double> waterTempValues(4);
 std::vector<double> oilTempValues(4);
 std::vector<double> oilTempValuesB(4);
@@ -180,7 +180,7 @@ double GetRPM(int engine)
 	return cockpitValues[31 + engine];
 }
 
-double GetManifold(int engine)
+float GetManifold(int engine)
 {
 	return manifoldValues[engine];
 }
@@ -473,23 +473,7 @@ bool ReadTurnCoordinatorBall()
 
 bool ReadManifolds()
 {
-
-	//note not all russian planes are able to map this way, most default to German method
-	if (IsRUPlane(planeType))
-	{
-		manifoldValues = RUManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else if (IsUSPlane(planeType))
-	{
-		manifoldValues = USManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else if (IsUKPlane(planeType))
-	{
-		manifoldValues = UKManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else
-		manifoldValues = GermanManifolds(codeCaveAddress, hProcessIL2);
-
+	manifoldValues = Manifolds(codeCaveAddress, hProcessIL2, planeType);
 
 	return 0;
 }
@@ -505,11 +489,13 @@ void UpdateOilTempValues()
 	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
-void UpdateCylinderHeadTemps() {
+void UpdateCylinderHeadTemps()
+{
 	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2);
 }
 
-void UpdateCarbMixTemps() {
+void UpdateCarbMixTemps()
+{
 	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
