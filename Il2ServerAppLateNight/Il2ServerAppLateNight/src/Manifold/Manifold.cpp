@@ -13,13 +13,13 @@ std::vector<float> GetLimits(std::string name)
 	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
 		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name) || IsLa5fns2(name))
 	{
-		return std::vector<float> { 30, 160 };
+		return std::vector<float> { 300, 1600 };
 	}
 
 	// RU Manifold C
 	if (IsPe2(name))
 	{
-		return std::vector<float> { 30, 160 };
+		return std::vector<float> { 300, 1200 };
 	}
 
 	// to do, other countries
