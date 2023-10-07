@@ -1,123 +1,82 @@
 #include <string>
+#include <unordered_set>
 
-bool IsYak9(std::string name)
+// Define a set of valid Russian plane names
+const std::unordered_set<std::string> ruPlaneNames = {
+	"Yak-9 ser.1", "Yak-9T ser.1", "Yak-1 ser.69", "Yak-1 ser.127",
+	"Yak-7B ser.36", "LaGG-3 ser.29", "Il-2 mod.1941", "Il-2 mod.1942",
+	"Il-2 mod.1943", "La-5 ser.8", "I-16 type 24", "MiG-3 ser.24",
+	"La-5 FN ser.2", "Pe-2 ser.87", "Pe-2 ser.35","Li-2"
+};
+
+// Function to check if a name is a valid Russian plane name
+bool IsRUPlane(const std::string& name)
 {
-	std::string v = "Yak-9 ser.1";
-	if (name.compare(v) == 0)
-		return true;
-
-	v = "Yak-9T ser.1";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return ruPlaneNames.find(name) != ruPlaneNames.end();
 }
 
-bool IsYak169(std::string name)
-{
-	std::string v = "Yak-1 ser.69";
-	if (name.compare(v) == 0)
-		return true;
+// Functions for specific Russian plane names
 
-	return false;
+bool IsLi2(const std::string& name)
+{
+	return(name == "Li-2");
+}
+bool IsYak9(const std::string& name)
+{
+	return (name == "Yak-9 ser.1");
 }
 
-bool IsYaks127(std::string name)
+bool IsYak9T(const std::string& name)
 {
-	std::string v = "Yak-1 ser.127";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "Yak-9T ser.1");
 }
 
-bool IsYak7b36(std::string name)
+bool IsYak169(const std::string& name)
 {
-	std::string v = "Yak-7B ser.36";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "Yak-1 ser.69");
 }
 
-bool IsLagg3s29(std::string name)
+bool IsYaks127(const std::string& name)
 {
-	std::string v = "LaGG-3 ser.29";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "Yak-1 ser.127");
 }
 
-bool IsIL2(std::string name)
+bool IsYak7b36(const std::string& name)
 {
-	std::string v = "Il-2 mod.1941";
-	if (name.compare(v) == 0)
-		return true;
-	v = "Il-2 mod.1942";
-	if (name.compare(v) == 0)
-		return true;
-	v = "Il-2 mod.1943";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "Yak-7B ser.36");
 }
 
-bool IsLa5s8(std::string name)
+bool IsLagg3s29(const std::string& name)
 {
-	std::string v = "La-5 ser.8";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "LaGG-3 ser.29");
 }
 
-bool IsI16(std::string name)
+bool IsIL2(const std::string& name)
 {
-	std::string v = "I-16 type 24";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "Il-2 mod.1941" || name == "Il-2 mod.1942" || name == "Il-2 mod.1943");
 }
 
-bool IsMig3(std::string name)
+bool IsLa5s8(const std::string& name)
 {
-	std::string v = "MiG-3 ser.24";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "La-5 ser.8");
 }
 
-bool IsLa5fns2(std::string name)
+bool IsI16(const std::string& name)
 {
-	std::string v = "La-5 FN ser.2";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "I-16 type 24");
 }
 
-bool IsPe2(std::string name)
+bool IsMig3(const std::string& name)
 {
-	std::string v = "Pe-2 ser.87";
-	if (name.compare(v) == 0)
-		return true;
-	v = "Pe-2 ser.35";
-	if (name.compare(v) == 0)
-		return true;
-
-	return false;
+	return (name == "MiG-3 ser.24");
 }
 
-bool IsRUPlane(std::string name)
+bool IsLa5fns2(const std::string& name)
 {
-	if (IsYak9(name))
-		return true;
-	else if (IsMig3(name))
-		return true;
+	return (name == "La-5 FN ser.2");
+}
 
-	return false;
+bool IsPe2(const std::string& name)
+{
+	return (name == "Pe-2 ser.87" || name == "Pe-2 ser.35");
 }

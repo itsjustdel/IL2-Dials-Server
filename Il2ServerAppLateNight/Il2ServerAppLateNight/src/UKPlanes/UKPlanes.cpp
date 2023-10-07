@@ -1,35 +1,51 @@
 #include <string>
+#include <unordered_set>
 
-bool IsUKPlane(std::string planeName)
+// Define a set of valid UK plane names
+const std::unordered_set<std::string> ukPlaneNames = {
+	"Spitfire Mk.Vb", "Spitfire Mk.IXe", "Tempest Mk.V ser.2",
+	"Hurricane Mk.II", "Spitfire Mk.XIV", "Typhoon Mk.Ib",
+	"Mosquito F.B. Mk.VI ser.2"
+};
+
+// Function to check if a name is a valid UK plane name
+bool IsUKPlane(const std::string& name)
 {
-	std::string v = "Spitfire Mk.Vb";
-	if (planeName.compare(v) == 0)
-		return true;
+	return ukPlaneNames.find(name) != ukPlaneNames.end();
+}
 
-	v = "Spitfire Mk.IXe";
-	if (planeName.compare(v) == 0)
-		return true;
+// Functions for specific UK plane names (optional)
+bool IsSpitfireMkVb(const std::string& name)
+{
+	return (name == "Spitfire Mk.Vb");
+}
 
-	v = "Tempest Mk.V ser.2";
-	if (planeName.compare(v) == 0)
-		return true;
+bool IsSpitfireMkIXe(const std::string& name)
+{
+	return (name == "Spitfire Mk.IXe");
+}
 
-	v = "Hurricane Mk.II";
-	if (planeName.compare(v) == 0)
-		return true;
+bool IsTempestMkVser2(const std::string& name)
+{
+	return (name == "Tempest Mk.V ser.2");
+}
 
-	v = "Spitfire Mk.XIV";
-	if (planeName.compare(v) == 0)
-		return true;
+bool IsHurricaneMkII(const std::string& name)
+{
+	return (name == "Hurricane Mk.II");
+}
 
-	v = "Typhoon Mk.Ib";
-	if (planeName.compare(v) == 0)
-		return true;
+bool IsSpitfireMkXIV(const std::string& name)
+{
+	return (name == "Spitfire Mk.XIV");
+}
 
-	v = "Mosquito F.B. Mk.VI ser.2";
-	if (planeName.compare(v) == 0)
-		return true;
+bool IsTyphoonMkIb(const std::string& name)
+{
+	return (name == "Typhoon Mk.Ib");
+}
 
-	
-	return false;
+bool IsMosquitoFBMkVIser2(const std::string& name)
+{
+	return (name == "Mosquito F.B. Mk.VI ser.2");
 }

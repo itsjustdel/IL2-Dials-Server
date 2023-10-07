@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "../RUPlanes/RUPlanes.h"
+#include "../GERPlanes/GERPlanes.h"
 
 char originalLineManifold[8];
 
@@ -22,7 +23,45 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 300, 1200 };
 	}
 
-	// to do, other countries
+	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
+		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
+	{
+		// A
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsBf109G2(name) || IsBf110E2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name))
+	{
+		// B
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsBf109K4(name)) {
+		// C
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsFW190D9(name)) {
+		// D
+		return std::vector<float> { 600, 2500 };
+	}
+
+	if (IsHe111H6(name) || IsJu88C6(name)) {
+		// E
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsHe111H16(name) || IsHs129B2(name) || IsME410A1(name)) {
+		// F
+		return std::vector<float> { 600, 1800 };
+	}
+
+
+	// none - 
+	// m2 262 A
+	// Ju-52/3m g4e
+	// ar 234 b2
+
 
 	return std::vector<float> { 0, 0 };
 }
