@@ -153,13 +153,13 @@
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="GERPlanes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Altimeter\Altimeter.h" />
     <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h" />
     <ClInclude Include="src\CylinderTemp\CylinderHead.h" />
     <ClInclude Include="src\DynamicBody\DynamicBody.h" />
     <ClInclude Include="src\EngineMod\EngineMod.h" />
+    <ClInclude Include="src\GERPlanes\GERPlanes.h" />
     <ClInclude Include="src\Injector\Injector.h" />
     <ClInclude Include="src\IPHelper\IPHelper.h" />
     <ClInclude Include="src\Main\Main.h" />

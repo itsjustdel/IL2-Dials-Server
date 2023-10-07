@@ -5,6 +5,8 @@
 #include <string>
 #include "../RUPlanes/RUPlanes.h"
 #include "../GERPlanes/GERPlanes.h"
+#include "../UKPlanes/UKPlanes.h"
+#include "../USPlanes/USPlanes.h"
 
 char originalLineManifold[8];
 
@@ -58,16 +60,51 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 600, 1800 };
 	}
 
+	// GER none - 
+	// m2 262 A
+	// Ju-52/3m g4e
+	// ar 234 b2
+
 	// ITA
 	if (IsMC202s8(name)) {
 		return std::vector<float> { 500, 2000 };
 	}
 
-	// none - 
-	// m2 262 A
-	// Ju-52/3m g4e
-	// ar 234 b2
+	// UK
+	if (IsTyphoonMkIb(name)) {
+		// C
+		return std::vector<float> { 0, 16 };
+	}
+	else if (IsUKPlane(name)) {
+		// A // B // D
+		return std::vector<float> { 0, 25 };
+	}
 
+	// US
+	if (IsA20B(name)) {
+		// A
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP40E(name)) {
+		// B
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP39L(name)) {
+		return std::vector<float> { 10, 75 };
+		// C
+	}
+	if (IsP47D28(name) || IsP47D22(name)) {
+		return std::vector<float> { 10, 75 };
+		// D
+	}
+	if (IsP51D15(name) || IsP51B5(name)) {
+		return std::vector<float> { 10, 75 };
+		// E
+	}
+	if (IsP38(name) || IsC47A(name)) {
+		return std::vector<float> { 10, 75 };
+		// F
+	}
 
 	return std::vector<float> { 0, 0 };
 }

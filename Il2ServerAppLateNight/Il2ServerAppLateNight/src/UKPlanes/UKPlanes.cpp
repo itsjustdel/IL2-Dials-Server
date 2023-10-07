@@ -4,8 +4,8 @@
 // Define a set of valid UK plane names
 const std::unordered_set<std::string> ukPlaneNames = {
 	"Spitfire Mk.Vb", "Spitfire Mk.IXe", "Tempest Mk.V ser.2",
-	"Hurricane Mk.II", "Spitfire Mk.XIV", "Typhoon Mk.Ib",
-	"Mosquito F.B. Mk.VI ser.2"
+	"Hurricane Mk.II", "Spitfire Mk.XIV","Spitfire Mk.XIVe",
+	"Typhoon Mk.Ib", "Mosquito F.B.Mk.VI ser.2"
 };
 
 // Function to check if a name is a valid UK plane name
