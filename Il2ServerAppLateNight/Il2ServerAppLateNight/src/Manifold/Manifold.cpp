@@ -10,19 +10,21 @@ char originalLineManifold[8];
 
 std::vector<float> GetLimits(std::string name)
 {
-	// RU Manifold A // RU Manifold B
+	// RU
 	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
 		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name) || IsLa5fns2(name))
 	{
+		// A //  B
 		return std::vector<float> { 300, 1600 };
 	}
 
-	// RU Manifold C
 	if (IsPe2(name))
 	{
+		// C
 		return std::vector<float> { 300, 1200 };
 	}
 
+	//GER
 	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
 		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
 	{
@@ -56,6 +58,10 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 600, 1800 };
 	}
 
+	// ITA
+	if (IsMC202s8(name)) {
+		return std::vector<float> { 500, 2000 };
+	}
 
 	// none - 
 	// m2 262 A
