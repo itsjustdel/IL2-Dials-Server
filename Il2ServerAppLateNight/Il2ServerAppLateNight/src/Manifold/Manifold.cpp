@@ -26,7 +26,7 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 300, 1200 };
 	}
 
-	//GER
+	// GER
 	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
 		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
 	{
@@ -34,7 +34,7 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 600, 1800 };
 	}
 
-	if (IsBf109G2(name) || IsBf110E2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name))
+	if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
 	{
 		// B
 		return std::vector<float> { 600, 1800 };
@@ -42,7 +42,7 @@ std::vector<float> GetLimits(std::string name)
 
 	if (IsBf109K4(name)) {
 		// C
-		return std::vector<float> { 600, 1800 };
+		return std::vector<float> { 600, 2000 };
 	}
 
 	if (IsFW190D9(name)) {
@@ -73,11 +73,16 @@ std::vector<float> GetLimits(std::string name)
 	// UK
 	if (IsTyphoonMkIb(name)) {
 		// C
-		return std::vector<float> { 0, 16 };
+		return std::vector<float> { -7, 16 };
 	}
-	else if (IsUKPlane(name)) {
+	else if (IsMosquitoFBMkVIser2(name))
+	{
+		return std::vector<float> { -8, 28 };
+	}
+	else if (IsUKPlane(name))
+	{
 		// A // B // D
-		return std::vector<float> { 0, 25 };
+		return std::vector<float> { -7, 25 };
 	}
 
 	// US
@@ -94,15 +99,15 @@ std::vector<float> GetLimits(std::string name)
 		// C
 	}
 	if (IsP47D28(name) || IsP47D22(name)) {
-		return std::vector<float> { 10, 75 };
+		return std::vector<float> { 0, 75 };
 		// D
 	}
 	if (IsP51D15(name) || IsP51B5(name)) {
-		return std::vector<float> { 10, 75 };
+		return std::vector<float> { 0, 100 }; //goes above dial limits
 		// E
 	}
 	if (IsP38(name) || IsC47A(name)) {
-		return std::vector<float> { 10, 75 };
+		return std::vector<float> { 0, 75 };
 		// F
 	}
 
