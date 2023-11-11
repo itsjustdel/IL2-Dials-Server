@@ -486,7 +486,8 @@ void UpdateWaterTempValues()
 
 void UpdateOilTempValues()
 {
-	if (IsBf109F2) {
+	// Bf 109s with combination oil and water - neeed to read from a different struct ( underlyingn data, not needle percentage position)
+	if (IsBf109F2(planeType) || IsBf109F4(planeType) || IsBf109G2(planeType) || IsBf109G4(planeType) || IsBf109G6Late(planeType) || IsBf109G6AS(planeType)) {
 		oilTempInValues = ReadOilTempsBf109(GetCodeCaveAddress(), GetIL2Handle(), planeType);
 		return;
 	}
