@@ -3,6 +3,11 @@
 #include <vector>
 #include <string>
 #include "../PlaneSelector.h"
+#include "../Injector/Injector.h"
+#include "../RUPlanes/RUPlanes.h"
+#include "../GERPlanes/GERPlanes.h"
+#include "../UKPlanes/UKPlanes.h"
+#include "../USPlanes/USPlanes.h"
 
 char originalLineOilTemp[8];
 
@@ -40,13 +45,13 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 			t = (temp);
 
 			t = -55 + temp * (205);
-			
+
 
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			t += 273.15;
 			values[i] = t;
 		}
-		else if (isP51B5(planeName)){
+		else if (isP51B5(planeName)) {
 			// note, same address as "generic"
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
@@ -57,15 +62,15 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 			double temp = (t + 70) / 220;
 			// t = (newTemp * 0.55) + 20 // .55 is 1 percent of the range on the dial which is used (20 to to 75) - needle enver goes over 75? + 20 to add start of range back on after we find percentage
 			// percentage in range
-			t = ((temp *.55)*100) + 20;
+			t = ((temp * .55) * 100) + 20;
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			t += 273.15;
 			values[i] = t;
 		}
 		else if (isP39(planeName)) {
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD78 + i * 8), &rawData, sizeof(double), 0);		
-			double t = *reinterpret_cast<double*>(rawData);		
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xD78 + i * 8), &rawData, sizeof(double), 0);
+			double t = *reinterpret_cast<double*>(rawData);
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			t += 273.15;
 			values[i] = t;
@@ -147,17 +152,17 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 			t += 273.15;
 			values[i] = t;
 		}
-		else if (isBF109K4(planeName)) 
-		{				
+		else if (isBF109K4(planeName))
+		{
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xCD8), &rawData, sizeof(double), 0);
 			//most planes send temp data in kelvin so adjust now so we have consistency
 			double t = *reinterpret_cast<double*>(rawData);
 			t += 273.15;
 			values[i] = t;
-		}		
+		}
 		else
-		{		
+		{
 			//generic offset from engine struct
 			//pointer +1E0 is offset for water temp in kelvin
 			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
@@ -173,9 +178,229 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 		values[1] = values[2];
 		values[2] = values[3];
 	}
-	
+
 	return values;
 }
+
+std::vector<float> GetLimitsOil(std::string name)
+{
+	// RU
+	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
+		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name) || IsLa5fns2(name))
+	{
+		// A // B
+		return std::vector<float> { 300, 1600 };
+	}
+
+	if (IsPe2(name))
+	{
+		// C
+		return std::vector<float> { 300, 1200 };
+	}
+
+	// GER
+	// A
+	if (IsBf109E7(name))
+	{
+		return std::vector<float> { 0, 130 };
+	}
+
+	// D
+	if (IsBf109F2(name)) {
+		return std::vector<float> { 0, 130};
+	}
+
+	// GER
+	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
+		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
+	{
+		// A
+		return std::vector<float> { 0, 130};
+	}
+
+	if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
+	{
+		// B
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsBf109K4(name)) {
+		// C
+		return std::vector<float> { 600, 2000 };
+	}
+
+	if (IsFW190D9(name)) {
+		// D
+		return std::vector<float> { 600, 2500 };
+	}
+
+	if (IsHe111H6(name) || IsJu88C6(name)) {
+		// E
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsHe111H16(name) || IsHs129B2(name) || IsME410A1(name)) {
+		// F
+		return std::vector<float> { 600, 1800 };
+	}
+	if (IsJu523mG4E) {
+		return std::vector<float> { 0, 120 };	//needs modelled so re-using variant B
+	}
+	// GER none - 
+	// m2 262 A
+	// Ju-52/3m g4e
+	// ar 234 b2
+
+	// ITA
+	if (IsMC202s8(name)) {
+		return std::vector<float> { 500, 2000 };
+	}
+
+	// UK
+	if (IsSpitfireMkXIV(name) || IsSpitfireMkXIVe(name)) {
+		// B
+		return std::vector<float> { 0, 120 };
+	}
+	else if (IsUKPlane(name))
+	{
+		// dial type A
+		return std::vector<float> { 0, 100 };
+	}
+
+	// US
+	if (IsA20B(name)) {
+		// A
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP40E(name)) {
+		// B
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP39L(name)) {
+		return std::vector<float> { 10, 75 };
+		// C
+	}
+	if (IsP47D28(name) || IsP47D22(name)) {
+		return std::vector<float> { 0, 75 };
+		// D
+	}
+	if (IsP51D15(name) || IsP51B5(name)) {
+		return std::vector<float> { 0, 100 }; //goes above dial limits
+		// E
+	}
+	if (IsP38(name) || IsC47A(name)) {
+		return std::vector<float> { 0, 75 };
+		// F
+	}
+
+	return std::vector<float> { 0, 0 };
+}
+
+std::vector<float> PercentageConversionOilIn(std::vector<float> percentages, std::string name)
+{
+	std::vector<float> limits = GetLimitsOil(name);
+	float range = limits[1] - limits[0];
+	for (size_t i = 0; i < 4; i++)
+	{
+		float p = limits[0] + percentages[i] * range;
+		percentages[i] = p;
+	}
+	return percentages;
+}
+
+std::vector<float> ReadOilTempsIn(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType)
+{
+	std::vector<float> values(4);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+
+	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+
+	uintptr_t baseOffset = 0x3e5c;
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		uintptr_t engineOffset = 0x190 * i;
+		uintptr_t offset = baseOffset + (engineOffset);
+
+		//all 2 engine planes have temps next to each other (so far)
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+		const size_t sizeOfData = sizeof(float);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
+
+		values[i] = *reinterpret_cast<float*>(rawData);
+	}
+
+	return PercentageConversionOilIn(values, planeType);
+}
+
+std::vector<float> ReadOilTempsOut(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType)
+{
+	std::vector<float> values(4);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+
+	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+
+	uintptr_t baseOffset = 0x3e54;
+	for (size_t i = 0; i < 4; i++)
+	{
+		uintptr_t engineOffset = 0x190 * i;
+		uintptr_t offset = baseOffset + (engineOffset);
+
+		//all 2 engine planes have temps next to each other (so far)
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+		const size_t sizeOfData = sizeof(float);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
+
+		values[i] = *reinterpret_cast<float*>(rawData);
+	}
+
+	return PercentageConversionOilIn(values, planeType);
+}
+
+std::vector<float> ReadOilTempsBf109(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType)
+{
+	//two engines
+	std::vector<float> values(4);
+	for (size_t i = 0; i < 4; i++)
+	{
+		//buffer
+		char rawData[sizeof(double)];
+		//read address saved in code cave
+		LPCVOID targetAddress;
+		//if (isJU52(planeName))
+		//{
+		//	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+		//	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDC8 + i * 8), &rawData, sizeof(double), 0);
+		//	//most planes send temp data in kelvin so adjust now so we have consistency
+		//	double t = *reinterpret_cast<double*>(rawData);
+		//	t += 273.15;
+		//	values[i] = t;
+		//}
+		//else if (isBF110E2(planeName) || isBF110G2(planeName))
+		//{
+		//	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x240), &targetAddress, sizeof(LPCVOID), 0);
+		//	ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0xDE0 + i * 8), &rawData, sizeof(double), 0);
+		//	//most planes send temp data in kelvin so adjust now so we have consistency
+		//	double t = *reinterpret_cast<double*>(rawData);
+		//	t += 273.15;
+		//	values[i] = t;
+		//}
+		//else
+		//{
+			//pointer +1E0 is offset for water temp in kelvin
+		ReadProcessMemory(hProcessIL2, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
+		ReadProcessMemory(hProcessIL2, (LPCVOID)((uintptr_t)targetAddress + 0x1E8), &rawData, sizeof(double), 0);
+		values[i] = *reinterpret_cast<double*>(rawData);
+		values[i] -= 273;
+		//}
+	}
+
+	return values;
+}
+
+
 
 //Inbound
 std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName) //in

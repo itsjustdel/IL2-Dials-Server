@@ -40,6 +40,11 @@ bool IsSpitfireMkXIV(const std::string& name)
 	return (name == "Spitfire Mk.XIV");
 }
 
+bool IsSpitfireMkXIVe(const std::string& name)
+{
+	return (name == "Spitfire Mk.XIVe");
+}
+
 bool IsTyphoonMkIb(const std::string& name)
 {
 	return (name == "Typhoon Mk.Ib");

@@ -30,7 +30,7 @@ bool ReadManifolds();
 
 bool ReadEngineModification();
 
-void ReadWaterTemps();
+void ReadWaterTemps();//?
 
 double GetHeading();
 
@@ -52,9 +52,9 @@ int GetEngineModification();
 
 double GetWaterTemp(int engine);
 
-double GetOilTemp(int engine);
+float GetOilTempOut(int engine);
 
-double GetOilTempB(int engine);
+double GetOilTempIn(int engine);
 
 void UpdateWaterTempValues();
 

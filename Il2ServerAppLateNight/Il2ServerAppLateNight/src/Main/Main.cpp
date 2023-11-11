@@ -31,6 +31,7 @@
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp/CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
+#include "../GERPlanes/GERPlanes.h"
 
 float version = 0.63f;
 
@@ -46,8 +47,8 @@ double turnNeedleValue;
 double turnBallValue;
 std::vector<float> manifoldValues(4);
 std::vector<double> waterTempValues(4);
-std::vector<double> oilTempValues(4);
-std::vector<double> oilTempValuesB(4);
+std::vector<float> oilTempInValues(4);
+std::vector<float> oilTempOutValues(4);
 std::vector<double> cylinderHeadTemps(4);
 std::vector<double> carbMixTemps(4);
 int engineModification;
@@ -194,14 +195,14 @@ double GetWaterTemp(int engine)
 {
 	return waterTempValues[engine];
 }
-double GetOilTemp(int engine)
+float GetOilTempOut(int engine)
 {
-	return oilTempValues[engine];
+	return oilTempOutValues[engine];
 }
 
-double GetOilTempB(int engine)
+double GetOilTempIn(int engine)
 {
-	return oilTempValuesB[engine];
+	return oilTempInValues[engine];
 }
 
 double GetCylinderHeadTemp(int engine)
@@ -485,8 +486,13 @@ void UpdateWaterTempValues()
 
 void UpdateOilTempValues()
 {
-	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(), planeType);
-	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
+	if (IsBf109F2) {
+		oilTempInValues = ReadOilTempsBf109(GetCodeCaveAddress(), GetIL2Handle(), planeType);
+		return;
+	}
+
+	oilTempInValues = ReadOilTempsIn(GetCodeCaveAddress(), GetIL2Handle(), planeType);
+	oilTempOutValues = ReadOilTempsOut(GetCodeCaveAddress(), GetIL2Handle(), planeType);
 }
 
 void UpdateCylinderHeadTemps()

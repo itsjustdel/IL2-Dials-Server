@@ -7,6 +7,7 @@ bool IsSpitfireMkIXe(const std::string& name);
 bool IsTempestMkVser2(const std::string& name);
 bool IsHurricaneMkII(const std::string& name);
 bool IsSpitfireMkXIV(const std::string& name);
+bool IsSpitfireMkXIVe(const std::string& name);
 bool IsTyphoonMkIb(const std::string& name);
 bool IsMosquitoFBMkVIser2(const std::string& name);
 
