@@ -54,7 +54,7 @@ std::vector<float> GetLimitsOil(std::string name)
 
 	// ITA
 	if (IsMC202s8(name)) {
-		return std::vector<float> { 500, 2000 };
+		return std::vector<float> { 30, 130 };
 	}
 
 	// UK
