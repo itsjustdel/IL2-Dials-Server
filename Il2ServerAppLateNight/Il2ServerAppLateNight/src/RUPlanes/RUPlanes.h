@@ -13,5 +13,7 @@ bool IsI16(const std::string& name);
 bool IsMig3(const std::string& name);
 bool IsLa5fns2(const std::string& name);
 bool IsPe2(const std::string& name);
-
+bool IsPe2s35(const std::string& name);
+bool IsPe2s87(const std::string& name);
 bool IsRUPlane(const std::string& name);
+bool IsLi2(const std::string& name);

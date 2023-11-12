@@ -24,17 +24,14 @@ bool Intake(std::string planeName)
 std::vector<float> GetLimitsOil(std::string name)
 {
 	// RU
-	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
-		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name) || IsLa5fns2(name))
+	// A
+	if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name))
 	{
-		// A // B
-		return std::vector<float> { 300, 1600 };
+		return std::vector<float> { 0, 120 };
 	}
-
-	if (IsPe2(name))
-	{
-		// C
-		return std::vector<float> { 300, 1200 };
+	// B
+	else if (IsPe2s87(name)) {
+		return std::vector<float> { 0, 160 };
 	}
 
 	// GER
