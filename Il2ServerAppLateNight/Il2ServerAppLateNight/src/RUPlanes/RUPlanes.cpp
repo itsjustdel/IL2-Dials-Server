@@ -90,8 +90,3 @@ bool IsPe2s87(const std::string& name)
 {
 	return (name == "Pe-2 ser.87");
 }
-
-bool IsLi2(const std::string& name)
-{
-	return (name == "Li - 2");
-}
