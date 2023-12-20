@@ -21,13 +21,15 @@ bool Intake(std::string planeName)
 }
 
 
-std::vector<float> GetLimitsOil(std::string name)
+std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 {
 	// RU
-	// A
-	if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name))
+	if (IsMig3(name)) {
+		return isOutOil ? std::vector<float> { 0, 125 } : std::vector<float>{ 0, 120 };
+	}
+	else if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name) || IsI16(name) || IsLa5s8(name) || IsLa5fns2(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
 	{
-		return std::vector<float> { 0, 120 };
+		return std::vector<float> { 0, 125 };
 	}
 	// B
 	else if (IsPe2s87(name)) {
@@ -62,6 +64,9 @@ std::vector<float> GetLimitsOil(std::string name)
 		// B
 		return std::vector<float> { 0, 120 };
 	}
+	else if (IsMosquitoFBMkVIser2(name)) {
+		return std::vector<float> { 0, 110 };
+	}
 	else if (IsUKPlane(name))
 	{
 		// dial type A
@@ -70,28 +75,26 @@ std::vector<float> GetLimitsOil(std::string name)
 
 	// US
 	if (IsA20B(name)) {
-		// A
-		return std::vector<float> { 10, 50 };
+		return std::vector<float> { 20, 120 };
 	}
-	if (IsP40E(name)) {
-		// B
-		return std::vector<float> { 10, 50 };
+
+	if (IsP39L(name) || IsP40E(name) || IsP47D22(name)) {
+		return std::vector<float> { 0, 100 };
 	}
-	if (IsP39L(name)) {
-		return std::vector<float> { 10, 75 };
-		// C
+	if (IsP47D28(name)) {
+		return std::vector<float> { -70, 150 };
 	}
-	if (IsP47D28(name) || IsP47D22(name)) {
-		return std::vector<float> { 0, 75 };
-		// D
+
+	if (IsP51B5(name)) {
+		return std::vector<float> { 20, 76 }; //values checked in debugger		
 	}
-	if (IsP51D15(name) || IsP51B5(name)) {
-		return std::vector<float> { 0, 100 }; //goes above dial limits
-		// E
+
+	if (IsP51D15(name)) {
+		return std::vector<float> { -70, 150 };
+
 	}
 	if (IsP38(name) || IsC47A(name)) {
-		return std::vector<float> { 0, 75 };
-		// F
+		return std::vector<float> { -50, 150 };
 	}
 
 	return std::vector<float> { 0, 0 };
@@ -99,7 +102,19 @@ std::vector<float> GetLimitsOil(std::string name)
 
 std::vector<float> PercentageConversionOilIn(std::vector<float> percentages, std::string name)
 {
-	std::vector<float> limits = GetLimitsOil(name);
+	std::vector<float> limits = GetLimitsOil(name, false);
+	float range = limits[1] - limits[0];
+	for (size_t i = 0; i < 4; i++)
+	{
+		float p = limits[0] + percentages[i] * range;
+		percentages[i] = p;
+	}
+	return percentages;
+}
+
+std::vector<float> PercentageConversionOilOut(std::vector<float> percentages, std::string name)
+{
+	std::vector<float> limits = GetLimitsOil(name, true);
 	float range = limits[1] - limits[0];
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -157,7 +172,7 @@ std::vector<float> ReadOilTempsOut(LPVOID codeCaveAddress, HANDLE hProcessIL2, s
 		values[i] = *reinterpret_cast<float*>(rawData);
 	}
 
-	return PercentageConversionOilIn(values, planeType);
+	return PercentageConversionOilOut(values, planeType);
 }
 
 std::vector<float> ReadOilTempsBf109(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType)
