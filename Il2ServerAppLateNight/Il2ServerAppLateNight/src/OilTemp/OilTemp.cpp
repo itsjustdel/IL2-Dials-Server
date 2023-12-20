@@ -59,6 +59,11 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 		return std::vector<float> { 30, 130 };
 	}
 
+	//ROM
+	if (IsIAR80(name)) {
+		return std::vector<float> { 30, 140 };// to check
+	}
+
 	// UK
 	if (IsSpitfireMkXIV(name) || IsSpitfireMkXIVe(name)) {
 		// B
@@ -93,8 +98,11 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 		return std::vector<float> { -70, 150 };
 
 	}
-	if (IsP38(name) || IsC47A(name)) {
+	if (IsP38(name)) {
 		return std::vector<float> { -50, 150 };
+	}
+	if (IsC47A(name)) {
+		return std::vector<float> { -70, 150 };
 	}
 
 	return std::vector<float> { 0, 0 };

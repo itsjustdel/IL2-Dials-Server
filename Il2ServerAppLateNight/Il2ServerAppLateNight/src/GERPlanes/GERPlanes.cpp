@@ -190,3 +190,8 @@ bool IsMC202s8(const std::string& name)
 {
 	return (name == "MC 202 s8");
 }
+
+bool IsIAR80(const std::string& name)
+{
+	return (name == "I.A.R. 80-A");
+}

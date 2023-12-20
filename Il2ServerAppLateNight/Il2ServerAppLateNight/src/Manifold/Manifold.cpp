@@ -21,9 +21,8 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 300, 1600 };
 	}
 
-	if (IsPe2(name))
+	else if (IsPe2(name))
 	{
-		// C
 		return std::vector<float> { 300, 1200 };
 	}
 
@@ -35,7 +34,7 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 600, 1800 };
 	}
 
-	if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
+	else if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
 	{
 		// B
 		return std::vector<float> { 600, 1800 };
@@ -59,6 +58,10 @@ std::vector<float> GetLimits(std::string name)
 	if (IsHe111H16(name) || IsHs129B2(name) || IsME410A1(name)) {
 		// F
 		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsIAR80(name)) {
+		return std::vector<float> { 600, 1800 }; // to check
 	}
 
 	// GER none - 
@@ -86,7 +89,7 @@ std::vector<float> GetLimits(std::string name)
 	else if (IsSpitfireMkVb(name)) {
 		return std::vector<float> { -7, 25 };
 	}
-	else if (IsSpitfireMkXIV(name)) {
+	else if (IsSpitfireMkXIV(name) || IsSpitfireMkXIVe(name)) {
 		return std::vector<float> { -7, 25 };
 	}
 	else if (IsTempestMkVser2(name)) {

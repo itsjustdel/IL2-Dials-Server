@@ -17,3 +17,4 @@ bool IsPe2s35(const std::string& name);
 bool IsPe2s87(const std::string& name);
 bool IsRUPlane(const std::string& name);
 bool IsLi2(const std::string& name);
+bool IsU2VS(const std::string& name);
