@@ -275,50 +275,50 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26));
+			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 26));
 			this->label1->ForeColor = System::Drawing::Color::CadetBlue;
 			this->label1->Location = System::Drawing::Point(10, 57);
 			this->label1->Margin = System::Windows::Forms::Padding(0);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(42, 42);
+			this->label1->Size = System::Drawing::Size(45, 39);
 			this->label1->TabIndex = 3;
 			this->label1->Text = L"IL";
 			// 
 			// starLabel
 			// 
 			this->starLabel->AutoSize = true;
-			this->starLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->starLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 26.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->starLabel->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(163)), static_cast<System::Int32>(static_cast<System::Byte>(7)),
 				static_cast<System::Int32>(static_cast<System::Byte>(13)));
 			this->starLabel->Location = System::Drawing::Point(38, 57);
 			this->starLabel->Margin = System::Windows::Forms::Padding(0);
 			this->starLabel->Name = L"starLabel";
-			this->starLabel->Size = System::Drawing::Size(43, 42);
+			this->starLabel->Size = System::Drawing::Size(40, 39);
 			this->starLabel->TabIndex = 4;
 			this->starLabel->Text = L"★";
 			// 
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Font = (gcnew System::Drawing::Font(L"Century Gothic", 26));
+			this->label3->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 26));
 			this->label3->ForeColor = System::Drawing::Color::CadetBlue;
 			this->label3->Location = System::Drawing::Point(70, 57);
 			this->label3->Margin = System::Windows::Forms::Padding(0);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(139, 42);
+			this->label3->Size = System::Drawing::Size(144, 39);
 			this->label3->TabIndex = 4;
 			this->label3->Text = L"2 DIALS";
 			// 
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Font = (gcnew System::Drawing::Font(L"Century Gothic", 24));
+			this->label4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 24));
 			this->label4->ForeColor = System::Drawing::Color::CadetBlue;
 			this->label4->Location = System::Drawing::Point(171, 9);
 			this->label4->Margin = System::Windows::Forms::Padding(0);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(38, 39);
+			this->label4->Size = System::Drawing::Size(38, 37);
 			this->label4->TabIndex = 5;
 			this->label4->Text = L"⇲";
 			this->label4->TextAlign = System::Drawing::ContentAlignment::TopRight;
@@ -340,14 +340,14 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->portTextBox->BackColor = System::Drawing::Color::CadetBlue;
 			this->portTextBox->BorderStyle = System::Windows::Forms::BorderStyle::None;
 			this->portTextBox->Cursor = System::Windows::Forms::Cursors::IBeam;
-			this->portTextBox->Font = (gcnew System::Drawing::Font(L"Century Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->portTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->portTextBox->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
 			this->portTextBox->Location = System::Drawing::Point(90, 290);
 			this->portTextBox->Name = L"portTextBox";
 			this->portTextBox->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			this->portTextBox->Size = System::Drawing::Size(106, 20);
+			this->portTextBox->Size = System::Drawing::Size(106, 19);
 			this->portTextBox->TabIndex = 7;
 			this->portTextBox->Text = L"11200";
 			this->portTextBox->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
@@ -359,13 +359,13 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			// 
 			this->portLabel->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
 			this->portLabel->AutoSize = true;
-			this->portLabel->Font = (gcnew System::Drawing::Font(L"Century Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->portLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->portLabel->ForeColor = System::Drawing::Color::CadetBlue;
 			this->portLabel->Location = System::Drawing::Point(47, 290);
 			this->portLabel->Margin = System::Windows::Forms::Padding(0);
 			this->portLabel->Name = L"portLabel";
-			this->portLabel->Size = System::Drawing::Size(45, 21);
+			this->portLabel->Size = System::Drawing::Size(42, 20);
 			this->portLabel->TabIndex = 8;
 			this->portLabel->Text = L"Port:";
 			this->portLabel->Visible = false;
@@ -419,7 +419,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(35, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.63";
+			this->versionBox->Text = L"v0.64";
 			this->versionBox->Visible = false;
 			// 
 			// DebugTextBox2
