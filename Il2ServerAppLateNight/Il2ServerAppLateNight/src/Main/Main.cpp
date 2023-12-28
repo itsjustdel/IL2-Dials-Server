@@ -31,8 +31,9 @@
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp/CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
+#include "../GERPlanes/GERPlanes.h"
 
-float version = 0.63f;
+float version = 0.64f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
@@ -44,10 +45,10 @@ const size_t altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
-std::vector<double> manifoldValues(4);
+std::vector<float> manifoldValues(4);
 std::vector<double> waterTempValues(4);
-std::vector<double> oilTempValues(4);
-std::vector<double> oilTempValuesB(4);
+std::vector<float> oilTempInValues(4);
+std::vector<float> oilTempOutValues(4);
 std::vector<double> cylinderHeadTemps(4);
 std::vector<double> carbMixTemps(4);
 int engineModification;
@@ -180,7 +181,7 @@ double GetRPM(int engine)
 	return cockpitValues[31 + engine];
 }
 
-double GetManifold(int engine)
+float GetManifold(int engine)
 {
 	return manifoldValues[engine];
 }
@@ -194,14 +195,14 @@ double GetWaterTemp(int engine)
 {
 	return waterTempValues[engine];
 }
-double GetOilTemp(int engine)
+float GetOilTempOut(int engine)
 {
-	return oilTempValues[engine];
+	return oilTempOutValues[engine];
 }
 
-double GetOilTempB(int engine)
+double GetOilTempIn(int engine)
 {
-	return oilTempValuesB[engine];
+	return oilTempInValues[engine];
 }
 
 double GetCylinderHeadTemp(int engine)
@@ -473,23 +474,7 @@ bool ReadTurnCoordinatorBall()
 
 bool ReadManifolds()
 {
-
-	//note not all russian planes are able to map this way, most default to German method
-	if (IsRUPlane(planeType))
-	{
-		manifoldValues = RUManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else if (IsUSPlane(planeType))
-	{
-		manifoldValues = USManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else if (IsUKPlane(planeType))
-	{
-		manifoldValues = UKManifolds(codeCaveAddress, hProcessIL2, planeType);
-	}
-	else
-		manifoldValues = GermanManifolds(codeCaveAddress, hProcessIL2);
-
+	manifoldValues = Manifolds(codeCaveAddress, hProcessIL2, planeType);
 
 	return 0;
 }
@@ -501,15 +486,23 @@ void UpdateWaterTempValues()
 
 void UpdateOilTempValues()
 {
-	oilTempValues = ReadOilTempsA(GetIL2Handle(), GetCodeCaveAddress(), planeType);
-	oilTempValuesB = ReadOilTempsB(GetIL2Handle(), GetCodeCaveAddress(), planeType);
+	// Bf 109s with combination oil and water - neeed to read from a different struct ( underlyingn data, not needle percentage position)
+	if (IsBf109F2(planeType) || IsBf109F4(planeType) || IsBf109G2(planeType) || IsBf109G4(planeType) || IsBf109G6Late(planeType) || IsBf109G6AS(planeType)) {
+		oilTempInValues = ReadOilTempsBf109(GetCodeCaveAddress(), GetIL2Handle(), planeType);
+		return;
+	}
+
+	oilTempInValues = ReadOilTempsIn(GetCodeCaveAddress(), GetIL2Handle(), planeType);
+	oilTempOutValues = ReadOilTempsOut(GetCodeCaveAddress(), GetIL2Handle(), planeType);
 }
 
-void UpdateCylinderHeadTemps() {
+void UpdateCylinderHeadTemps()
+{
 	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2);
 }
 
-void UpdateCarbMixTemps() {
+void UpdateCarbMixTemps()
+{
 	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 

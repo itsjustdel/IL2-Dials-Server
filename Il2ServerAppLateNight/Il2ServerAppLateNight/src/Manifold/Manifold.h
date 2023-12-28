@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeType);
+
 std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2);
 
 std::vector<double> USManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType);
