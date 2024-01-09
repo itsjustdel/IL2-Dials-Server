@@ -46,7 +46,7 @@ double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
 std::vector<float> manifoldValues(4);
-std::vector<double> waterTempValues(4);
+std::vector<float> waterTempValues(4);
 std::vector<float> oilTempInValues(4);
 std::vector<float> oilTempOutValues(4);
 std::vector<double> cylinderHeadTemps(4);
@@ -481,7 +481,7 @@ bool ReadManifolds()
 
 void UpdateWaterTempValues()
 {
-	waterTempValues = ReadWaterTemps(GetIL2Handle(), GetCodeCaveAddress(), planeType);
+	waterTempValues = WaterTemps(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
 void UpdateOilTempValues()
@@ -552,7 +552,7 @@ void ReadTest()
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
 	ReadEngineModification();
-	waterTempValues = ReadWaterTemps(hProcessIL2, codeCaveAddress, planeType);
+	waterTempValues = WaterTemps(hProcessIL2, codeCaveAddress, planeType);
 
 
 	//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves

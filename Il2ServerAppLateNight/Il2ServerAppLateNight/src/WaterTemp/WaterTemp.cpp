@@ -2,46 +2,167 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
+#include "../Injector/Injector.h"
+#include "../RUPlanes/RUPlanes.h"
+#include "../GERPlanes/GERPlanes.h"
+#include "../UKPlanes/UKPlanes.h"
+#include "../USPlanes/USPlanes.h"
 
 char originalLineWaterTemp[8];
 
-std::vector<double> ReadWaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeName)
+
+std::vector<float> GetLimits(std::string name)
 {
-	//two engines
-	std::vector<double> values(4);
-	for (size_t i = 0; i < 4; i++)
+	// RU
+	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
+		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name)
+		|| IsLa5fns2(name) || IsLi2(name))
 	{
-		//buffer
-		char rawData[sizeof(double)];
-		//read address saved in code cave
-		LPCVOID targetAddress;
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2C0 + i*8), &targetAddress, sizeof(LPCVOID), 0);
-
-		//pointer +178 is offset for water temp in kelvin
-		ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x178), &rawData, sizeof(double), 0);
-
-		values[i] = *reinterpret_cast<double*>(rawData);
-
-		//Bf 109 K4 Has it's own way to calc water temp
-		std::string v = "Bf 109 K-4";
-		if (planeName.compare(v) == 0)
-		{
-			LPCVOID targetAddress;
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2C0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
-
-			//a little calculation made by the game for the k4 water
-			//the function "getOil" gives us this number
-			char oilData[sizeof(double)];
-			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x190), &oilData, sizeof(double), 0);
-			double oil = *reinterpret_cast<double*>(oilData);
-			// ((water - "GetOil")*0.20) - worked out from from il2 assembly
-			values[i] -= (values[i] - oil) * 0.20;
-			//can return values, 1 engine plane
-			return values;
-		}		
+		// A // B
+		return std::vector<float> { 300, 1600 };
 	}
 
-	return values;
+	else if (IsPe2(name))
+	{
+		return std::vector<float> { 300, 1200 };
+	}
+
+	// GER
+	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
+		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
+	{
+		// A
+		return std::vector<float> { 600, 1800 };
+	}
+
+	else if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
+	{
+		// B
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsBf109K4(name)) {
+		// C
+		return std::vector<float> { 600, 2000 };
+	}
+
+	if (IsFW190D9(name)) {
+		// D
+		return std::vector<float> { 600, 2500 };
+	}
+
+	if (IsHe111H6(name) || IsJu88C6(name)) {
+		// E
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsHe111H16(name) || IsHs129B2(name) || IsME410A1(name)) {
+		// F
+		return std::vector<float> { 600, 1800 };
+	}
+
+	if (IsIAR80(name)) {
+		return std::vector<float> { 600, 1800 }; // to check
+	}
+
+	// GER none - 
+	// m2 262 A
+	// Ju-52/3m g4e
+	// ar 234 b2
+
+	// ITA
+	if (IsMC202s8(name)) {
+		return std::vector<float> { 500, 2000 };
+	}
+
+	// UK
+	if (IsTyphoonMkIb(name)) {
+		return std::vector<float> { -7, 16 };
+	}
+	else if (IsMosquitoFBMkVIser2(name))
+		return std::vector<float> { -7, 27 };
+	else if (IsHurricaneMkII(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsSpitfireMkIXe(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsSpitfireMkVb(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsSpitfireMkXIV(name) || IsSpitfireMkXIVe(name)) {
+		return std::vector<float> { 40, 140 };
+	}
+	else if (IsTempestMkVser2(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsUKPlane(name))
+	{
+		// A // B // D
+		return std::vector<float> { -9, 25 };
+	}
+
+	// US
+	if (IsA20B(name)) {
+		// A
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP40E(name)) {
+		// B
+		return std::vector<float> { 10, 50 };
+	}
+	if (IsP39L(name)) {
+		return std::vector<float> { 10, 75 };
+		// C
+	}
+	if (IsP47D28(name) || IsP47D22(name)) {
+		return std::vector<float> { 0, 75 };
+		// D
+	}
+	if (IsP51D15(name) || IsP51B5(name)) {
+		return std::vector<float> { 0, 100 }; //goes above dial limits
+		// E
+	}
+	if (IsP38(name) || IsC47A(name)) {
+		return std::vector<float> { 0, 75 };
+		// F
+	}
+
+	return std::vector<float> { 0, 0 };
+}
+
+std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
+{
+	std::vector<float> limits = GetLimits(name);
+	float range = limits[1] - limits[0];
+	for (size_t i = 0; i < 4; i++)
+	{
+		float p = limits[0] + percentages[i] * range;
+		percentages[i] = p;
+	}
+	return percentages;
+}
+std::vector<float> WaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeType)
+{
+	std::vector<float> values(4);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+
+	LPVOID toStruct = PointerToDataStruct(hProcess, addressToRead);
+	for (size_t i = 0; i < 4; i++)
+	{
+		uintptr_t engineOffset = 0x190 * i;
+		uintptr_t offset = 0x3ea4 + (engineOffset);
+
+		//all 2 engine planes have temps next to each other (so far)
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+		const size_t sizeOfData = sizeof(float);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcess, temp, &rawData, sizeOfData, NULL);
+
+		values[i] = *reinterpret_cast<float*>(rawData);
+	}
+
+	return PercentageConversion(values, planeType);
 }
 
 bool InjectionWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
@@ -91,48 +212,48 @@ bool CaveWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	uintptr_t relAddress = (uintptr_t)toCave + 0x200 - 0xD1;// 0xD1 for where this section of the cave starts	
 	//unpack to bytes
 	BYTE relBytes[8];
-	for (size_t i = 0; i < 8; i++)	
-		relBytes[i] = relAddress >> (i * 8);	
-	
-	BYTE bytes[75] = {	0x50,
-						// move plane type struct to rax
-						0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
-						// cmp rax, r12
-						0x4C, 0x39, 0xE0,
-						// pop rax
-						0x58,						
-						// jne [addy]
-						0x75, 0x3A,
-						// cmp r14, 00
-						0x49, 0x83, 0xFE, 0x00,
-						// jne
-						0x75, 0x09,
-						// rcx to mem
-						0x48, 0x89, 0x0D, 0xC9, 0x01, 0x00, 0x00,
-						// jmp to end
-						0xEB, 0x2B,
-						// cmp r14, 01
-						0x49, 0x83, 0xFE, 0x01,
-						// jne [addy]
-						0x75, 0x09,
-						// rcx,[addy]
-						0x48, 0x89, 0x0D, 0xC2, 0x01, 0x00, 0x00,
-						// jmp to end
-						0xEB, 0x1C,
-						// cmp r14, 02
-						0x49, 0x83, 0xFE, 0x02,
-						// jne
-						0x75, 0x09,
-						// rcx to mem
-						0x48, 0x89, 0x0D, 0xBB, 0x01, 0x00, 0x00,
-						// jmp to end
-						0xEB, 0x0D,
-						// cmp r14, 03
-						0x49, 0x83, 0xFE, 0x03,
-						// jne
-						0x75, 0x07,
-						// rcx to mem
-						0x48, 0x89, 0x0D, 0xB4, 0x01, 0x00, 0x00,						
+	for (size_t i = 0; i < 8; i++)
+		relBytes[i] = relAddress >> (i * 8);
+
+	BYTE bytes[75] = { 0x50,
+		// move plane type struct to rax
+		0x48, 0xA1, relBytes[0], relBytes[1], relBytes[2], relBytes[3], relBytes[4], relBytes[5], relBytes[6],relBytes[7],
+		// cmp rax, r12
+		0x4C, 0x39, 0xE0,
+		// pop rax
+		0x58,
+		// jne [addy]
+		0x75, 0x3A,
+		// cmp r14, 00
+		0x49, 0x83, 0xFE, 0x00,
+		// jne
+		0x75, 0x09,
+		// rcx to mem
+		0x48, 0x89, 0x0D, 0xC9, 0x01, 0x00, 0x00,
+		// jmp to end
+		0xEB, 0x2B,
+		// cmp r14, 01
+		0x49, 0x83, 0xFE, 0x01,
+		// jne [addy]
+		0x75, 0x09,
+		// rcx,[addy]
+		0x48, 0x89, 0x0D, 0xC2, 0x01, 0x00, 0x00,
+		// jmp to end
+		0xEB, 0x1C,
+		// cmp r14, 02
+		0x49, 0x83, 0xFE, 0x02,
+		// jne
+		0x75, 0x09,
+		// rcx to mem
+		0x48, 0x89, 0x0D, 0xBB, 0x01, 0x00, 0x00,
+		// jmp to end
+		0xEB, 0x0D,
+		// cmp r14, 03
+		0x49, 0x83, 0xFE, 0x03,
+		// jne
+		0x75, 0x07,
+		// rcx to mem
+		0x48, 0x89, 0x0D, 0xB4, 0x01, 0x00, 0x00,
 	};
 
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &bytes, sizeof(bytes), &bytesWritten);
