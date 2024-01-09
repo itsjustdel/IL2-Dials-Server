@@ -75,31 +75,12 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 500, 2000 };
 	}
 
-	// UK
-	if (IsTyphoonMkIb(name)) {
-		return std::vector<float> { -7, 16 };
-	}
-	else if (IsMosquitoFBMkVIser2(name))
-		return std::vector<float> { -7, 27 };
-	else if (IsHurricaneMkII(name)) {
-		return std::vector<float> { -7, 25 };
-	}
-	else if (IsSpitfireMkIXe(name)) {
-		return std::vector<float> { -7, 25 };
-	}
-	else if (IsSpitfireMkVb(name)) {
-		return std::vector<float> { -7, 25 };
-	}
-	else if (IsSpitfireMkXIV(name) || IsSpitfireMkXIVe(name)) {
+	// UK 
+	if (IsSpitfireMkXIV(name))
 		return std::vector<float> { 40, 140 };
-	}
-	else if (IsTempestMkVser2(name)) {
-		return std::vector<float> { -7, 25 };
-	}
 	else if (IsUKPlane(name))
 	{
-		// A // B // D
-		return std::vector<float> { -9, 25 };
+		return std::vector<float> { 0, 140 };
 	}
 
 	// US
