@@ -39,9 +39,9 @@ float version = 0.64f;
 const int size = 100; //note, min size?
 
 //where we will hold our data from instruments in game
-const size_t cockpitValuesLength = 100;
+const SIZE_T cockpitValuesLength = 100;
 double cockpitValues[cockpitValuesLength];
-const size_t altimeterValuesLength = 20;
+const SIZE_T altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
 double turnNeedleValue;
 double turnBallValue;
@@ -275,16 +275,16 @@ bool CockpitInstrumentsDataStruct(LPVOID structStart)
 
 	//we need to read the data and get what values we need from it
 	//need to finalise numbers
-	const size_t sizeOfData = cockpitValuesLength * 8;
+	const SIZE_T sizeOfData = cockpitValuesLength * 8;
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, structStart, &rawData, sizeOfData, NULL);
 
 	//step through data read 8 bytes at a time and grab double
-	size_t dCount = 0;
-	for (size_t i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
+	SIZE_T dCount = 0;
+	for (SIZE_T i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
 	{
 		char temp[8];
-		for (size_t j = 0; j < 8; j++)
+		for (SIZE_T j = 0; j < 8; j++)
 		{
 			temp[j] = rawData[i + j];
 		}
@@ -301,16 +301,16 @@ bool AltimeterDataStruct(LPVOID structStart)
 
 	//we need to read the data and get what values we need from it
 	//need to finalise numbers
-	const size_t sizeOfData = 10 * 8;
+	const SIZE_T sizeOfData = 10 * 8;
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, structStart, &rawData, sizeOfData, NULL);
 
 	//step through data read 8 bytes at a time and grab doubles -- could go directly to [7] if i work out the maths
-	size_t dCount = 0;
-	for (size_t i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
+	SIZE_T dCount = 0;
+	for (SIZE_T i = 0; i < sizeOfData; i += 8, dCount++)//8 bytes to get double (?)
 	{
 		char temp[8];
-		for (size_t j = 0; j < 8; j++)
+		for (SIZE_T j = 0; j < 8; j++)
 		{
 			temp[j] = rawData[i + j];
 		}
@@ -333,7 +333,7 @@ bool PlaneTypeDataStruct(LPVOID structStart)
 	ReadProcessMemory(hProcessIL2, addressToRead, &rawData, 64, NULL);
 	std::string planeName;
 
-	for (size_t i = 0; i < 64; i++)
+	for (SIZE_T i = 0; i < 64; i++)
 	{
 		//look for null terminated string
 		if (rawData[i] == 0x00)
@@ -413,7 +413,7 @@ bool ReadTurnNeedle()
 
 	LPVOID toTurnNeedle = (LPVOID)(target);
 
-	const size_t sizeOfData = sizeof(double);
+	const SIZE_T sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, toTurnNeedle, &rawData, sizeOfData, NULL);
 
@@ -462,7 +462,7 @@ bool ReadTurnCoordinatorBall()
 	//needle value at +D0
 	LPVOID toTurnBall = (LPVOID)((uintptr_t)(toStruct)+0xD0);
 
-	const size_t sizeOfData = sizeof(double);
+	const SIZE_T sizeOfData = sizeof(double);
 	char rawData[sizeOfData];
 	ReadProcessMemory(hProcessIL2, toTurnBall, &rawData, sizeOfData, NULL);
 
@@ -514,7 +514,7 @@ bool ReadEngineModification()
 	//8 bytes to store our info
 	//read to unsigned 8 int (byte)
 	BYTE bytes[8];
-	size_t bytesRead;
+	SIZE_T bytesRead;
 	//Then once you read your value(255) into there, you can print it this way:
 	ReadProcessMemory(hProcessIL2, addressToRead, &bytes, sizeof(bytes), &bytesRead);
 
@@ -580,7 +580,7 @@ void ReadTest()
 
 void SendTest()
 {
-	for (size_t i = 0; i < cockpitValuesLength; i++)
+	for (SIZE_T i = 0; i < cockpitValuesLength; i++)
 	{
 		cockpitValues[i] += 0.0000001;
 	}

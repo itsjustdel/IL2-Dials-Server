@@ -167,7 +167,7 @@ int serverListen() {
 		{
 			planeType = "No Plane";
 
-			for (size_t i = 0; i < total; i++)
+			for (SIZE_T i = 0; i < total; i++)
 			{
 				floatArray[i] = 0;
 			}
@@ -194,13 +194,13 @@ int serverListen() {
 			//bank needle
 			floatArray[8] = (float)(GetTurnAndBankNeedle());
 			//rpm
-			for (size_t i = 0; i < 4; i++)//4 engines max
+			for (SIZE_T i = 0; i < 4; i++)//4 engines max
 			{
 				//get rpm know where the rpm struct starts
 				floatArray[9 + i] = (float)(GetRPM(i));
 			}
 			//manifold(s)
-			for (size_t i = 0; i < 4; i++)//4 engines max
+			for (SIZE_T i = 0; i < 4; i++)//4 engines max
 			{
 				floatArray[13 + i] = (float)(GetManifold(i));
 			}
@@ -208,27 +208,27 @@ int serverListen() {
 			floatArray[17] = (float)(GetEngineModification());
 
 			//water temp
-			for (size_t i = 0; i < 4; i++)
+			for (SIZE_T i = 0; i < 4; i++)
 			{
 				floatArray[18 + i] = (float)(GetWaterTemp(i));
 			}
 			//oil temp out
-			for (size_t i = 0; i < 4; i++)
+			for (SIZE_T i = 0; i < 4; i++)
 			{
 				floatArray[22 + i] = (float)(GetOilTempOut(i));
 			}
 			//oil temp In
-			for (size_t i = 0; i < 4; i++)
+			for (SIZE_T i = 0; i < 4; i++)
 			{
 				floatArray[26 + i] = (float)(GetOilTempIn(i));
 			}
 			//cylinder head temp
-			for (size_t i = 0; i < 4; i++)
+			for (SIZE_T i = 0; i < 4; i++)
 			{
 				floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
 			}
 			//carb mix temp
-			for (size_t i = 0; i < 4; i++)
+			for (SIZE_T i = 0; i < 4; i++)
 			{
 				floatArray[34 + i] = (float)(GetCarbMixTemp(i));
 			}
@@ -260,8 +260,8 @@ int serverListen() {
 		p += sizeof(fbits);
 
 		// Serialize "planeType string length" into outBuf
-		//size_t to uint32
-		uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is size_t and not the size of the data in the array
+		//SIZE_T to uint32
+		uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is SIZE_T and not the size of the data in the array
 		memcpy(p, &neX, sizeof(neX));
 		p += sizeof(neX);
 

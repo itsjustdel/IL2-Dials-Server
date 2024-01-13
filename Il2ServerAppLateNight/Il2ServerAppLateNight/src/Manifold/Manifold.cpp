@@ -134,7 +134,7 @@ std::vector<float> PercentageConversion(std::vector<float> percentages, std::str
 {
 	std::vector<float> limits = GetLimits(name);
 	float range = limits[1] - limits[0];
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		float p = limits[0] + percentages[i] * range;
 		percentages[i] = p;
@@ -148,14 +148,14 @@ std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::st
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
 		uintptr_t offset = 0x3da8 + (engineOffset);
 
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
-		const size_t sizeOfData = sizeof(float);
+		const SIZE_T sizeOfData = sizeof(float);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
 
@@ -169,7 +169,7 @@ std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::st
 std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
 	std::vector<double> manifoldValues(4);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		//offset in cave, four addresses to read for each plane
 		//first engine is + 0x180 from cave, 2nd 0x188..etc
@@ -178,7 +178,7 @@ std::vector<double> GermanManifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 		LPVOID _manifold = (LPVOID)((uintptr_t)(toStruct)+0x9F8);
-		const size_t sizeOfData = sizeof(double);
+		const SIZE_T sizeOfData = sizeof(double);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, _manifold, &rawData, sizeOfData, NULL);
 
@@ -404,8 +404,8 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	//read address from rcx and save in codecave
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x6D);
-	size_t totalWritten = 0;
-	size_t bytesWritten = 0;
+	SIZE_T totalWritten = 0;
+	SIZE_T bytesWritten = 0;
 	//first of all write the original function back in
 	//and write orignal back in after our code
 	WriteProcessMemory(hProcess, toCave, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);//5 is enough for the jump plus address
@@ -517,7 +517,7 @@ bool CaveManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x6D);
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineManifold, sizeof(originalLineManifold), &bytesWritten);
 
 	BYTE jump = 0xE9;
@@ -538,7 +538,7 @@ bool InjectionManifold(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-bool HookManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookManifold(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

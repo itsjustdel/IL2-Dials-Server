@@ -42,7 +42,7 @@ LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src)
 	//find unallocated memory
 	MEMORY_BASIC_INFORMATION mbi;
 
-	size_t size = 0x1000;
+	SIZE_T size = 0x1000;
 
 	for (SIZE_T addr = src; addr < src + 2147483648; addr += size)
 		//for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
@@ -67,7 +67,7 @@ LPVOID AllocateMemoryUp(HANDLE hProcess, uintptr_t src)
 
 bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& codeCaveAddress)
 {
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	char originalLine[8];//7 for mov inst, 1 for ret
 	//read line
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLine, 0x08, &bytesWritten);
@@ -84,10 +84,10 @@ bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& c
 		ReadProcessMemory(hProcess, (LPVOID)(src + 0x01), &address, 0x04, &bytesWritten);
 
 		//add the starting address of getPointerToCockpitInstruments to the address that was stored previously plus the length to the next instruction
-		codeCaveAddress = LPVOID(src + (uintptr_t)(address) + 0x05);
+		codeCaveAddress = LPVOID(src + (uintptr_t)(address)+0x05);
 
 		CaveRecovered();
-		
+
 		return 1;
 	}
 	else
@@ -99,14 +99,14 @@ bool CodeCave(HANDLE hProcess, uintptr_t src, MODULEENTRY32 moduleRSE, LPVOID& c
 		if (codeCaveAddress == 0)
 			//fail
 			return 0;
-		
+
 	}
 
 	return 1;
 
 }
 
-bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult,LPVOID caveStart,SIZE_T size, char* originalMemory)
+bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult, LPVOID caveStart, SIZE_T size, char* originalMemory)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;
@@ -116,7 +116,7 @@ bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult,LPVOID caveStart,SI
 	//release code cave memory back to the wild
 	VirtualFreeEx(hProcess, caveStart, 0, MEM_RELEASE);
 
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	//put back - array pointers decay to first element in array so need to copy data this way to a local variable
 	char test[100];//how to pass variable for this??
@@ -124,8 +124,8 @@ bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult,LPVOID caveStart,SI
 		test[i] = originalMemory[i];
 
 	//then write it
-	WriteProcessMemory(hProcess, (LPVOID)AOBresult, &test,size, &bytesWritten);
-	
+	WriteProcessMemory(hProcess, (LPVOID)AOBresult, &test, size, &bytesWritten);
+
 
 	//put write protections back to what they were before we injected
 	VirtualProtectEx(hProcess, (LPVOID)AOBresult, size, dwOld, &dwOld);
@@ -133,7 +133,7 @@ bool RestoreOriginalMemory(HANDLE hProcess, LPVOID AOBresult,LPVOID caveStart,SI
 	return 1;
 }
 
-bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult,SIZE_T size, char * outStr)
+bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult, SIZE_T size, char* outStr)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;
@@ -143,7 +143,7 @@ bool SaveOriginalMemory(HANDLE hProcess, LPVOID AOBresult,SIZE_T size, char * ou
 	//Save original memory so we can paste it back in after we get what we need (the address to data struct that holds what we need)
 	char test[100];
 	ReadProcessMemory(hProcess, (LPVOID)AOBresult, &test, size, NULL);
-	for (int i = 0; i < 100; ++i) 
+	for (int i = 0; i < 100; ++i)
 		outStr[i] = test[i];
 
 	//put write protections back to what they were before we injected
@@ -160,9 +160,9 @@ LPVOID PointerToDataStruct(HANDLE hProcess, LPVOID readAddress)
 		//return 0;
 
 	//read process memory returns to this
-	LPVOID pointer= 0;
-	
-	size_t bytesRead = 0;
+	LPVOID pointer = 0;
+
+	SIZE_T bytesRead = 0;
 	//attempt to read from address passed by Inject function	
 	ReadProcessMemory(hProcess, readAddress, &pointer, sizeof(LPCVOID), &bytesRead);
 

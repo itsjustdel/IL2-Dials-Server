@@ -7,7 +7,7 @@
 std::vector<double> CylinderHeadTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2)
 {
 	std::vector<double> values(4);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		//offset in cave, four addresses to read for each plane
 		//first engine is + 0x280 from cave, 2nd 0x188..etc
@@ -16,7 +16,7 @@ std::vector<double> CylinderHeadTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+0xB38);
-		const size_t sizeOfData = sizeof(double);
+		const SIZE_T sizeOfData = sizeof(double);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
 
