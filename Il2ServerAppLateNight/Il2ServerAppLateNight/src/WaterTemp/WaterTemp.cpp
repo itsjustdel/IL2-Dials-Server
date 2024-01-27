@@ -59,6 +59,7 @@ std::vector<float> GetLimits(std::string name)
 		return std::vector<float> { 0, 130};
 	}
 
+	// combo dial
 	if (isGerWaterD(name)) {
 		// D
 		return std::vector<float> { 0, 80};
