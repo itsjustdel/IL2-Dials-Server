@@ -196,7 +196,7 @@ std::vector<float> ReadOilTempsBf109(LPVOID codeCaveAddress, HANDLE hProcessIL2,
 		ReadProcessMemory(hProcessIL2, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2E0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 		ReadProcessMemory(hProcessIL2, (LPCVOID)((uintptr_t)targetAddress + 0x1E0), &rawData, sizeof(double), 0);
 		values[i] = *reinterpret_cast<double*>(rawData);
-		values[i] -= 273;
+		values[i] -= 273.15f;
 	}
 
 	return values;

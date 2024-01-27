@@ -10,6 +10,9 @@
 
 char originalLineWaterTemp[8];
 
+bool isGerWaterD(std::string name) {
+	return IsBf109F4(name) || IsBf109G2(name) || IsBf109F2(name) || IsBf109F4(name) || IsBf109G6(name) || IsBf109G6Late(name) || IsBf109G6AS(name);
+}
 
 std::vector<float> GetLimits(std::string name)
 {
@@ -28,47 +31,38 @@ std::vector<float> GetLimits(std::string name)
 	}
 
 	// GER
-	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
-		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
+	// A
+	// j87d3, bf109e7, bf109g14, me410a1
+	// B
+	// he11h6, bf110e2, ju88a4, bf110g2, he11h16, ju88c6
+	// C
+	// bf109k4, fw190d9
+	// D
+	// f4, g2, f2, g4, g6, g6-late, bf109g6as
+	// 
+	// Note: IAR ?
+
+	if (IsJu87D3(name) || IsBf109E7(name) || IsBf109G14(name) || IsME410A1(name))
 	{
 		// A
-		return std::vector<float> { 600, 1800 };
+		return std::vector<float> { 0, 130};
 	}
 
-	else if (IsBf109G2(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsBf109G6(name) || IsBf109G6AS(name) || IsBf109G6Late(name) || IsBf109G14(name))
+	else if (IsHe111H6(name) || IsHe111H16(name) || IsBf110E2(name) || IsBf110G2(name) || IsJu88A4(name) || IsJu88C6(name))
 	{
 		// B
-		return std::vector<float> { 600, 1800 };
+		return std::vector<float> { 0, 120};
 	}
 
-	if (IsBf109K4(name)) {
+	if (IsBf109K4(name) || IsFW190D9(name)) {
 		// C
-		return std::vector<float> { 600, 2000 };
+		return std::vector<float> { 0, 130};
 	}
 
-	if (IsFW190D9(name)) {
+	if (isGerWaterD(name)) {
 		// D
-		return std::vector<float> { 600, 2500 };
+		return std::vector<float> { 0, 80};
 	}
-
-	if (IsHe111H6(name) || IsJu88C6(name)) {
-		// E
-		return std::vector<float> { 600, 1800 };
-	}
-
-	if (IsHe111H16(name) || IsHs129B2(name) || IsME410A1(name)) {
-		// F
-		return std::vector<float> { 600, 1800 };
-	}
-
-	if (IsIAR80(name)) {
-		return std::vector<float> { 600, 1800 }; // to check
-	}
-
-	// GER none - 
-	// m2 262 A
-	// Ju-52/3m g4e
-	// ar 234 b2
 
 	// ITA
 	if (IsMC202s8(name)) {
@@ -109,7 +103,7 @@ std::vector<float> GetLimits(std::string name)
 		// F
 	}
 
-	return std::vector<float> { 0, 0 };
+	return std::vector<float> { 0, 135 }; // UK A is 140, GER A is 130 -- to do FC planes
 }
 
 std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
@@ -129,19 +123,39 @@ std::vector<float> WaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::stri
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 
 	LPVOID toStruct = PointerToDataStruct(hProcess, addressToRead);
+
+	bool gerWaterD = isGerWaterD(planeType);
 	for (size_t i = 0; i < 4; i++)
 	{
-		uintptr_t engineOffset = 0x190 * i;
-		uintptr_t offset = 0x3ea4 + (engineOffset);
+		if (gerWaterD) {
+			// bf 109 raw water value - This dial seems to be on a different data point, 
+			// but we read the oil directly too, since it is a double dial so will leave this way for now
+			char rawData[sizeof(double)];
+			//read address saved in code cave
+			LPCVOID targetAddress;
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)codeCaveAddress + 0x2C0 + i * 8), &targetAddress, sizeof(LPCVOID), 0);
 
-		//all 2 engine planes have temps next to each other (so far)
-		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
-		const size_t sizeOfData = sizeof(float);
-		char rawData[sizeOfData];
-		ReadProcessMemory(hProcess, temp, &rawData, sizeOfData, NULL);
+			//pointer +178 is offset for water temp in kelvin
+			ReadProcessMemory(hProcess, (LPCVOID)((uintptr_t)targetAddress + 0x178), &rawData, sizeof(double), 0);
 
-		values[i] = *reinterpret_cast<float*>(rawData);
+			values[i] = *reinterpret_cast<double*>(rawData);
+			values[i] -= 273.15f; // kelvin to C
+		}
+		else {
+			//use draw arg value
+			uintptr_t engineOffset = 0x190 * i;
+			uintptr_t offset = 0x3ea4 + (engineOffset);
+			LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+			const size_t sizeOfData = sizeof(float);
+			char rawData[sizeOfData];
+			ReadProcessMemory(hProcess, temp, &rawData, sizeOfData, NULL);
+
+			values[i] = *reinterpret_cast<float*>(rawData);
+		}
 	}
+
+	// don't convert ger water d raw data values
+	if (gerWaterD) return values;
 
 	return PercentageConversion(values, planeType);
 }
