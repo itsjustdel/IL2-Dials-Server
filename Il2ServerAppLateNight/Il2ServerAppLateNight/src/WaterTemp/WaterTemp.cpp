@@ -17,18 +17,28 @@ bool isGerWaterD(std::string name) {
 std::vector<float> GetLimits(std::string name)
 {
 	// RU
-	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
-		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name)
-		|| IsLa5fns2(name) || IsLi2(name))
+	// 0 - 120 A
+	// lagg3 s29, il2 41,42,43, mig3 s24, pe s35, li2
+	if (IsLagg3s29(name) || IsIL2(name) || IsMig3(name) || IsPe2s35(name) || IsLi2(name))
 	{
-		// A // B
-		return std::vector<float> { 300, 1600 };
+		return std::vector<float> { 0, 120 };
 	}
 
-	else if (IsPe2(name))
+	// 0 - 125 B
+	// yak 1 s69, yak 7b s36, yak 9s1, yak9t s1
+	if (IsYak169(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
 	{
-		return std::vector<float> { 300, 1200 };
+		return std::vector<float> { 0, 125 };
 	}
+
+	// 0 - 160 C
+	// pe 2 s87
+	if (IsPe2s87(name))
+	{
+		return std::vector<float> { 0, 160 };
+	}
+
+	//none la-5 s8, i 16, la5fn s2
 
 	// GER
 	// A
@@ -67,7 +77,7 @@ std::vector<float> GetLimits(std::string name)
 
 	// ITA
 	if (IsMC202s8(name)) {
-		return std::vector<float> { 500, 2000 };
+		return std::vector<float> { 0, 130 };
 	}
 
 	// UK 
@@ -79,30 +89,25 @@ std::vector<float> GetLimits(std::string name)
 	}
 
 	// US
-	if (IsA20B(name)) {
-		// A
-		return std::vector<float> { 10, 50 };
+	// A 50 - 15
+	// p-40e1, p-39l-1
+	if (IsP40E(name) || IsP39L(name)) {
+		return std::vector<float> {50, 150};
 	}
-	if (IsP40E(name)) {
-		// B
-		return std::vector<float> { 10, 50 };
+
+	// B -70, 150
+	// P38J-25
+	if (IsP38(name)) {
+		return std::vector<float> {-70, 150};
 	}
-	if (IsP39L(name)) {
-		return std::vector<float> { 10, 75 };
-		// C
+
+	// C -70, 150
+	// P-51D-15, P-51B-5
+	if (IsP51B5(name) || IsP51D15(name)) {
+		return std::vector<float> {-70, 150};
 	}
-	if (IsP47D28(name) || IsP47D22(name)) {
-		return std::vector<float> { 0, 75 };
-		// D
-	}
-	if (IsP51D15(name) || IsP51B5(name)) {
-		return std::vector<float> { 0, 100 }; //goes above dial limits
-		// E
-	}
-	if (IsP38(name) || IsC47A(name)) {
-		return std::vector<float> { 0, 75 };
-		// F
-	}
+	// none p-47d-28, P-47D-22, C-47A, a20
+
 
 	return std::vector<float> { 0, 135 }; // UK A is 140, GER A is 130 -- to do FC planes
 }
