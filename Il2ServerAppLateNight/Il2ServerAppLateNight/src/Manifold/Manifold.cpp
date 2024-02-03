@@ -10,7 +10,7 @@
 
 char originalLineManifold[8];
 
-std::vector<float> GetLimits(std::string name)
+std::vector<float> GetWaterLimits(std::string name)
 {
 	// RU
 	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
@@ -130,9 +130,9 @@ std::vector<float> GetLimits(std::string name)
 	return std::vector<float> { 0, 0 };
 }
 
-std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
+std::vector<float> PercentageConversionWater(std::vector<float> percentages, std::string name)
 {
-	std::vector<float> limits = GetLimits(name);
+	std::vector<float> limits = GetWaterLimits(name);
 	float range = limits[1] - limits[0];
 	for (SIZE_T i = 0; i < 4; i++)
 	{
@@ -162,7 +162,7 @@ std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::st
 		values[i] = *reinterpret_cast<float*>(rawData);
 	}
 
-	return PercentageConversion(values, planeType);
+	return PercentageConversionWater(values, planeType);
 }
 
 //old
