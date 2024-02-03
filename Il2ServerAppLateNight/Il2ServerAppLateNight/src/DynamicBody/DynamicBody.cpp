@@ -8,7 +8,7 @@ bool InjectionDynamicBody(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//note, replicated in cave code
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x30);
 
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineDynamicBody, sizeof(originalLineDynamicBody), &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
@@ -33,12 +33,12 @@ bool InjectionDynamicBody(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CaveDynamicBody(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	size_t totalWritten = 0;
+	SIZE_T totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x30);
 	//cave - where we put our own code alongside the original
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
@@ -84,7 +84,7 @@ bool CaveDynamicBody(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//else, store rcx
 	//the pointer value we want is stored in rcx, so move rcx to point in our cave for later retrieval	
 	// "rcxToMem" 
-	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xE9, 0x01, 0x00, 0x00 }; 
+	BYTE rcxToMem[7] = { 0x48, 0x89, 0x0D, 0xE9, 0x01, 0x00, 0x00 };
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), rcxToMem, sizeof(rcxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
@@ -101,7 +101,7 @@ bool CaveDynamicBody(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 }
 
 
-bool HookDynamicBody(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookDynamicBody(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

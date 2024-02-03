@@ -107,19 +107,19 @@ LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTur
 	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, turnNeedleAddressInCave);
 
 	//only search for limits between 20 and 50
-	for (size_t a = 10; a < 60; a++)
+	for (SIZE_T a = 10; a < 60; a++)
 	{
 
 		//scan through segment of memory we know value is in until we find "limit" 
 		//limit is the known value where the rotation is locked - user will fly plane in a manner to max out needle movement while we scan
-		for (size_t i = 0; i < 1000 * sizeof(double); i += sizeof(double))
+		for (SIZE_T i = 0; i < 1000 * sizeof(double); i += sizeof(double))
 		{
 			//add address using uintptr_t and cast back to lpcvoid to use with ReadProcessMemory function		
 			LPCVOID targetAddress = (LPCVOID)((uintptr_t)(toDynamicBodyStruct)+i);
 			//read a double in to this variable
 			double d;
 			//for debug to see if we read anything
-			size_t bytesRead;
+			SIZE_T bytesRead;
 			//read memory from process at "struct start", read a double
 			ReadProcessMemory(hProcess, targetAddress, &d, sizeof(double), &bytesRead);
 

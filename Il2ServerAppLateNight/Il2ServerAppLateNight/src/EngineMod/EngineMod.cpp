@@ -4,12 +4,12 @@ char originalLineEngineModification[6];
 
 bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	size_t totalWritten = 0;
+	SIZE_T totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0xBF);//C8 is where we got to with other functions
 	//cave - where we put our own code alongside the original
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
@@ -40,7 +40,7 @@ bool CaveEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 bool InjectionEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
 	toCave = (LPVOID)((uintptr_t)(toCave)+0xBF);
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineEngineModification, sizeof(originalLineEngineModification), &bytesWritten);
 
 	BYTE jump = 0xE9;
@@ -62,7 +62,7 @@ bool InjectionEngineModification(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-bool HookEngineModification(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookEngineModification(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

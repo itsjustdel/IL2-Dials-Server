@@ -7,7 +7,7 @@ bool InjectionAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//note, replicated in cave code
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x1A);//0x23 is after other code stops
 
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineAltimeter, 0x08, &bytesWritten);
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
@@ -38,34 +38,34 @@ bool CaveAltimeter(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x1A);
 	//cave - where we put our own code alongside the original
 
-	size_t totalWritten = 0;
-	size_t bytesWritten = 0;
+	SIZE_T totalWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	WriteProcessMemory(hProcess, toCave, &originalLineAltimeter, 7, &bytesWritten);//7 is without ret
 	totalWritten += bytesWritten;
 
 	//the pointer value we want is stored in rax, so move rax to point in our cave for later retrieval
 	BYTE raxToMem[2] = { 0x48, 0xA3 };
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + totalWritten), raxToMem, sizeof(raxToMem), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), raxToMem, sizeof(raxToMem), &bytesWritten);
 	totalWritten += bytesWritten;
 
 	//note rax doesn't have a relative mov instrution 
 	LPVOID targetAddress = (LPVOID)((uintptr_t)(toCave)-0x1A + 0x220);
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + totalWritten), &targetAddress, sizeof(LPVOID), &bytesWritten);;
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &targetAddress, sizeof(LPVOID), &bytesWritten);;
 	totalWritten += bytesWritten;
 
 	//jump to return address
-	BYTE jump = 0xE9;	
+	BYTE jump = 0xE9;
 	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &jump, sizeof(jump), &bytesWritten);//HERE JUMP GOIONG IN WRONG PLACE?
 	totalWritten += bytesWritten;
 
 	DWORD returnAddress = (uintptr_t)(src - ((uintptr_t)toCave + totalWritten - 3));
-	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave) + totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
+	WriteProcessMemory(hProcess, (LPVOID)((uintptr_t)(toCave)+totalWritten), &returnAddress, sizeof(returnAddress), &bytesWritten);
 
 	return 1;
 }
 
-bool HookAltimeter(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookAltimeter(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

@@ -112,7 +112,7 @@ std::vector<float> PercentageConversionOilIn(std::vector<float> percentages, std
 {
 	std::vector<float> limits = GetLimitsOil(name, false);
 	float range = limits[1] - limits[0];
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		float p = limits[0] + percentages[i] * range;
 		percentages[i] = p;
@@ -124,7 +124,7 @@ std::vector<float> PercentageConversionOilOut(std::vector<float> percentages, st
 {
 	std::vector<float> limits = GetLimitsOil(name, true);
 	float range = limits[1] - limits[0];
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		float p = limits[0] + percentages[i] * range;
 		percentages[i] = p;
@@ -141,14 +141,14 @@ std::vector<float> ReadOilTempsIn(LPVOID codeCaveAddress, HANDLE hProcessIL2, st
 
 	uintptr_t baseOffset = 0x3e5c;
 
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
 		uintptr_t offset = baseOffset + (engineOffset);
 
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
-		const size_t sizeOfData = sizeof(float);
+		const SIZE_T sizeOfData = sizeof(float);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
 
@@ -166,14 +166,14 @@ std::vector<float> ReadOilTempsOut(LPVOID codeCaveAddress, HANDLE hProcessIL2, s
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
 	uintptr_t baseOffset = 0x3e54;
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
 		uintptr_t offset = baseOffset + (engineOffset);
 
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
-		const size_t sizeOfData = sizeof(float);
+		const SIZE_T sizeOfData = sizeof(float);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
 
@@ -187,7 +187,7 @@ std::vector<float> ReadOilTempsBf109(LPVOID codeCaveAddress, HANDLE hProcessIL2,
 {
 	//two engines
 	std::vector<float> values(4);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		//buffer
 		char rawData[sizeof(double)];
@@ -209,7 +209,7 @@ std::vector<double> ReadOilTempsA(HANDLE hProcess, LPVOID codeCaveAddress, std::
 {
 	//two engines
 	std::vector<double> values(4);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		//buffer
 		char rawData[sizeof(double)];
@@ -370,7 +370,7 @@ std::vector<double> ReadOilTempsB(HANDLE hProcess, LPVOID codeCaveAddress, std::
 {
 	//two engines
 	std::vector<double> values(4);
-	for (size_t i = 0; i < 4; i++)
+	for (SIZE_T i = 0; i < 4; i++)
 	{
 		//buffer
 		char rawData[sizeof(double)];
@@ -419,7 +419,7 @@ bool InjectionOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//position in cave where we will start to write
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x129);
 
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLineOilTemp, sizeof(originalLineOilTemp), &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
@@ -446,12 +446,12 @@ bool InjectionOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	size_t totalWritten = 0;
+	SIZE_T totalWritten = 0;
 	//position in cave where we will start to write
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x129);
 
 	//cave - where we put our own code alongside the original
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
@@ -462,7 +462,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	uintptr_t relAddress = (uintptr_t)toCave + 0x200 - 0x129;// 0xD1 for where this section of the cave starts	
 	//unpack to bytes
 	BYTE relBytes[8];
-	for (size_t i = 0; i < 8; i++)
+	for (SIZE_T i = 0; i < 8; i++)
 		relBytes[i] = relAddress >> (i * 8);
 
 	BYTE bytes[75] = { 0x50,
@@ -521,7 +521,7 @@ bool CaveOilTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-bool HookOilTemp(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookOilTemp(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

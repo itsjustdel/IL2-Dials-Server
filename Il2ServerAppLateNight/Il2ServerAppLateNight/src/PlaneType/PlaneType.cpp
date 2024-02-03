@@ -9,7 +9,7 @@ bool InjectionPlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	//note, replicated in cave code
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x00);//plane type is a tstart of code cave
 
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 	ReadProcessMemory(hProcess, (LPVOID)src, &originalLinePlaneType, 8, &bytesWritten);//5 is enough for jump plus address
 
 	//0x09 is the byte form of "jmp", assembly language to jump to a location. Note this is a x86 instruction (it can only jump +- 2gb of memory)
@@ -33,12 +33,12 @@ bool InjectionPlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 
 bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 {
-	size_t totalWritten = 0;
+	SIZE_T totalWritten = 0;
 	//cave in RSE dll already has some cockpit instruments stuff in it so we will put our code after it
 	//add to cave,( uintptr_t for addition)
 	toCave = (LPVOID)((uintptr_t)(toCave)+0x00);//0x00 - plane type at start of cave
 	//cave - where we put our own code alongside the original
-	size_t bytesWritten = 0;
+	SIZE_T bytesWritten = 0;
 
 	//first of all write the original function back in
 	//and write orignal back in after our code
@@ -71,7 +71,7 @@ bool CavePlaneType(HANDLE hProcess, uintptr_t src, LPVOID toCave)
 	return 1;
 }
 
-bool HookPlaneType(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress)
+bool HookPlaneType(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress)
 {
 	//save old read/write access to put back to how it was later
 	DWORD dwOld;

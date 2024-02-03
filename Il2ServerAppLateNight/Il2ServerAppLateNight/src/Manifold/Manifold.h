@@ -13,4 +13,4 @@ std::vector<double> UKManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 
 std::vector<double> RUManifolds(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType);
 
-bool HookManifold(HANDLE hProcess, void* pSrc, size_t size, LPVOID codeCaveAddress);
+bool HookManifold(HANDLE hProcess, void* pSrc, SIZE_T size, LPVOID codeCaveAddress);
