@@ -1,160 +1,33 @@
 #pragma once
 #include <Windows.h>
-#include "../USPlanes/USPlanes.h"
+#include <vector>
 #include <string>
 #include "../Injector/Injector.h"
+#include "../USPlanes/USPlanes.h"
 
-uintptr_t OffsetToTurnNeedle(std::string planeType)
+std::vector<float> GetLimitsTurnNeedle(std::string name)
 {
-	uintptr_t offset = 0;
-	//unique offsets for some planes
-	if (planeType.compare("P-47D-28") == 0)
-		offset = 0XCE8;
-
-	else if (planeType.compare("Yak-7B ser.36") == 0)
-		offset = 0xC90;
-
-	else if (planeType.compare("Tempest Mk.V ser.2") == 0)
-		offset = 0XD28;
-
-	else if (planeType.compare("Spitfire Mk.IXe") == 0)
-		offset = 0XD50;
-
-	else if (planeType.compare("Hurricane Mk.II") == 0)
-		offset = 0XD20;
-
-	//yak9 s1 0xC48
-	else if (planeType.compare("Yak-9 ser.1") == 0)
-		offset = 0XC88;
-
-	//9t 0xC50
-	else if (planeType.compare("Yak-9T ser.1") == 0)
-		offset = 0XC90;
-
-	//hs 129 = 0xCA8
-	else if (planeType.compare("Hs 129 B-2") == 0)
-		offset = 0XCE8;
-
-	//Typhoon Mk.Ib	
-	else if (planeType.compare("Typhoon Mk.Ib") == 0)
-		offset = 0XD88;
-
-	//"U-2VS"
-	else if (planeType.compare("U-2VS") == 0)
-		offset = 0X10f8;
-
-	//P-47D-22
-	else if (planeType.compare("P-47D-22") == 0)
-		offset = 0XCE0;
-
-	//Spitfire Mk.XIV
-	else if (planeType.compare("Spitfire Mk.XIV") == 0)
-		offset = 0XE70;
-
-	//P-51B-5
-	else if (planeType.compare("P-51B-5") == 0)
-		offset = 0XD18;
-
-	//grab the a-20 here before us plane check - it has default
-	else if (planeType.compare("A-20B") == 0)
-		offset = 0xB30;
-
-	//p38
-	//"P-38J-25";
-	else if (planeType.compare("P-38J-25") == 0)	
-		offset = 0xDB8;		
-
-	//p51D
-	else if (planeType.compare("P-51D-15") == 0)
-		offset = 0xD20;
-
-	else if (planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)	
-		offset = 0xDD0;
-
-	else if (planeType.compare("C-47A") == 0)
-		offset = 0x11F8;
-
-	else if (IsUSPlane(planeType))	
-		offset = 0xD30;		
-	
-	else	
-		//default
-		offset = 0xB30;
-	
-
-	return offset;
+	return std::vector<float> { 0, 1 }; // 6 degress per second standard turn? --as is in game sending atm
 }
 
-
-//bools used for turn needle scan  -move function to turn needle class
-bool foundNegativeTurnLimit[100];//oversized
-bool foundPositiveTurnLimit[100];
-LPCVOID positiveTurnNeedleOffset[100];
-LPCVOID negativeTurnNeedleOffset[100];
-
-LPCVOID TurnNeedleScanner(LPCVOID structStart, HANDLE hProcess, bool injectedTurnNeedle, LPVOID codeCaveAddress, HANDLE hProcessIL2)
+float PercentageConversionTurnNeedle(float percentage, std::string name)
 {
-	//we need to wait for injection before we do this
-	if (!injectedTurnNeedle)
-		return 0;
-
-
-
-	//find where to setart our search
-	//turn needle location stored at codecave + 140
-	LPVOID turnNeedleAddressInCave = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240);
-	//read address in cave 
-	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, turnNeedleAddressInCave);
-
-	//only search for limits between 20 and 50
-	for (SIZE_T a = 10; a < 60; a++)
-	{
-
-		//scan through segment of memory we know value is in until we find "limit" 
-		//limit is the known value where the rotation is locked - user will fly plane in a manner to max out needle movement while we scan
-		for (SIZE_T i = 0; i < 1000 * sizeof(double); i += sizeof(double))
-		{
-			//add address using uintptr_t and cast back to lpcvoid to use with ReadProcessMemory function		
-			LPCVOID targetAddress = (LPCVOID)((uintptr_t)(toDynamicBodyStruct)+i);
-			//read a double in to this variable
-			double d;
-			//for debug to see if we read anything
-			SIZE_T bytesRead;
-			//read memory from process at "struct start", read a double
-			ReadProcessMemory(hProcess, targetAddress, &d, sizeof(double), &bytesRead);
-
-			//check read double against passed "limit"
-			//make sure to compare the same data type (negative numbers can differ)
-
-			double doubleA = (double)(a);
-			double minusDoubleA = -(double)(a);
-			if (d == doubleA)
-			{
-				//we have found potentially found our offset
-				foundPositiveTurnLimit[a] = true;
-				positiveTurnNeedleOffset[a] = (LPCVOID)i;
-			}
-
-			if (d == minusDoubleA)
-			{
-				//we have found potentially found our offset
-				foundNegativeTurnLimit[a] = true;
-				negativeTurnNeedleOffset[a] = (LPCVOID)i;
-			}
-		}
-
-		//check if we have found both neative and positive offsets
-		if (foundNegativeTurnLimit[a] && foundPositiveTurnLimit[a])
-		{
-			if (negativeTurnNeedleOffset[a] == positiveTurnNeedleOffset[a])
-			{
-				//looks like we have it!
-				return negativeTurnNeedleOffset[a];
-			}
-
-		}
-	}
-	return 0;
-
+	std::vector<float> limits = GetLimitsTurnNeedle(name);
+	float range = limits[1] - limits[0];
+	return limits[0] + percentage * range;
 }
 
+float TurnNeedleValue(HANDLE hProcess, LPVOID codeCaveAddress, std::string planeType)
+{
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+	LPVOID toStruct = PointerToDataStruct(hProcess, addressToRead);
+	uintptr_t offset = 0x8a1c;
+	LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+	const size_t sizeOfData = sizeof(float);
+	char rawData[sizeOfData];
+	ReadProcessMemory(hProcess, temp, &rawData, sizeOfData, NULL);
+
+	float value = *reinterpret_cast<float*>(rawData);
+
+	return PercentageConversionTurnNeedle(value, planeType);
+}

@@ -143,11 +143,12 @@ int serverListen() {
 		ReadPlaneType();
 		ReadCockpitInstruments();
 		ReadAltimeter();
-		ReadTurnNeedle();
+
 		ReadTurnCoordinatorBall();
 		ReadManifolds();
 		ReadEngineModification();
 		//water temps read in water temps class - TO DO, refactor for above
+		UpdateTurnNeedle();
 		UpdateWaterTempValues();
 		UpdateOilTempValues();
 		UpdateCylinderHeadTemps();

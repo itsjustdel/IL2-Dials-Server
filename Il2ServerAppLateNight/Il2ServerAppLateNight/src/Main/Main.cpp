@@ -43,7 +43,7 @@ const SIZE_T cockpitValuesLength = 100;
 double cockpitValues[cockpitValuesLength];
 const SIZE_T altimeterValuesLength = 20;
 double altimeterValues[altimeterValuesLength];
-double turnNeedleValue;
+float turnNeedleValue;
 double turnBallValue;
 std::vector<float> manifoldValues(4);
 std::vector<float> waterTempValues(4);
@@ -395,63 +395,6 @@ bool ReadAltimeter()
 	return 0;
 }
 
-bool ReadTurnNeedle()
-{
-	//How to find new offsets-
-	//Find value in debugger by ising +240 offset in cave. Needle is clamped number after NaNs e.g 24, 31
-	//watch value and check offsets of found instructions (or use turn needle scanner!)
-
-	//injection saves alt. pointer at code cave's address + 0xxx
-	//pointer start of struct in our cave
-	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240);
-	//read
-	LPVOID toDynamicBodyStruct = PointerToDataStruct(hProcessIL2, addressToRead);
-
-	uintptr_t offset = OffsetToTurnNeedle(planeType);
-
-	uintptr_t target = (uintptr_t)(toDynamicBodyStruct)+offset;
-
-	LPVOID toTurnNeedle = (LPVOID)(target);
-
-	const SIZE_T sizeOfData = sizeof(double);
-	char rawData[sizeOfData];
-	ReadProcessMemory(hProcessIL2, toTurnNeedle, &rawData, sizeOfData, NULL);
-
-	//re interporet raw to double
-	turnNeedleValue = *reinterpret_cast<double*>(rawData);
-
-
-	//some are mirrored
-	if (planeType.compare("Yak-7B ser.36") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Tempest Mk.V ser.2") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Spitfire Mk.IXe") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Hurricane Mk.II") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Yak-9 ser.1") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Yak-9T ser.1") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("U-2VS") == 0)
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Mosquito F.B. Mk.VI ser.2") == 0)//+		planeType	"Mosquito F.B. Mk.VI ser.2"	std::string
-		turnNeedleValue *= -1;
-
-	if (planeType.compare("Typhoon Mk.Ib") == 0)
-		turnNeedleValue *= -1;
-
-	return 0;
-}
-
 bool ReadTurnCoordinatorBall()
 {
 	//injection saves pointer at code cave's address + 0xxx
@@ -477,6 +420,11 @@ bool ReadManifolds()
 	manifoldValues = Manifolds(codeCaveAddress, hProcessIL2, planeType);
 
 	return 0;
+}
+
+void UpdateTurnNeedle()
+{
+	turnNeedleValue = TurnNeedleValue(GetIL2Handle(), GetCodeCaveAddress(), planeType);
 }
 
 void UpdateWaterTempValues()
@@ -548,7 +496,7 @@ void ReadTest()
 	ReadCockpitInstruments();
 	ReadAltimeter();
 	ReadPlaneType();
-	ReadTurnNeedle();
+	//ReadTurnNeedle();
 	ReadTurnCoordinatorBall();
 	ReadManifolds();
 	ReadEngineModification();
@@ -825,17 +773,6 @@ int Injections(System::ComponentModel::BackgroundWorker^ worker)
 			return 0;
 		}
 	}
-
-	return 1;
-}
-
-int NeedleScan(System::ComponentModel::BackgroundWorker^ worker)
-{
-	//debugging function to find offsets
-	LPCVOID needleOffset = TurnNeedleScanner(dynamicBodyAddress, hProcessIL2, injectedDynamicBody, codeCaveAddress, hProcessIL2);
-	if (needleOffset != 0)
-		//convert to int and send
-		worker->ReportProgress((uintptr_t)needleOffset);
 
 	return 1;
 }
