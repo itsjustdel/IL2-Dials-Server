@@ -66,4 +66,4 @@ double GetCylinderHeadTemp(int engine);
 
 void UpdateCarbMixTemps();
 
-double GetCarbMixTemp(int engine);
+float GetCarbMixTemp(int engine);

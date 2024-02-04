@@ -2,57 +2,61 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
-
 #include "../Injector/Injector.h"
-#include "../PlaneSelector.h"
+#include "../USPlanes/USPlanes.h"
 
-std::vector<double> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::string planeName)
+std::vector<float> GetLimitsCarbAirMix(std::string name)
 {
-	std::vector<double> values(4);
-	for (SIZE_T i = 0; i < 4; i++)
-	{
-		//offset in cave, four addresses to read for each plane
-		//first engine is + 0x240 from cave, 2nd 0x188..etc
-		uintptr_t engineOffset = 0x08 * i;
-		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x240);
-		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
+	// none - p40
 
-		//two engines
-		uintptr_t offsetToTemp = 0x00;
-		// p38 0xE30,0xE38
-		if (isP38J(planeName))
-			offsetToTemp = 0xE30;
-		// p39 0xD70
-		else if (isP39(planeName))
-			offsetToTemp = 0xD70;
-		// p47 22 0xD30 
-		else if (isP47D22(planeName))
-			offsetToTemp = 0xD30;
-		// p47 28 0xD40
-		else if (isP47D28(planeName))
-			offsetToTemp = 0xD40;
-		// p51B 0xD60
-		else if (isP51B5(planeName))
-			offsetToTemp = 0xD60;
-		// p51D 0xD68
-		else if (isP51D15(planeName))
-			offsetToTemp = 0xD68;
-		// a20 0xD88,0xD90
-		else if (isA20B(planeName))
-			offsetToTemp = 0xD88;
-		// c47 0x1260, 0x1268
-		else if (isC47(planeName))
-			offsetToTemp = 0x1260;
-
-		offsetToTemp += i * 8;
-		//all 2 engine planes have temps next to each other (so far)
-		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offsetToTemp);
-		const SIZE_T sizeOfData = sizeof(double);
-		char rawData[sizeOfData];
-		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);
-
-		values[i] = *reinterpret_cast<double*>(rawData);
+	// A p47d-22  -70 - 150
+	if (IsP47D22(name)) return { -70, 150 };
+	// B p47D-28
+	if (IsP47D28(name)) return { -70, 150 };
+	// C p51d15, p51b-5
+	if (IsP51B5(name) || IsP51D15(name)) return { -70, 150 };
+	// D A20
+	if (IsA20B(name)) return { -45, 45 };
+	// E c-47, p38
+	if (IsC47A(name) || IsP38(name)) return { -70, 150 };
+	// F p39
+	if (IsP39L(name)) {
+		return { -50, 50 };
 	}
 
-	return values;
+
+	return std::vector<float> { 0, 0 };
+}
+
+std::vector<float> PercentageConversionCarbAirMix(std::vector<float> percentages, std::string name)
+{
+	std::vector<float> limits = GetLimitsCarbAirMix(name);
+	float range = limits[1] - limits[0];
+	for (size_t i = 0; i < 4; i++)
+	{
+		float p = limits[0] + percentages[i] * range;
+		percentages[i] = p;
+	}
+	return percentages;
+}
+
+std::vector<float> CarbAirMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType)
+{
+	std::vector<float> values(4);
+	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
+	LPVOID toStruct = PointerToDataStruct(hProcess, addressToRead);
+	for (SIZE_T i = 0; i < 4; i++)
+	{
+		uintptr_t engineOffset = 0x190 * i;
+		uintptr_t offset = 0x3dbc + (engineOffset);
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
+		const size_t sizeOfData = sizeof(float);
+		char rawData[sizeOfData];
+		ReadProcessMemory(hProcess, temp, &rawData, sizeOfData, NULL);
+
+		values[i] = *reinterpret_cast<float*>(rawData);
+	}
+
+
+	return PercentageConversionCarbAirMix(values, planeType);
 }

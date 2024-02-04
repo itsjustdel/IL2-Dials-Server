@@ -50,7 +50,7 @@ std::vector<float> waterTempValues(4);
 std::vector<float> oilTempInValues(4);
 std::vector<float> oilTempOutValues(4);
 std::vector<double> cylinderHeadTemps(4);
-std::vector<double> carbMixTemps(4);
+std::vector<float> carbMixTemps(4);
 int engineModification;
 //where we hold planeType string
 std::string planeType;
@@ -210,7 +210,7 @@ double GetCylinderHeadTemp(int engine)
 	return cylinderHeadTemps[engine];
 }
 
-double GetCarbMixTemp(int engine)
+float GetCarbMixTemp(int engine)
 {
 	return carbMixTemps[engine];
 }
@@ -503,7 +503,7 @@ void UpdateCylinderHeadTemps()
 
 void UpdateCarbMixTemps()
 {
-	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
+	carbMixTemps = CarbAirMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
 bool ReadEngineModification()
