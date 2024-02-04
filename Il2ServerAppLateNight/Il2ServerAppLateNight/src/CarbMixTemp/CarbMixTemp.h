@@ -4,4 +4,4 @@
 #include <string>
 #include <vector>
 
-std::vector<float> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType);
+std::vector<float> CarbAirMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType);

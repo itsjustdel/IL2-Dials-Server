@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 #include "../Injector/Injector.h"
-
 #include "../USPlanes/USPlanes.h"
-std::vector<float> GetLimits(std::string name)
+
+std::vector<float> GetLimitsCarbAirMix(std::string name)
 {
 	// none - p40
 
@@ -14,21 +14,23 @@ std::vector<float> GetLimits(std::string name)
 	// B p47D-28
 	if (IsP47D28(name)) return { -70, 150 };
 	// C p51d15, p51b-5
-	if (IsP51B5(name) || IsP51D15) return { -70, 150 };
+	if (IsP51B5(name) || IsP51D15(name)) return { -70, 150 };
 	// D A20
-	if (IsA20B(name)) return { -40, 40 };
+	if (IsA20B(name)) return { -45, 45 };
 	// E c-47, p38
 	if (IsC47A(name) || IsP38(name)) return { -70, 150 };
 	// F p39
-	if (IsP39L(name)) return { -70, 150 };
+	if (IsP39L(name)) {
+		return { -50, 50 };
+	}
 
 
 	return std::vector<float> { 0, 0 };
 }
 
-std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
+std::vector<float> PercentageConversionCarbAirMix(std::vector<float> percentages, std::string name)
 {
-	std::vector<float> limits = GetLimits(name);
+	std::vector<float> limits = GetLimitsCarbAirMix(name);
 	float range = limits[1] - limits[0];
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -38,7 +40,7 @@ std::vector<float> PercentageConversion(std::vector<float> percentages, std::str
 	return percentages;
 }
 
-std::vector<float> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType)
+std::vector<float> CarbAirMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::string planeType)
 {
 	std::vector<float> values(4);
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
@@ -56,5 +58,5 @@ std::vector<float> CarbMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std::st
 	}
 
 
-	return PercentageConversion(values, planeType);
+	return PercentageConversionCarbAirMix(values, planeType);
 }

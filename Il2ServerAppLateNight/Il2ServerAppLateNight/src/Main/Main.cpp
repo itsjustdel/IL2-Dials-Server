@@ -503,7 +503,7 @@ void UpdateCylinderHeadTemps()
 
 void UpdateCarbMixTemps()
 {
-	carbMixTemps = CarbMixTemps(codeCaveAddress, hProcessIL2, planeType);
+	carbMixTemps = CarbAirMixTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
 bool ReadEngineModification()

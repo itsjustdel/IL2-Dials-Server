@@ -14,7 +14,7 @@ bool isGerWaterD(std::string name) {
 	return IsBf109F4(name) || IsBf109G2(name) || IsBf109F2(name) || IsBf109F4(name) || IsBf109G6(name) || IsBf109G6Late(name) || IsBf109G6AS(name);
 }
 
-std::vector<float> GetLimits(std::string name)
+std::vector<float> GetLimitsWaterTemp(std::string name)
 {
 	// RU
 	// 0 - 120 A
@@ -112,9 +112,9 @@ std::vector<float> GetLimits(std::string name)
 	return std::vector<float> { 0, 135 }; // UK A is 140, GER A is 130 -- to do FC planes
 }
 
-std::vector<float> PercentageConversion(std::vector<float> percentages, std::string name)
+std::vector<float> PercentageConversionWater(std::vector<float> percentages, std::string name)
 {
-	std::vector<float> limits = GetLimits(name);
+	std::vector<float> limits = GetLimitsWaterTemp(name);
 	float range = limits[1] - limits[0];
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -163,7 +163,7 @@ std::vector<float> WaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::stri
 	// don't convert ger water d raw data values
 	if (gerWaterD) return values;
 
-	return PercentageConversion(values, planeType);
+	return PercentageConversionWater(values, planeType);
 }
 
 bool InjectionWaterTemp(HANDLE hProcess, uintptr_t src, LPVOID toCave)
