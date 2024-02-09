@@ -33,7 +33,7 @@
 #include "../CarbMixTemp/CarbMixTemp.h"
 #include "../GERPlanes/GERPlanes.h"
 
-float version = 0.64f;
+float version = 0.65f;
 
 //how much memory to change permissions on in original code
 const int size = 100; //note, min size?
