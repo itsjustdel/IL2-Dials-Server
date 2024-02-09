@@ -22,7 +22,7 @@ bool ReadCockpitInstruments();
 
 bool ReadAltimeter();
 
-bool ReadTurnNeedle();
+void UpdateTurnNeedle();
 
 bool ReadTurnCoordinatorBall();
 
@@ -30,7 +30,6 @@ bool ReadManifolds();
 
 bool ReadEngineModification();
 
-void ReadWaterTemps();//?
 
 double GetHeading();
 
