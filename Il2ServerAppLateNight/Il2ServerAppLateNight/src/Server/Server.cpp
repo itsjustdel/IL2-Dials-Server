@@ -18,7 +18,7 @@
 #include "../../sha1.h"
 
 #define DEFAULT_BUFLEN  512
-#define DEFAULT_PORT    "80"
+#define DEFAULT_PORT    "443"
 #define WEBSOCKET_KEY   "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 #pragma pack (push, 1)
