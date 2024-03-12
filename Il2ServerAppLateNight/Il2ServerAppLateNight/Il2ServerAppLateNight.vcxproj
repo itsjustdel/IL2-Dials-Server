@@ -157,6 +157,7 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="sha1.h" />
     <ClInclude Include="src\Altimeter\Altimeter.h" />
     <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h" />
     <ClInclude Include="src\CylinderTemp\CylinderHead.h" />

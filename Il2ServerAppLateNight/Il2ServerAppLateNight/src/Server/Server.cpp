@@ -15,6 +15,42 @@
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp//CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
+#include "../../sha1.h"
+
+#define DEFAULT_BUFLEN  512
+#define DEFAULT_PORT    "80"
+#define WEBSOCKET_KEY   "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+#pragma pack (push, 1)
+struct _websocket_header
+{
+	unsigned char opcode : 4;
+
+	unsigned char rsv3 : 1;
+	unsigned char rsv2 : 1;
+	unsigned char rsv1 : 1;
+	unsigned char fin : 1;
+
+	unsigned char len : 7;
+	unsigned char mask : 1;
+};
+
+struct _extended_16
+{
+	unsigned char value[2];
+};
+
+struct _extended_64
+{
+	unsigned char value[8];
+};
+
+struct _mask_key
+{
+	unsigned char value[4];
+};
+#pragma pack (pop)
+
 
 using namespace System::Diagnostics;
 
@@ -78,221 +114,255 @@ int serverBroadcast()
 }
 
 int serverListen() {
-	int iResult = 0;
 
 	WSADATA wsaData;
+	int iResult;
 
-	SOCKET RecvSocket;
-	struct sockaddr_in RecvAddr;
+	SOCKET ListenSocket = INVALID_SOCKET;
+	SOCKET ClientSocket = INVALID_SOCKET;
 
-	unsigned short Port = nServerPort;
+	struct addrinfo* result = NULL;
+	struct addrinfo hints;
 
-	char RecvBuf[1024];
-	int BufLen = 1024;
+	int iSendResult;
+	char recvbuf[DEFAULT_BUFLEN];
+	int recvbuflen = DEFAULT_BUFLEN;
 
-	struct sockaddr_in SenderAddr;
-	int SenderAddrSize = sizeof(SenderAddr);
-
-	//-----------------------------------------------
 	// Initialize Winsock
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != NO_ERROR) {
-		OutputDebugString(L"WSAStartup failed with error %d\n");
-		return 1;
-	}
-	//-----------------------------------------------
-	// Create a receiver socket to receive datagrams
-	RecvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (RecvSocket == INVALID_SOCKET) {
-		OutputDebugString(L"socket failed with error %d\n");
-		return 1;
-	}
-	//-----------------------------------------------
-	// Bind the socket to any address and the specified port.
-
-	RecvAddr.sin_family = AF_INET;
-	RecvAddr.sin_port = htons(Port);
-	RecvAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	iResult = bind(RecvSocket, (SOCKADDR*)&RecvAddr, sizeof(RecvAddr));
 	if (iResult != 0) {
-		OutputDebugString(L"bind failed with error %d\n");
+		printf("WSAStartup failed with error: %d\n", iResult);
 		return 1;
 	}
 
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
+
+	// Resolve the server address and port
+	iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+	if (iResult != 0) {
+		printf("getaddrinfo failed with error: %d\n", iResult);
+		WSACleanup();
+		return 1;
+	}
+
+	// Create a SOCKET for connecting to server
+	ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (ListenSocket == INVALID_SOCKET) {
+		printf("socket failed with error: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	// Setup the TCP listening socket
+	iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		printf("bind failed with error: %d\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	freeaddrinfo(result);
+
+	iResult = listen(ListenSocket, SOMAXCONN);
+	if (iResult == SOCKET_ERROR) {
+		printf("listen failed with error: %d\n", WSAGetLastError());
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	// Accept a client socket
+	ClientSocket = accept(ListenSocket, NULL, NULL);
+	if (ClientSocket == INVALID_SOCKET) {
+		printf("accept failed with error: %d\n", WSAGetLastError());
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	// No longer need server socket
+	closesocket(ListenSocket);
 	while (true)
 	{
-		//-----------------------------------------------
-		// Call the recvfrom function to receive datagrams
-		// on the bound socket.
-		wprintf(L"Receiving datagrams...\n");
-		iResult = recvfrom(RecvSocket,
-			RecvBuf, BufLen, 0, (SOCKADDR*)&SenderAddr, &SenderAddrSize);
-		if (iResult == SOCKET_ERROR) {
-			OutputDebugString(L"recvfrom failed with error %d\n");
+		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+		if (iResult == 0)
+		{
+			printf("Connection closing...\n");
+			break;
+		}
+		else if (iResult < 0)
+		{
+			printf("recv failed with error: %d\n", WSAGetLastError());
+			closesocket(ClientSocket);
+			WSACleanup();
+			return 1;
 		}
 
-		////////////////Package//////////////////////
-		//we represent the data with floats in the app, so let's convert now and save network traffic
-		const int total = 38;
-		float floatArray[total];
+		recvbuf[iResult] = 0;
 
-		//read memory only when requested - could be refactored in to the getters
-		//HANDLE hProcess = GetIL2Handle();
-		//LPVOID codeCaveAddress = GetCodeCaveAddress();
-		ReadPlaneType();
-		ReadCockpitInstruments();
-		ReadAltimeter();
-		ReadTurnNeedle();
-		ReadTurnCoordinatorBall();
-		ReadManifolds();
-		ReadEngineModification();
-		//water temps read in water temps class - TO DO, refactor for above
-		UpdateWaterTempValues();
-		UpdateOilTempValues();
-		UpdateCylinderHeadTemps();
-		UpdateCarbMixTemps();
+		char sendbuf[1024];
+		size_t sendbuf_size = 0;
 
+		// see if it's requesting a key
+		char* pKey = strstr(recvbuf, "Sec-WebSocket-Key:");
 
-		//packing differecnt data types in to one char array for sending (serialisation)
-		//https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
-
-		//version
-		float programVersion = GetIL2DialsVersion();
-		//planeType
-		std::string planeType = GetPlaneType();
-
-		//send blanks if no game found/injected
-		if (GetInjected() == false)
+		if (pKey)
 		{
-			planeType = "No Plane";
+			// parse just the key part
+			pKey = strchr(pKey, ' ') + 1;
+			char* pEnd = strchr(pKey, '\r');
+			*pEnd = 0;
 
-			for (SIZE_T i = 0; i < total; i++)
+			char key[256];
+			_snprintf_s(key, _countof(key), "%s%s", pKey, WEBSOCKET_KEY);
+
+			unsigned char result[20];
+			const unsigned char* pSha1Key = sha1(key);
+
+			// endian swap each of the 5 ints
+			for (int i = 0; i < 5; i++)
 			{
-				floatArray[i] = 0;
+				for (int c = 0; c < 4; c++)
+					result[i * 4 + c] = pSha1Key[i * 4 + (4 - c - 1)];
 			}
-			floatArray[1] = 760;//mmhg default
+
+			pKey = base64_encode(result, 20);
+
+			const char* pTemplateResponse = "HTTP/1.1 101 Switching Protocols\r\n"
+				"Upgrade: websocket\r\n"
+				"Connection: Upgrade\r\n"
+				"Sec-WebSocket-Accept: %s\r\n\r\n";
+
+			_snprintf_s(sendbuf, _countof(sendbuf), pTemplateResponse, pKey);
+			sendbuf_size = strlen(sendbuf);
 		}
 		else
 		{
-			//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-			floatArray[0] = (float)(GetAltitude());
-			//mgh
-			floatArray[1] = (float)(GetMMHg());
-			//airspeed
-			floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
-			//heading
-			floatArray[3] = (float)(GetHeading());
-			//Pitch
-			floatArray[4] = (float)(GetPitch());
-			//Roll
-			floatArray[5] = (float)(GetRoll());
-			//vertical speed 
-			floatArray[6] = (float)(GetVSI());
-			//ball
-			floatArray[7] = (float)(GetTurnAndBankBall());
-			//bank needle
-			floatArray[8] = (float)(GetTurnAndBankNeedle());
-			//rpm
-			for (SIZE_T i = 0; i < 4; i++)//4 engines max
-			{
-				//get rpm know where the rpm struct starts
-				floatArray[9 + i] = (float)(GetRPM(i));
-			}
-			//manifold(s)
-			for (SIZE_T i = 0; i < 4; i++)//4 engines max
-			{
-				floatArray[13 + i] = (float)(GetManifold(i));
-			}
-			//engine mod
-			floatArray[17] = (float)(GetEngineModification());
+			// else read, print the response, and echo it back to the server
+			_websocket_header* h = (_websocket_header*)recvbuf;
 
-			//water temp
-			for (SIZE_T i = 0; i < 4; i++)
+			_mask_key* mask_key;
+
+			unsigned long long length;
+
+			if (h->len < 126)
 			{
-				floatArray[18 + i] = (float)(GetWaterTemp(i));
+				length = h->len;
+				mask_key = (_mask_key*)(recvbuf + sizeof(_websocket_header));
 			}
-			//oil temp out
-			for (SIZE_T i = 0; i < 4; i++)
+			else if (h->len == 126)
 			{
-				floatArray[22 + i] = (float)(GetOilTempOut(i));
+				_extended_16* extended = (_extended_16*)(recvbuf + sizeof(_websocket_header));
+
+				length = (extended->value[0] << 8) | extended->value[1];
+				mask_key = (_mask_key*)(recvbuf + sizeof(_websocket_header) + sizeof(_extended_16));
 			}
-			//oil temp In
-			for (SIZE_T i = 0; i < 4; i++)
+			else
 			{
-				floatArray[26 + i] = (float)(GetOilTempIn(i));
+				_extended_64* extended = (_extended_64*)(recvbuf + sizeof(_websocket_header));
+
+				length = (((unsigned long long) extended->value[0]) << 56) | (((unsigned long long) extended->value[1]) << 48) | (((unsigned long long) extended->value[2]) << 40) |
+					(((unsigned long long) extended->value[3]) << 32) | (((unsigned long long) extended->value[4]) << 24) | (((unsigned long long) extended->value[5]) << 16) |
+					(((unsigned long long) extended->value[6]) << 8) | (((unsigned long long) extended->value[7]) << 0);
+
+				mask_key = (_mask_key*)(recvbuf + sizeof(_websocket_header) + sizeof(_extended_64));
 			}
-			//cylinder head temp
-			for (SIZE_T i = 0; i < 4; i++)
+
+			char* client_msg = ((char*)mask_key) + sizeof(_mask_key);
+
+			if (h->mask)
 			{
-				floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
+				for (int i = 0; i < length; i++)
+					client_msg[i] = client_msg[i] ^ mask_key->value[i % 4];
 			}
-			//carb mix temp
-			for (SIZE_T i = 0; i < 4; i++)
+
+			printf("Client: %s\r\n", client_msg);
+
+			char* pData;
+
+			h = (_websocket_header*)sendbuf;
+			*h = _websocket_header{};
+
+			h->opcode = 0x1; //0x1 = text, 0x2 = blob
+			h->fin = 1;
+
+			char text[256];
+			_snprintf_s(text, _countof(text), "Server Echo: %s", client_msg);
+
+			unsigned long long msg_length = strlen(text);
+
+			sendbuf_size = sizeof(_websocket_header);
+
+			if (msg_length <= 125)
 			{
-				floatArray[34 + i] = (float)(GetCarbMixTemp(i));
+				pData = sendbuf + sizeof(_websocket_header);
+				h->len = msg_length;
 			}
+			else if (msg_length <= 0xffff)
+			{
+				h->len = 126;
+
+				_extended_16* extended = (_extended_16*)(sendbuf + sendbuf_size);
+				sendbuf_size += sizeof(_extended_16);
+
+				extended->value[0] = (msg_length >> 8) & 0xff;
+				extended->value[1] = msg_length & 0xff;
+			}
+			else
+			{
+				h->len = 127;
+
+				_extended_64* extended = (_extended_64*)(sendbuf + sendbuf_size);
+				sendbuf_size += sizeof(_extended_64);
+
+				extended->value[0] = ((msg_length >> 56) & 0xff);
+				extended->value[1] = ((msg_length >> 48) & 0xff);
+				extended->value[2] = ((msg_length >> 40) & 0xff);
+				extended->value[3] = ((msg_length >> 32) & 0xff);
+				extended->value[4] = ((msg_length >> 24) & 0xff);
+				extended->value[5] = ((msg_length >> 16) & 0xff);
+				extended->value[6] = ((msg_length >> 8) & 0xff);
+				extended->value[7] = ((msg_length >> 0) & 0xff);
+			}
+
+			pData = sendbuf + sendbuf_size;
+
+			memcpy(pData, text, (size_t)msg_length);
+			sendbuf_size += (size_t)msg_length;
 		}
 
-		// The buffer we will be writing bytes into
-		//make space for
-		//program version
-		//planetype string size
-		//planetype string data size
-		//float array containing instrument/dial values
-		//64 bit string
-		unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
-		// A pointer we will advance whenever we write data
-		unsigned char* p = outBuf;
 
-		//float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
-		//we know how big this float array will be so we don't need to send size
-		memcpy(p, (char*)floatArray, sizeof(floatArray));
-		p += sizeof(floatArray);//4btye float * array length
+		iSendResult = send(ClientSocket, sendbuf, (int)sendbuf_size, 0);
 
-		// Serialize "program version" into outBuf
-		//using uint32_t when serializing            
-		//copy float to uint32 safely
-		uint32_t fbits = 0;
-		memcpy(&fbits, &programVersion, sizeof(programVersion));
-		//copy to buffer
-		memcpy(p, &fbits, sizeof(fbits));
-		p += sizeof(fbits);
-
-		// Serialize "planeType string length" into outBuf
-		//SIZE_T to uint32
-		uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is SIZE_T and not the size of the data in the array
-		memcpy(p, &neX, sizeof(neX));
-		p += sizeof(neX);
-
-		//string data already in correct format - copy to buffer            
-		memcpy(p, planeType.data(), 64);
-		p += 64;
-
-		char* sendBuffer = (char*)outBuf;
-		int sendLength = sizeof(outBuf);
-
-		// send to client (//sender is the client,it initiated         
-		if (sendto(RecvSocket, sendBuffer, sendLength, 0, (struct sockaddr*)&SenderAddr, sizeof(SenderAddr)) < 0) {
-			perror("sending error...\n");
-			closesocket(RecvSocket);
-			exit(-1);
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(ClientSocket);
+			WSACleanup();
+			return 1;
 		}
 	}
 
-	//-----------------------------------------------
-	// Close the socket when finished receiving datagrams
-	OutputDebugString(L"Finished receiving. Closing socket.\n");
-	iResult = closesocket(RecvSocket);
+	// shutdown the connection since we're done
+	iResult = shutdown(ClientSocket, SD_SEND);
 	if (iResult == SOCKET_ERROR) {
-		OutputDebugString(L"closesocket failed with error %d\n");
+		printf("shutdown failed with error: %d\n", WSAGetLastError());
+		closesocket(ClientSocket);
+		WSACleanup();
 		return 1;
 	}
 
-	//-----------------------------------------------
-	// Clean up and exit.
-	OutputDebugString(L"Exiting.\n");
+	// cleanup
+	closesocket(ClientSocket);
 	WSACleanup();
+
 	return 0;
 
 }
