@@ -60,6 +60,8 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 	}
 
 	//ROM
+//	RSE.RSE::CCockpitInstruments::simulation + 1076 - 48 8D 15 DB870D00 - lea rdx, [RSE.RSE::CAeroplane_IAR_80_A::`vftable'+2C8] { ("I.A.R. 80-A") }
+
 	if (IsIAR80(name)) {
 		return std::vector<float> { 30, 140 };// to check
 	}

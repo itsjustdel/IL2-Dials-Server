@@ -37,6 +37,8 @@ const std::unordered_set<std::string> germanPlaneNames = {
 
 	"Me 262 A",
 	"Me 410 A-1"
+
+	// some missing here - unused?
 };
 
 // Function to check if a name is a valid German plane name
@@ -193,5 +195,10 @@ bool IsMC202s8(const std::string& name)
 
 bool IsIAR80(const std::string& name)
 {
-	return (name == "I.A.R. 80-A");
+	return (name == "I.A.R. 80-A" || name == "I.A.R. 80-B");
+}
+
+bool IsTa152H1(const std::string& name)
+{
+	return (name == "Ta 152 H1");
 }

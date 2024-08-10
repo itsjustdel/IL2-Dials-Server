@@ -24,6 +24,10 @@ bool IsSpitfireMkIXe(const std::string& name)
 {
 	return (name == "Spitfire Mk.IXe");
 }
+bool IsSpitfireMkIXc(const std::string& name)
+{
+	return (name == "Spitfire Mk.IXc");
+}
 
 bool IsTempestMkVser2(const std::string& name)
 {

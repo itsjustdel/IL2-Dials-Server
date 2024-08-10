@@ -64,7 +64,7 @@ std::vector<float> GetLimitsWaterTemp(std::string name)
 		return std::vector<float> { 0, 120};
 	}
 
-	if (IsBf109K4(name) || IsFW190D9(name)) {
+	if (IsBf109K4(name) || IsFW190D9(name) || IsTa152H1(name)) {
 		// C
 		return std::vector<float> { 0, 130};
 	}

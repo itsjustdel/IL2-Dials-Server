@@ -32,3 +32,4 @@ bool IsAR234B2(const std::string& name);
 bool IsME410A1(const std::string& name);
 bool IsMC202s8(const std::string& name); //ITA
 bool IsIAR80(const std::string& name); //ROM
+bool IsTa152H1(const std::string& name);

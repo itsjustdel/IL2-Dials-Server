@@ -45,7 +45,7 @@ std::vector<float> GetManifoldLimits(std::string name)
 		return std::vector<float> { 600, 2000 };
 	}
 
-	if (IsFW190D9(name)) {
+	if (IsFW190D9(name) || IsTa152H1(name)) {
 		// D
 		return std::vector<float> { 600, 2500 };
 	}
@@ -80,7 +80,11 @@ std::vector<float> GetManifoldLimits(std::string name)
 	}
 	else if (IsMosquitoFBMkVIser2(name))
 		return std::vector<float> { -7, 27 };
+
 	else if (IsHurricaneMkII(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsSpitfireMkIXc(name)) {
 		return std::vector<float> { -7, 25 };
 	}
 	else if (IsSpitfireMkIXe(name)) {
