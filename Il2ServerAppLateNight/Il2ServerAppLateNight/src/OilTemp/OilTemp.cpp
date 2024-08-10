@@ -139,7 +139,7 @@ std::vector<float> ReadOilTempsIn(LPVOID codeCaveAddress, HANDLE hProcessIL2, st
 
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t baseOffset = 0x3e5c;
+	uintptr_t baseOffset = 0x3e5c + 0x8;
 
 	for (SIZE_T i = 0; i < 4; i++)
 	{
@@ -165,7 +165,7 @@ std::vector<float> ReadOilTempsOut(LPVOID codeCaveAddress, HANDLE hProcessIL2, s
 
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t baseOffset = 0x3e54;
+	uintptr_t baseOffset = 0x3e54 + 0x8;
 	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;

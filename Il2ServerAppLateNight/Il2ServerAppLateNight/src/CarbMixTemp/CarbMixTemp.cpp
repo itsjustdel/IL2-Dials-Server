@@ -48,7 +48,7 @@ std::vector<float> CarbAirMixTemps(LPVOID codeCaveAddress, HANDLE hProcess, std:
 	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
-		uintptr_t offset = 0x3dbc + (engineOffset);
+		uintptr_t offset = 0x3dbc + 0x8 + (engineOffset);
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
 		const size_t sizeOfData = sizeof(float);
 		char rawData[sizeOfData];

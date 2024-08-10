@@ -21,7 +21,7 @@ float TurnNeedleValue(HANDLE hProcess, LPVOID codeCaveAddress, std::string plane
 {
 	LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x200);
 	LPVOID toStruct = PointerToDataStruct(hProcess, addressToRead);
-	uintptr_t offset = 0x8a1c;
+	uintptr_t offset = 0x8a1c + 0x8;
 	LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
 	const size_t sizeOfData = sizeof(float);
 	char rawData[sizeOfData];

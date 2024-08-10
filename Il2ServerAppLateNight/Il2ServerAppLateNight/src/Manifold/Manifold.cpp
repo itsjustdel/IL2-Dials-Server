@@ -151,7 +151,7 @@ std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::st
 	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
-		uintptr_t offset = 0x3da8 + (engineOffset);
+		uintptr_t offset = 0x3da8 + 0x8 + (engineOffset);
 
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);

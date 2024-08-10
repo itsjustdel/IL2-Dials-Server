@@ -150,7 +150,7 @@ std::vector<float> WaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::stri
 		else {
 			//use draw arg value
 			uintptr_t engineOffset = 0x190 * i;
-			uintptr_t offset = 0x3ea4 + (engineOffset);
+			uintptr_t offset = 0x3ea4 + 0x8 + (engineOffset);
 			LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
 			const size_t sizeOfData = sizeof(float);
 			char rawData[sizeOfData];
