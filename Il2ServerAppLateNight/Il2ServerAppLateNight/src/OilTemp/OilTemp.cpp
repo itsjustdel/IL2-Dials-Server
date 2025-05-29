@@ -27,7 +27,7 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 	if (IsMig3(name)) {
 		return isOutOil ? std::vector<float> { 0, 125 } : std::vector<float>{ 0, 120 };
 	}
-	else if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name) || IsI16(name) || IsLa5s8(name) || IsLa5fns2(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
+	else if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name) || IsI16(name) || IsLa5s8(name) || IsLa5fs38(name) || IsLa5fns2(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
 	{
 		return std::vector<float> { 0, 125 };
 	}
@@ -60,6 +60,8 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 	}
 
 	//ROM
+//	RSE.RSE::CCockpitInstruments::simulation + 1076 - 48 8D 15 DB870D00 - lea rdx, [RSE.RSE::CAeroplane_IAR_80_A::`vftable'+2C8] { ("I.A.R. 80-A") }
+
 	if (IsIAR80(name)) {
 		return std::vector<float> { 30, 140 };// to check
 	}
@@ -139,7 +141,7 @@ std::vector<float> ReadOilTempsIn(LPVOID codeCaveAddress, HANDLE hProcessIL2, st
 
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t baseOffset = 0x3e5c;
+	uintptr_t baseOffset = 0x3e5c + 0x8;
 
 	for (SIZE_T i = 0; i < 4; i++)
 	{
@@ -165,7 +167,7 @@ std::vector<float> ReadOilTempsOut(LPVOID codeCaveAddress, HANDLE hProcessIL2, s
 
 	LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-	uintptr_t baseOffset = 0x3e54;
+	uintptr_t baseOffset = 0x3e54 + 0x8;
 	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;

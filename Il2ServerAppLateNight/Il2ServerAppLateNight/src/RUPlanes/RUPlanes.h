@@ -9,6 +9,7 @@ bool IsYak7b36(const std::string& name);
 bool IsLagg3s29(const std::string& name);
 bool IsIL2(const std::string& name);
 bool IsLa5s8(const std::string& name);
+bool IsLa5fs38(const std::string& name);
 bool IsI16(const std::string& name);
 bool IsMig3(const std::string& name);
 bool IsLa5fns2(const std::string& name);

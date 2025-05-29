@@ -15,7 +15,7 @@ std::vector<double> CylinderHeadTemps(LPVOID codeCaveAddress, HANDLE hProcessIL2
 		LPVOID addressToRead = (LPVOID)((uintptr_t)(codeCaveAddress)+0x280 + offset);
 		LPVOID toStruct = PointerToDataStruct(hProcessIL2, addressToRead);
 
-		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+0xB38);
+		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+0xB38 + 0x8);
 		const SIZE_T sizeOfData = sizeof(double);
 		char rawData[sizeOfData];
 		ReadProcessMemory(hProcessIL2, temp, &rawData, sizeOfData, NULL);

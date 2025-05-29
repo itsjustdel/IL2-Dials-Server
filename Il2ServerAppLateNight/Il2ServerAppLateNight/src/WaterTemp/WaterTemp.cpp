@@ -64,7 +64,7 @@ std::vector<float> GetLimitsWaterTemp(std::string name)
 		return std::vector<float> { 0, 120};
 	}
 
-	if (IsBf109K4(name) || IsFW190D9(name)) {
+	if (IsBf109K4(name) || IsFW190D9(name) || IsTa152H1(name)) {
 		// C
 		return std::vector<float> { 0, 130};
 	}
@@ -150,7 +150,7 @@ std::vector<float> WaterTemps(HANDLE hProcess, LPVOID codeCaveAddress, std::stri
 		else {
 			//use draw arg value
 			uintptr_t engineOffset = 0x190 * i;
-			uintptr_t offset = 0x3ea4 + (engineOffset);
+			uintptr_t offset = 0x3ea4 + 0x8 + (engineOffset);
 			LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
 			const size_t sizeOfData = sizeof(float);
 			char rawData[sizeOfData];

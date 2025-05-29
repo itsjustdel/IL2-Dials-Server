@@ -14,7 +14,7 @@ std::vector<float> GetManifoldLimits(std::string name)
 {
 	// RU
 	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
-		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsI16(name) || IsMig3(name)
+		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsLa5fs38(name) || IsI16(name) || IsMig3(name)
 		|| IsLa5fns2(name) || IsLi2(name))
 	{
 		// A // B
@@ -45,7 +45,7 @@ std::vector<float> GetManifoldLimits(std::string name)
 		return std::vector<float> { 600, 2000 };
 	}
 
-	if (IsFW190D9(name)) {
+	if (IsFW190D9(name) || IsTa152H1(name)) {
 		// D
 		return std::vector<float> { 600, 2500 };
 	}
@@ -80,7 +80,11 @@ std::vector<float> GetManifoldLimits(std::string name)
 	}
 	else if (IsMosquitoFBMkVIser2(name))
 		return std::vector<float> { -7, 27 };
+
 	else if (IsHurricaneMkII(name)) {
+		return std::vector<float> { -7, 25 };
+	}
+	else if (IsSpitfireMkIXc(name)) {
 		return std::vector<float> { -7, 25 };
 	}
 	else if (IsSpitfireMkIXe(name)) {
@@ -151,7 +155,7 @@ std::vector<float> Manifolds(LPVOID codeCaveAddress, HANDLE hProcessIL2, std::st
 	for (SIZE_T i = 0; i < 4; i++)
 	{
 		uintptr_t engineOffset = 0x190 * i;
-		uintptr_t offset = 0x3da8 + (engineOffset);
+		uintptr_t offset = 0x3da8 + 0x8 + (engineOffset);
 
 		//all 2 engine planes have temps next to each other (so far)
 		LPVOID temp = (LPVOID)((uintptr_t)(toStruct)+offset);
