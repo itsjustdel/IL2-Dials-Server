@@ -76,6 +76,11 @@ bool IsLa5fns2(const std::string& name)
 	return (name == "La-5 FN ser.2");
 }
 
+bool IsLa5fs38(const std::string& name)
+{
+	return (name == "La-5 F ser.38");
+}
+
 bool IsPe2(const std::string& name)
 {
 	return (name == "Pe-2 ser.87" || name == "Pe-2 ser.35");

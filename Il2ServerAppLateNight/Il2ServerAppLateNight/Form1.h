@@ -419,8 +419,9 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(35, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.66";
+			this->versionBox->Text = L"v0.67";
 			this->versionBox->Visible = false;
+			this->versionBox->TextChanged += gcnew System::EventHandler(this, &Form1::versionBox_TextChanged);
 			// 
 			// DebugTextBox2
 			// 
@@ -854,6 +855,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 	}
 
+private: System::Void versionBox_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+}
 };
 
 	
