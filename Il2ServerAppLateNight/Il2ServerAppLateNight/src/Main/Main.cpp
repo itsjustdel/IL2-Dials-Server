@@ -49,7 +49,7 @@ std::vector<float> manifoldValues(4);
 std::vector<float> waterTempValues(4);
 std::vector<float> oilTempInValues(4);
 std::vector<float> oilTempOutValues(4);
-std::vector<double> cylinderHeadTemps(4);
+std::vector<float> cylinderHeadTemps(4);
 std::vector<float> carbMixTemps(4);
 int engineModification;
 //where we hold planeType string
@@ -446,7 +446,7 @@ void UpdateOilTempValues()
 
 void UpdateCylinderHeadTemps()
 {
-	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2);
+	cylinderHeadTemps = CylinderHeadTemps(codeCaveAddress, hProcessIL2, planeType);
 }
 
 void UpdateCarbMixTemps()
