@@ -563,6 +563,11 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			return;
 		}
 
+		// Update plane name label if visible
+		if (planeNameLabel->Visible) {
+			planeNameLabel->Text = "Plane: " + gcnew System::String(GetPlaneType().c_str());
+		}
+
 		
 		//look for turn needle scanner (only in test builds)
 		//bool needleTest = true;
