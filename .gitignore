@@ -353,3 +353,6 @@ MigrationBackup/
 .ionide/
 
 Il2ServerAppLateNight/enc_temp_folder/
+
+# vcpkg installed packages
+vcpkg_installed/
