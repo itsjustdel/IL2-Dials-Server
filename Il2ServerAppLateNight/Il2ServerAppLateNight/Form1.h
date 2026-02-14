@@ -185,6 +185,7 @@ private: System::ComponentModel::BackgroundWorker^ serverWorkerUDP;
 	private: System::Windows::Forms::TextBox^ portTextBox;
 
 	private: System::Windows::Forms::Label^ portLabel;
+private: System::Windows::Forms::Label^ planeNameLabel;
 private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 
@@ -218,6 +219,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->portTextBox = (gcnew System::Windows::Forms::TextBox());
 			this->portLabel = (gcnew System::Windows::Forms::Label());
+			this->planeNameLabel = (gcnew System::Windows::Forms::Label());
 			this->DebugTextBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 			this->LocalClientCheckBox = (gcnew System::Windows::Forms::CheckBox());
@@ -370,7 +372,20 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->portLabel->Text = L"Port:";
 			this->portLabel->Visible = false;
 			// 
-			// DebugTextBox
+			// planeNameLabel
+			// 
+			this->planeNameLabel->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->planeNameLabel->AutoSize = true;
+			this->planeNameLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->planeNameLabel->ForeColor = System::Drawing::Color::CadetBlue;
+			this->planeNameLabel->Location = System::Drawing::Point(47, 310);
+			this->planeNameLabel->Margin = System::Windows::Forms::Padding(0);
+			this->planeNameLabel->Name = L"planeNameLabel";
+			this->planeNameLabel->Size = System::Drawing::Size(60, 20);
+			this->planeNameLabel->TabIndex = 9;
+			this->planeNameLabel->Text = L"Plane: ";
+			this->planeNameLabel->Visible = false;
 			// 
 			this->DebugTextBox->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
 				static_cast<System::Int32>(static_cast<System::Byte>(24)));
@@ -459,6 +474,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->Controls->Add(this->LocalClientCheckBox);
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
+			this->Controls->Add(this->planeNameLabel);
 			this->Controls->Add(this->portTextBox);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->label4);
@@ -728,6 +744,10 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		DebugTextBox->Visible = !DebugTextBox->Visible;
 		//LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible; //don't need anymore?
 		versionBox->Visible = !versionBox->Visible;
+		planeNameLabel->Visible = !planeNameLabel->Visible;
+		if (planeNameLabel->Visible) {
+			planeNameLabel->Text = "Plane: " + gcnew System::String(GetPlaneType().c_str());
+		}
 	}
 
 
