@@ -14,11 +14,13 @@ struct DialScaling {
 
 class Config {
 public:
-    static bool LoadConfig(const std::string& filePath);
+    static bool LoadConfig();
+    static bool DownloadAndSaveConfig(const std::string& url);
     static DialScaling GetDialScaling(const std::string& dialName, const std::string& variant);
     static std::string GetPlaneDialVariant(const std::string& planeName, const std::string& dialType);
 
 private:
+    static std::string GetConfigPath();
     static std::unordered_map<std::string, std::unordered_map<std::string, DialScaling>> dialVariants;
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> planes;
 };

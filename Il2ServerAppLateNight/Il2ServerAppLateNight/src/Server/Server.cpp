@@ -167,7 +167,7 @@ int serverListen() {
 		// Load config if not loaded
 		static bool configLoaded = false;
 		if (!configLoaded) {
-			Config::LoadConfig("config.json");
+			Config::LoadConfig();
 			configLoaded = true;
 		}
 

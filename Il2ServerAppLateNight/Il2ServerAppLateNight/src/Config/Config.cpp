@@ -1,11 +1,40 @@
 #include "Config.h"
 #include <fstream>
 #include <iostream>
+#include <windows.h>
+#include <shlobj.h>
 
 std::unordered_map<std::string, std::unordered_map<std::string, DialScaling>> Config::dialVariants;
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>> Config::planes;
 
-bool Config::LoadConfig(const std::string& filePath) {
+std::string Config::GetConfigPath() {
+    // First try appdata
+    char* appDataPath = nullptr;
+    if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &appDataPath) == S_OK) {
+        std::string path = std::string(appDataPath) + "\\IL2Dials\\config.json";
+        CoTaskMemFree(appDataPath);
+        if (std::ifstream(path).good()) {
+            return path;
+        }
+    }
+    
+    // Fallback to exe directory
+    char exePath[MAX_PATH];
+    GetModuleFileNameA(nullptr, exePath, MAX_PATH);
+    std::string dir = std::string(exePath);
+    size_t pos = dir.find_last_of("\\/");
+    if (pos != std::string::npos) {
+        dir = dir.substr(0, pos);
+    }
+    return dir + "\\config.json";
+}
+
+bool Config::LoadConfig() {
+    std::string filePath = GetConfigPath();
+    return LoadConfigFromFile(filePath);
+}
+
+bool Config::LoadConfigFromFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         std::cerr << "Failed to open config file: " << filePath << std::endl;
@@ -14,6 +43,10 @@ bool Config::LoadConfig(const std::string& filePath) {
 
     nlohmann::json j;
     file >> j;
+
+    // Clear existing data
+    dialVariants.clear();
+    planes.clear();
 
     // Load dial_variants
     if (j.contains("dial_variants")) {
@@ -41,6 +74,12 @@ bool Config::LoadConfig(const std::string& filePath) {
     }
 
     return true;
+}
+
+bool Config::DownloadAndSaveConfig(const std::string& url) {
+    // Placeholder - implement download logic
+    // For now, return false
+    return false;
 }
 
 DialScaling Config::GetDialScaling(const std::string& dialName, const std::string& variant) {
