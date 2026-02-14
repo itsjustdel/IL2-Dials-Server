@@ -107,7 +107,7 @@ int serverListen() {
 			UpdateCarbMixTemps();
 
 
-			//packing differecnt data types in to one char array for sending (serialisation)
+			//packing different data types in to one char array for sending (serialisation)
 			//https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
 
 			//version
@@ -259,11 +259,14 @@ int serverListen() {
 
 boost::asio::ip::address CreateServerAddress(bool localIP)
 {
-	//get local ip address
+	// Get local IP address
+	// Note: This helper function is currently not used by serverListen(),
+	// which binds to all interfaces (INADDR_ANY) to accept connections from any network adapter.
 	std::vector<std::string> ipv4Addreses = GetIPAddresses(localIP);
 	if (ipv4Addreses.size() == 0)
 	{
-		// Return any address as fallback
+		// Return "any address" (0.0.0.0) as fallback - binds to all interfaces
+		OutputDebugString(L"Warning: No IP addresses found, using any address (0.0.0.0)\n");
 		return boost::asio::ip::address_v4::any();
 	}
 
@@ -274,7 +277,8 @@ boost::asio::ip::address CreateServerAddress(bool localIP)
 	auto addr = boost::asio::ip::address::from_string(ipAddress, ec);
 	
 	if (ec) {
-		// Return any address on error
+		// Return "any address" on parse error
+		OutputDebugString(L"Warning: Failed to parse IP address, using any address (0.0.0.0)\n");
 		return boost::asio::ip::address_v4::any();
 	}
 	
@@ -283,6 +287,13 @@ boost::asio::ip::address CreateServerAddress(bool localIP)
 
 int StartServerUDP(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
 {
+	// Note: 'worker' and 'localIP' parameters are kept for backward compatibility with the UI layer
+	// but are currently unused. The server binds to all network interfaces (INADDR_ANY).
+	// The worker parameter was likely intended for progress reporting, and localIP for binding
+	// to a specific interface, but these features are not currently implemented.
+	(void)worker;  // Suppress unused parameter warning
+	(void)localIP; // Suppress unused parameter warning
+	
 	serverListen();
 
 	return 1;
