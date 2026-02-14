@@ -11,7 +11,7 @@ std::string Config::GetConfigPath() {
     // First try appdata
     char* appDataPath = nullptr;
     if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &appDataPath) == S_OK) {
-        std::string path = std::string(appDataPath) + "\\IL2Dials\\config.json";
+        std::string path = std::string(appDataPath) + "\\IL2Dials\\plane-config.json";
         CoTaskMemFree(appDataPath);
         if (std::ifstream(path).good()) {
             return path;
@@ -26,7 +26,7 @@ std::string Config::GetConfigPath() {
     if (pos != std::string::npos) {
         dir = dir.substr(0, pos);
     }
-    return dir + "\\config.json";
+    return dir + "\\plane-config.json";
 }
 
 bool Config::LoadConfig() {

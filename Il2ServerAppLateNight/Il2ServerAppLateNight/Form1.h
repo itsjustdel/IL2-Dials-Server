@@ -905,14 +905,14 @@ private: System::Void versionBox_TextChanged(System::Object^ sender, System::Eve
 private: System::Void updateConfigButton_Click(System::Object^ sender, System::EventArgs^ e) {
 	try {
 		System::Net::WebClient^ client = gcnew System::Net::WebClient();
-		System::String^ url = "https://example.com/config.json"; // Placeholder URL
+		System::String^ url = "https://github.com/user-attachments/files/25318490/plane-config.json";
 		System::String^ json = client->DownloadString(url);
 		
 		// Save to appdata
 		System::String^ appDataPath = System::Environment::GetFolderPath(System::Environment::SpecialFolder::LocalApplicationData);
 		System::String^ configDir = System::IO::Path::Combine(appDataPath, "IL2Dials");
 		System::IO::Directory::CreateDirectory(configDir);
-		System::String^ configPath = System::IO::Path::Combine(configDir, "config.json");
+		System::String^ configPath = System::IO::Path::Combine(configDir, "plane-config.json");
 		System::IO::File::WriteAllText(configPath, json);
 		
 		// Reload config
