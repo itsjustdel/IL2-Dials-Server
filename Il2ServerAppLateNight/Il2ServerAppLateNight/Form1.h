@@ -905,7 +905,7 @@ private: System::Void versionBox_TextChanged(System::Object^ sender, System::Eve
 private: System::Void updateConfigButton_Click(System::Object^ sender, System::EventArgs^ e) {
 	try {
 		System::Net::WebClient^ client = gcnew System::Net::WebClient();
-		System::String^ url = "https://github.com/user-attachments/files/25318490/plane-config.json";
+		System::String^ url = "https://github.com/itsjustdel/IL2-Dials-Server/releases/download/test-config-file/plane-config.json";
 		System::String^ json = client->DownloadString(url);
 		
 		// Save to appdata
