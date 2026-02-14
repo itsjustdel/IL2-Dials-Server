@@ -1,0 +1,43 @@
+{
+  "dial_variants": {
+    "altitude_A": {"max": 10000},
+    "airspeed_A": {"max": 400},
+    "mmhg_A": {"min": 28.0, "max": 31.0},
+    "rpm_A": {"max": 3000},
+    "manifold_A": {"max": 60},
+    "manifold_B": {"max": 50},
+    "manifold_C": {"max": 55},
+    "water_temp_A": {"max": 120},
+    "water_temp_D": {"max": 100},
+    "oil_temp_in_D": {"max": 100},
+    "oil_temp_out_A": {"max": 100},
+    "cylinder_head_A": {"max": 250},
+    "carb_mix_A": {"max": 50}
+  },
+  "planes": {
+    "Bf 109 F-4": {
+      "altitude": "A",
+      "airspeed": "A",
+      "mmhg": "A",
+      "rpm": "A",
+      "manifold": "B",
+      "water_temp": "D",
+      "oil_temp_in": "D",
+      "oil_temp_out": "A",
+      "cylinder_head": "A",
+      "carb_mix": "A"
+    },
+    "P-51D-15": {
+      "altitude": "A",
+      "airspeed": "A",
+      "mmhg": "A",
+      "rpm": "A",
+      "manifold": "A",
+      "water_temp": "A",
+      "oil_temp_in": "A",
+      "oil_temp_out": "A",
+      "cylinder_head": "A",
+      "carb_mix": "A"
+    }
+  }
+}
