@@ -1,13 +1,11 @@
-#pragma comment(lib, "ws2_32.lib") //https://stackoverflow.com/questions/57831867/do-i-actually-have-to-link-ws2-32-lib
 #pragma warning(disable:4996)
 
-#include <winsock2.h>
-#include <Ws2tcpip.h>
+#define _WIN32_WINNT 0x0601
+#include <boost/asio.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <thread>
-//#include <codecvt> //use to convert PCWSTR
 #include <sstream>
 
 #include "../Main/Main.h"
@@ -17,6 +15,7 @@
 #include "../CarbMixTemp/CarbMixTemp.h"
 
 using namespace System::Diagnostics;
+using boost::asio::ip::udp;
 
 int nServerPort = 11200;
 
@@ -27,336 +26,274 @@ void SetPortNumber(int t)
 
 int serverBroadcast()
 {
-	WSADATA wsaData;
+	try {
+		boost::asio::io_context io_context;
+		udp::socket sock(io_context, udp::endpoint(udp::v4(), 0));
+		
+		sock.set_option(boost::asio::socket_base::broadcast(true));
 
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
+		udp::endpoint broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), nServerPort);
+		
+		char sendMSG[] = "Broadcast message from IL-2 Dials Server";
 
-	SOCKET sock;
+		while (true)
+		{
+			sock.send_to(boost::asio::buffer(sendMSG, strlen(sendMSG) + 1), broadcast_endpoint);
+		}
 
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
-
-	char broadcast = '1';
-
-	if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) < 0)
-	{
-
-		closesocket(sock);
-
+		sock.close();
+	}
+	catch (std::exception& e) {
+		std::cerr << "Exception in serverBroadcast: " << e.what() << std::endl;
 		return 0;
-
 	}
-
-	struct sockaddr_in Recv_addr;
-
-	struct sockaddr_in Sender_addr;
-
-	int len = sizeof(struct sockaddr_in);
-
-	char sendMSG[] = "Broadcast message from IL-2 Dials Server";
-
-	char recvbuff[50] = "";
-
-	int recvbufflen = 50;
-
-	Recv_addr.sin_family = AF_INET;
-
-	Recv_addr.sin_port = htons(nServerPort);
-
-	Recv_addr.sin_addr.s_addr = INADDR_BROADCAST;
-
-	while (true)
-	{
-
-
-		sendto(sock, sendMSG, strlen(sendMSG) + 1, 0, (sockaddr*)&Recv_addr, sizeof(Recv_addr));
-	}
-	//recvfrom(sock, recvbuff, recvbufflen, 0, (sockaddr*)&Recv_addr, &len);
-
-	closesocket(sock);
-
-	WSACleanup();
+	
+	return 1;
 }
 
 int serverListen() {
-	int iResult = 0;
+	try {
+		// Create io_context for Boost.Asio operations
+		boost::asio::io_context io_context;
+		
+		// Create UDP socket and bind to any address on the specified port
+		udp::socket socket(io_context, udp::endpoint(udp::v4(), nServerPort));
+		
+		// Buffer for receiving data
+		char RecvBuf[1024];
+		udp::endpoint sender_endpoint;
 
-	WSADATA wsaData;
+		wprintf(L"Server listening on port %d...\n", nServerPort);
 
-	SOCKET RecvSocket;
-	struct sockaddr_in RecvAddr;
+		while (true)
+		{
+			// Receive datagram from client
+			boost::system::error_code error;
+			size_t len = socket.receive_from(
+				boost::asio::buffer(RecvBuf, 1024), 
+				sender_endpoint, 
+				0, 
+				error
+			);
 
-	unsigned short Port = nServerPort;
+			if (error && error != boost::asio::error::message_size)
+			{
+				OutputDebugString(L"receive_from failed\n");
+				continue;
+			}
 
-	char RecvBuf[1024];
-	int BufLen = 1024;
+			wprintf(L"Receiving datagrams...\n");
 
-	struct sockaddr_in SenderAddr;
-	int SenderAddrSize = sizeof(SenderAddr);
+			////////////////Package//////////////////////
+			//we represent the data with floats in the app, so let's convert now and save network traffic
+			const int total = 38;
+			float floatArray[total];
 
-	//-----------------------------------------------
-	// Initialize Winsock
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != NO_ERROR) {
-		OutputDebugString(L"WSAStartup failed with error %d\n");
-		return 1;
-	}
-	//-----------------------------------------------
-	// Create a receiver socket to receive datagrams
-	RecvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (RecvSocket == INVALID_SOCKET) {
-		OutputDebugString(L"socket failed with error %d\n");
-		return 1;
-	}
-	//-----------------------------------------------
-	// Bind the socket to any address and the specified port.
+			//read memory only when requested - could be refactored in to the getters
+			//HANDLE hProcess = GetIL2Handle();
+			//LPVOID codeCaveAddress = GetCodeCaveAddress();
+			ReadPlaneType();
+			ReadCockpitInstruments();
+			ReadAltimeter();
 
-	RecvAddr.sin_family = AF_INET;
-	RecvAddr.sin_port = htons(Port);
-	RecvAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+			ReadTurnCoordinatorBall();
+			ReadManifolds();
+			ReadEngineModification();
+			//water temps read in water temps class - TO DO, refactor for above
+			UpdateTurnNeedle();
+			UpdateWaterTempValues();
+			UpdateOilTempValues();
+			UpdateCylinderHeadTemps();
+			UpdateCarbMixTemps();
 
-	iResult = bind(RecvSocket, (SOCKADDR*)&RecvAddr, sizeof(RecvAddr));
-	if (iResult != 0) {
-		OutputDebugString(L"bind failed with error %d\n");
-		return 1;
-	}
 
-	while (true)
-	{
+			//packing different data types in to one char array for sending (serialisation)
+			//https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
+
+			//version
+			float programVersion = GetIL2DialsVersion();
+			//planeType
+			std::string planeType = GetPlaneType();
+
+			//send blanks if no game found/injected
+			if (GetInjected() == false)
+			{
+				planeType = "No Plane";
+
+				for (SIZE_T i = 0; i < total; i++)
+				{
+					floatArray[i] = 0;
+				}
+				floatArray[1] = 760;//mmhg default
+			}
+			else
+			{
+				//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
+				floatArray[0] = (float)(GetAltitude());
+				//mgh
+				floatArray[1] = (float)(GetMMHg());
+				//airspeed
+				floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+				//heading
+				floatArray[3] = (float)(GetHeading());
+				//Pitch
+				floatArray[4] = (float)(GetPitch());
+				//Roll
+				floatArray[5] = (float)(GetRoll());
+				//vertical speed 
+				floatArray[6] = (float)(GetVSI());
+				//ball
+				floatArray[7] = (float)(GetTurnAndBankBall());
+				//bank needle
+				floatArray[8] = (float)(GetTurnAndBankNeedle());
+				//rpm
+				for (SIZE_T i = 0; i < 4; i++)//4 engines max
+				{
+					//get rpm know where the rpm struct starts
+					floatArray[9 + i] = (float)(GetRPM(i));
+				}
+				//manifold(s)
+				for (SIZE_T i = 0; i < 4; i++)//4 engines max
+				{
+					floatArray[13 + i] = (float)(GetManifold(i));
+				}
+				//engine mod
+				floatArray[17] = (float)(GetEngineModification());
+
+				//water temp
+				for (SIZE_T i = 0; i < 4; i++)
+				{
+					floatArray[18 + i] = (float)(GetWaterTemp(i));
+				}
+				//oil temp out
+				for (SIZE_T i = 0; i < 4; i++)
+				{
+					floatArray[22 + i] = (float)(GetOilTempOut(i));
+				}
+				//oil temp In
+				for (SIZE_T i = 0; i < 4; i++)
+				{
+					floatArray[26 + i] = (float)(GetOilTempIn(i));
+				}
+				//cylinder head temp
+				for (SIZE_T i = 0; i < 4; i++)
+				{
+					floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
+				}
+				//carb mix temp
+				for (SIZE_T i = 0; i < 4; i++)
+				{
+					floatArray[34 + i] = (float)(GetCarbMixTemp(i));
+				}
+			}
+
+			// The buffer we will be writing bytes into
+			//make space for
+			//program version
+			//planetype string size
+			//planetype string data size
+			//float array containing instrument/dial values
+			//64 bit string
+			unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
+			// A pointer we will advance whenever we write data
+			unsigned char* p = outBuf;
+
+			//float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
+			//we know how big this float array will be so we don't need to send size
+			memcpy(p, (char*)floatArray, sizeof(floatArray));
+			p += sizeof(floatArray);//4btye float * array length
+
+			// Serialize "program version" into outBuf
+			//using uint32_t when serializing            
+			//copy float to uint32 safely
+			uint32_t fbits = 0;
+			memcpy(&fbits, &programVersion, sizeof(programVersion));
+			//copy to buffer
+			memcpy(p, &fbits, sizeof(fbits));
+			p += sizeof(fbits);
+
+			// Serialize "planeType string length" into outBuf
+			//SIZE_T to uint32
+			uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is SIZE_T and not the size of the data in the array
+			memcpy(p, &neX, sizeof(neX));
+			p += sizeof(neX);
+
+			//string data already in correct format - copy to buffer            
+			memcpy(p, planeType.data(), 64);
+			p += 64;
+
+			char* sendBuffer = (char*)outBuf;
+			int sendLength = sizeof(outBuf);
+
+			// send to client (sender is the client, it initiated the request)         
+			boost::system::error_code send_error;
+			socket.send_to(
+				boost::asio::buffer(sendBuffer, sendLength), 
+				sender_endpoint, 
+				0, 
+				send_error
+			);
+
+			if (send_error) {
+				OutputDebugString(L"send_to failed\n");
+			}
+		}
+
 		//-----------------------------------------------
-		// Call the recvfrom function to receive datagrams
-		// on the bound socket.
-		wprintf(L"Receiving datagrams...\n");
-		iResult = recvfrom(RecvSocket,
-			RecvBuf, BufLen, 0, (SOCKADDR*)&SenderAddr, &SenderAddrSize);
-		if (iResult == SOCKET_ERROR) {
-			OutputDebugString(L"recvfrom failed with error %d\n");
-		}
-
-		////////////////Package//////////////////////
-		//we represent the data with floats in the app, so let's convert now and save network traffic
-		const int total = 38;
-		float floatArray[total];
-
-		//read memory only when requested - could be refactored in to the getters
-		//HANDLE hProcess = GetIL2Handle();
-		//LPVOID codeCaveAddress = GetCodeCaveAddress();
-		ReadPlaneType();
-		ReadCockpitInstruments();
-		ReadAltimeter();
-
-		ReadTurnCoordinatorBall();
-		ReadManifolds();
-		ReadEngineModification();
-		//water temps read in water temps class - TO DO, refactor for above
-		UpdateTurnNeedle();
-		UpdateWaterTempValues();
-		UpdateOilTempValues();
-		UpdateCylinderHeadTemps();
-		UpdateCarbMixTemps();
-
-
-		//packing differecnt data types in to one char array for sending (serialisation)
-		//https://stackoverflow.com/questions/1703322/serialize-strings-ints-and-floats-to-character-arrays-for-networking-without-li
-
-		//version
-		float programVersion = GetIL2DialsVersion();
-		//planeType
-		std::string planeType = GetPlaneType();
-
-		//send blanks if no game found/injected
-		if (GetInjected() == false)
-		{
-			planeType = "No Plane";
-
-			for (SIZE_T i = 0; i < total; i++)
-			{
-				floatArray[i] = 0;
-			}
-			floatArray[1] = 760;//mmhg default
-		}
-		else
-		{
-			//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-			floatArray[0] = (float)(GetAltitude());
-			//mgh
-			floatArray[1] = (float)(GetMMHg());
-			//airspeed
-			floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
-			//heading
-			floatArray[3] = (float)(GetHeading());
-			//Pitch
-			floatArray[4] = (float)(GetPitch());
-			//Roll
-			floatArray[5] = (float)(GetRoll());
-			//vertical speed 
-			floatArray[6] = (float)(GetVSI());
-			//ball
-			floatArray[7] = (float)(GetTurnAndBankBall());
-			//bank needle
-			floatArray[8] = (float)(GetTurnAndBankNeedle());
-			//rpm
-			for (SIZE_T i = 0; i < 4; i++)//4 engines max
-			{
-				//get rpm know where the rpm struct starts
-				floatArray[9 + i] = (float)(GetRPM(i));
-			}
-			//manifold(s)
-			for (SIZE_T i = 0; i < 4; i++)//4 engines max
-			{
-				floatArray[13 + i] = (float)(GetManifold(i));
-			}
-			//engine mod
-			floatArray[17] = (float)(GetEngineModification());
-
-			//water temp
-			for (SIZE_T i = 0; i < 4; i++)
-			{
-				floatArray[18 + i] = (float)(GetWaterTemp(i));
-			}
-			//oil temp out
-			for (SIZE_T i = 0; i < 4; i++)
-			{
-				floatArray[22 + i] = (float)(GetOilTempOut(i));
-			}
-			//oil temp In
-			for (SIZE_T i = 0; i < 4; i++)
-			{
-				floatArray[26 + i] = (float)(GetOilTempIn(i));
-			}
-			//cylinder head temp
-			for (SIZE_T i = 0; i < 4; i++)
-			{
-				floatArray[30 + i] = (float)(GetCylinderHeadTemp(i));
-			}
-			//carb mix temp
-			for (SIZE_T i = 0; i < 4; i++)
-			{
-				floatArray[34 + i] = (float)(GetCarbMixTemp(i));
-			}
-		}
-
-		// The buffer we will be writing bytes into
-		//make space for
-		//program version
-		//planetype string size
-		//planetype string data size
-		//float array containing instrument/dial values
-		//64 bit string
-		unsigned char outBuf[sizeof(uint32_t) + sizeof(uint32_t) + 64 + sizeof(floatArray)];
-		// A pointer we will advance whenever we write data
-		unsigned char* p = outBuf;
-
-		//float array to buffer - NOTE THESE MUST STAY THE FIRST POSITON IN THE STREAM - 3RD PARTY DEPENDENCIES
-		//we know how big this float array will be so we don't need to send size
-		memcpy(p, (char*)floatArray, sizeof(floatArray));
-		p += sizeof(floatArray);//4btye float * array length
-
-		// Serialize "program version" into outBuf
-		//using uint32_t when serializing            
-		//copy float to uint32 safely
-		uint32_t fbits = 0;
-		memcpy(&fbits, &programVersion, sizeof(programVersion));
-		//copy to buffer
-		memcpy(p, &fbits, sizeof(fbits));
-		p += sizeof(fbits);
-
-		// Serialize "planeType string length" into outBuf
-		//SIZE_T to uint32
-		uint32_t neX = static_cast<unsigned int>(planeType.size());//note it is SIZE_T and not the size of the data in the array
-		memcpy(p, &neX, sizeof(neX));
-		p += sizeof(neX);
-
-		//string data already in correct format - copy to buffer            
-		memcpy(p, planeType.data(), 64);
-		p += 64;
-
-		char* sendBuffer = (char*)outBuf;
-		int sendLength = sizeof(outBuf);
-
-		// send to client (//sender is the client,it initiated         
-		if (sendto(RecvSocket, sendBuffer, sendLength, 0, (struct sockaddr*)&SenderAddr, sizeof(SenderAddr)) < 0) {
-			perror("sending error...\n");
-			closesocket(RecvSocket);
-			exit(-1);
-		}
+		// Close the socket when finished receiving datagrams
+		OutputDebugString(L"Finished receiving. Closing socket.\n");
+		socket.close();
 	}
-
-	//-----------------------------------------------
-	// Close the socket when finished receiving datagrams
-	OutputDebugString(L"Finished receiving. Closing socket.\n");
-	iResult = closesocket(RecvSocket);
-	if (iResult == SOCKET_ERROR) {
-		OutputDebugString(L"closesocket failed with error %d\n");
+	catch (std::exception& e) {
+		std::cerr << "Exception in serverListen: " << e.what() << std::endl;
+		OutputDebugString(L"serverListen failed with exception\n");
 		return 1;
 	}
 
 	//-----------------------------------------------
 	// Clean up and exit.
 	OutputDebugString(L"Exiting.\n");
-	WSACleanup();
 	return 0;
 
 }
 
-sockaddr_in CreateServerSocketAddress(bool localIP)
+boost::asio::ip::address CreateServerAddress(bool localIP)
 {
-	// setup address structure
-	sockaddr_in serverSocketAddress;
-	//clear
-	memset((char*)&serverSocketAddress, 0, sizeof(serverSocketAddress));
-
-	//get local ipdaddress
+	// Get local IP address
+	// Note: This helper function is currently not used by serverListen(),
+	// which binds to all interfaces (INADDR_ANY) to accept connections from any network adapter.
 	std::vector<std::string> ipv4Addreses = GetIPAddresses(localIP);
 	if (ipv4Addreses.size() == 0)
 	{
-		//returne mpty
-		return serverSocketAddress;
+		// Return "any address" (0.0.0.0) as fallback - binds to all interfaces
+		OutputDebugString(L"Warning: No IP addresses found, using any address (0.0.0.0)\n");
+		return boost::asio::ip::address_v4::any();
 	}
 
 	std::string ipAddress = ipv4Addreses[0];
-
-	const std::wstring wideIPstr = std::wstring(ipAddress.begin(), ipAddress.end());
-	const wchar_t* c0 = wideIPstr.c_str();
-	PCWSTR serverIP = (PCWSTR)c0;
-
-
-	serverSocketAddress.sin_family = AF_INET;
-	serverSocketAddress.sin_port = htons(nServerPort);
-
-	//convert to inet format and save in serversocketaddress    
-	InetPton(AF_INET, serverIP, &serverSocketAddress.sin_addr.s_addr);
-
-	///
-
-	return serverSocketAddress;
-
-}
-
-SOCKET CreateClientSocket()
-{
-
-	SOCKET client_socket;
-	if ((client_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR) // <<< UDP socket
-	{
-		return 0;
+	
+	// Convert string to Boost.Asio address
+	boost::system::error_code ec;
+	auto addr = boost::asio::ip::address::from_string(ipAddress, ec);
+	
+	if (ec) {
+		// Return "any address" on parse error
+		OutputDebugString(L"Warning: Failed to parse IP address, using any address (0.0.0.0)\n");
+		return boost::asio::ip::address_v4::any();
 	}
-
-	return client_socket;
-}
-
-int InitialiseWinsockUDP()
-{
-	WSADATA ws;
-	if (WSAStartup(MAKEWORD(2, 2), &ws) != 0)
-	{
-		return 0;
-	}
-
-	return 1;
+	
+	return addr;
 }
 
 int StartServerUDP(System::ComponentModel::BackgroundWorker^ worker, bool localIP)
 {
+	// Note: 'worker' and 'localIP' parameters are kept for backward compatibility with the UI layer
+	// but are currently unused. The server binds to all network interfaces (INADDR_ANY).
+	// The worker parameter was likely intended for progress reporting, and localIP for binding
+	// to a specific interface, but these features are not currently implemented.
+	(void)worker;  // Suppress unused parameter warning
+	(void)localIP; // Suppress unused parameter warning
+	
 	serverListen();
 
 	return 1;

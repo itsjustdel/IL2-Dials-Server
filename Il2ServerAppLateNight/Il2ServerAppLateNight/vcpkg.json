@@ -1,0 +1,7 @@
+{
+  "name": "il2-dials-server",
+  "version-string": "0.62",
+  "dependencies": [
+    "boost-asio"
+  ]
+}

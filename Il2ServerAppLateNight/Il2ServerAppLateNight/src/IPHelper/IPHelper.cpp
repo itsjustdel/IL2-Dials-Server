@@ -1,15 +1,13 @@
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
+#define _WIN32_WINNT 0x0601
 #endif
 
 #include <stdio.h>
-#include <winsock2.h>
+#include <boost/asio.hpp>
 #include <iphlpapi.h>
-#include <ws2tcpip.h>
 #include <vector>
 #include <string>
 
-#pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "iphlpapi.lib")
 
 void print_adapter(PIP_ADAPTER_ADDRESSES aa)
@@ -32,18 +30,9 @@ void print_addr(PIP_ADAPTER_UNICAST_ADDRESS ua)
 	printf("%s\n", buf);
 }
 
-std::vector<std::string> IpAddresses()//this canr eturn more than 1, not using
+std::vector<std::string> IpAddresses()//this can return more than 1, not using
 {
-
-
 	std::vector<std::string> ipv4Addresses;
-
-
-	WSAData d;
-	if (WSAStartup(MAKEWORD(2, 2), &d) != 0) {
-		return ipv4Addresses;
-	}
-
 
 	DWORD rv, size;
 	PIP_ADAPTER_ADDRESSES adapter_addresses, aa;
@@ -92,59 +81,56 @@ std::vector<std::string> IpAddresses()//this canr eturn more than 1, not using
 
 	free(adapter_addresses);
 
-	WSACleanup();
 	return ipv4Addresses;
 }
 
 std::vector<std::string> GetMyIPAddress()
 {
 	std::vector<std::string> ipv4Addresses;
-	WSADATA WSAData;
 
-	// Initialize winsock dll
-	if (::WSAStartup(MAKEWORD(1, 0), &WSAData))
-	{
-		//AfxMessageBox(_T("Failed to find the WinSock DLL"));
-		return ipv4Addresses;
+	try {
+		// Use Boost.Asio to get the host name and resolve it
+		boost::asio::io_context io_context;
+		
+		// Get hostname
+		char hostname[256];
+		if (gethostname(hostname, sizeof(hostname)) != 0) {
+			return ipv4Addresses;
+		}
+		
+		// Resolve hostname to get IP addresses
+		boost::asio::ip::tcp::resolver resolver(io_context);
+		boost::asio::ip::tcp::resolver::query query(hostname, "");
+		boost::system::error_code ec;
+		
+		auto results = resolver.resolve(query, ec);
+		
+		if (ec) {
+			return ipv4Addresses;
+		}
+		
+		// Extract IPv4 addresses
+		for (const auto& entry : results) {
+			auto addr = entry.endpoint().address();
+			if (addr.is_v4() && !addr.is_loopback()) {
+				ipv4Addresses.push_back(addr.to_string());
+			}
+		}
+		
+		// If no non-loopback address found, add the first IPv4 address
+		if (ipv4Addresses.empty()) {
+			for (const auto& entry : results) {
+				auto addr = entry.endpoint().address();
+				if (addr.is_v4()) {
+					ipv4Addresses.push_back(addr.to_string());
+					break;
+				}
+			}
+		}
 	}
-
-	char szHostName[128] = "";
-
-	//get the standard host name of the machine
-	if (::gethostname(szHostName, sizeof(szHostName)))
-	{
-		//AfxMessageBox(_T("Failed to get the host name"));
+	catch (std::exception& e) {
+		// Return empty vector on error
 	}
-
-
-	struct sockaddr_in SocketAddress;
-	struct hostent* pHost = 0;
-
-	// Get local IP addresses
-	pHost = ::gethostbyname(szHostName);
-
-	if (!pHost)
-	{
-		//AfxMessageBox(_T("Failed to get the host information."));
-		return ipv4Addresses;
-	}
-
-	char aszIPAddresses[10][16]; // maximum of ten IP addresses
-
-	for (int nCount = 0; ((pHost->h_addr_list[nCount]) && (nCount < 10)); ++nCount)
-	{
-		memcpy(&SocketAddress.sin_addr, pHost->h_addr_list[nCount], pHost->h_length);
-		strcpy(aszIPAddresses[nCount], inet_ntoa(SocketAddress.sin_addr));
-	}
-
-	//convert to readable format with inte-ntop (specialised function for this purpose)
-	char str[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(SocketAddress.sin_addr), str, INET_ADDRSTRLEN);
-	
-	ipv4Addresses.push_back(str);
-
-	// Cleanup
-	WSACleanup();
 
 	return ipv4Addresses;
 }
