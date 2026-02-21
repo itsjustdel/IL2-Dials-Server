@@ -3,6 +3,8 @@
 #include "src/Main/Main.h";
 #include <chrono>;
 #include <string>;
+#include "src/Config/Config.h"
+
 
 namespace Il2Dials
 {

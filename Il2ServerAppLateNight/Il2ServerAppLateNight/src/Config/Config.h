@@ -21,6 +21,9 @@ public:
 
 private:
     static std::string GetConfigPath();
+    static bool LoadConfigFromFile(const std::string& filePath);
+
     static std::unordered_map<std::string, std::unordered_map<std::string, DialScaling>> dialVariants;
     static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> planes;
+
 };
