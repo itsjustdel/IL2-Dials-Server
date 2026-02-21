@@ -26,7 +26,7 @@ std::vector<float> GetLimitsWaterTemp(std::string name)
 
 	// 0 - 125 B
 	// yak 1 s69, yak 7b s36, yak 9s1, yak9t s1
-	if (IsYak169(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
+	if (IsYak123(name) || IsYak169(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name) || IsYak3s9(name) || IsLagg3s4(name))
 	{
 		return std::vector<float> { 0, 125 };
 	}
@@ -52,7 +52,7 @@ std::vector<float> GetLimitsWaterTemp(std::string name)
 	// 
 	// Note: IAR ?
 
-	if (IsJu87D3(name) || IsBf109E7(name) || IsBf109G14(name) || IsME410A1(name))
+	if (IsJu87D3(name) || IsJu87D5(name) || IsBf109E4(name) || IsBf109E7(name) || IsBf109G14(name) || IsME410A1(name))
 	{
 		// A
 		return std::vector<float> { 0, 130};

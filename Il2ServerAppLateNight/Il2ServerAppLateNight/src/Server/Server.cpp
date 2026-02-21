@@ -12,6 +12,7 @@
 
 #include "../Main/Main.h"
 #include "../IPHelper/IPHelper.h"
+#include "../RUPlanes/RUPlanes.h"
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp//CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
@@ -192,6 +193,19 @@ int serverListen() {
 			floatArray[1] = (float)(GetMMHg());
 			//airspeed
 			floatArray[2] = (float)(GetAirspeedFromCockpitStruct());
+			if (IsI153(planeType))
+			{
+				// I-153 reports ~0.0-0.55 normalized where we need a 0-80 style output for the existing client dial
+				floatArray[2] = floatArray[2] * (80.0f / 55.0f);
+				if (floatArray[2] > 0.8f)
+				{
+					floatArray[2] = 0.8f;
+				}
+				if (floatArray[2] < 0.0f)
+				{
+					floatArray[2] = 0.0f;
+				}
+			}
 			//heading
 			floatArray[3] = (float)(GetHeading());
 			//Pitch

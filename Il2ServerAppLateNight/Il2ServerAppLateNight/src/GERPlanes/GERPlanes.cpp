@@ -3,6 +3,7 @@
 #include <unordered_set>
 
 const std::unordered_set<std::string> germanPlaneNames = {
+	"Bf 109 E-4",
 	"Bf 109 E-7",
 	"Bf 109 F-2",
 	"Bf 109 F-4",
@@ -10,7 +11,7 @@ const std::unordered_set<std::string> germanPlaneNames = {
 	"Bf 109 G-4",
 	"Bf 109 G-6",
 	"Bf 109 G-6 Late",
-	"Bf 109 G-6AS"
+	"Bf 109 G-6AS",
 	"Bf 109 G-14",
 	"Bf 109 K-4",
 
@@ -18,6 +19,7 @@ const std::unordered_set<std::string> germanPlaneNames = {
 	"Bf-110 G2",
 
 	"Ju-87 D3",
+	"Ju-87 D5",
 	"Ju-88 A4",
 	"Ju-88 C6",
 	"Ju-52/3m g4e",
@@ -50,6 +52,11 @@ bool IsGERPlane(const std::string& name)
 bool IsBf109E7(const std::string& name)
 {
 	return (name == "Bf 109 E-7");
+}
+
+bool IsBf109E4(const std::string& name)
+{
+	return (name == "Bf 109 E-4");
 }
 
 bool IsBf109F2(const std::string& name)
@@ -115,6 +122,11 @@ bool IsBf110G2(const std::string& name)
 bool IsJu87D3(const std::string& name)
 {
 	return (name == "Ju-87 D3");
+}
+
+bool IsJu87D5(const std::string& name)
+{
+	return (name == "Ju-87 D5");
 }
 
 bool IsJu88A4(const std::string& name)

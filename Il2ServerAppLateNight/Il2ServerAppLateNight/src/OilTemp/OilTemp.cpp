@@ -27,7 +27,7 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 	if (IsMig3(name)) {
 		return isOutOil ? std::vector<float> { 0, 125 } : std::vector<float>{ 0, 120 };
 	}
-	else if (IsLagg3s29(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name) || IsI16(name) || IsLa5s8(name) || IsLa5fs38(name) || IsLa5fns2(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) || IsYak9(name) || IsYak9T(name))
+	else if (IsLagg3s29(name) || IsLagg3s4(name) || IsIL2(name) || IsPe2s35(name) || IsLi2(name) || IsI16(name) || IsI153(name) || IsLa5s8(name) || IsLa5fs38(name) || IsLa5fns2(name) || IsLa7s1(name) || IsYak123(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) || IsYak3s9(name) || IsYak9(name) || IsYak9T(name))
 	{
 		return std::vector<float> { 0, 125 };
 	}
@@ -49,7 +49,7 @@ std::vector<float> GetLimitsOil(std::string name, boolean isOutOil)
 		return std::vector<float> { 0, 125}; //in game needle is a bit off for the fw 190s dial is 0-120 in game
 	}
 	// A C
-	else if (IsBf109E7(name) || IsBf109K4(name) || IsJu87D3(name) || IsME410A1(name))
+	else if (IsBf109E4(name) || IsBf109E7(name) || IsBf109K4(name) || IsJu87D3(name) || IsJu87D5(name) || IsME410A1(name))
 	{
 		return std::vector<float> { 0, 130 };
 	}

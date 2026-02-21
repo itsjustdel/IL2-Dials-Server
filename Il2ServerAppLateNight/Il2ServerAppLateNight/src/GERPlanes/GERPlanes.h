@@ -2,6 +2,7 @@
 #include <string>
 
 bool IsGERPlane(const std::string& name);
+bool IsBf109E4(const std::string& name);
 bool IsBf109E7(const std::string& name);
 bool IsBf109F2(const std::string& name);
 bool IsBf109F4(const std::string& name);
@@ -16,6 +17,7 @@ bool IsBf109K4(const std::string& name);
 bool IsBf110E2(const std::string& name);
 bool IsBf110G2(const std::string& name);
 bool IsJu87D3(const std::string& name);
+bool IsJu87D5(const std::string& name);
 bool IsJu88A4(const std::string& name);
 bool IsJu88C6(const std::string& name);
 bool IsJu523mG4E(const std::string& name);

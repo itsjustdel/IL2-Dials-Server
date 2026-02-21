@@ -13,8 +13,8 @@ char originalLineManifold[8];
 std::vector<float> GetManifoldLimits(std::string name)
 {
 	// RU
-	if (IsYak9(name) || IsYak169(name) || IsYaks127(name) || IsYak7b36(name) ||
-		IsLagg3s29(name) || IsIL2(name) || IsLa5s8(name) || IsLa5fs38(name) || IsI16(name) || IsMig3(name)
+	if (IsYak9(name) || IsYak9T(name) || IsYak169(name) || IsYak123(name) || IsYaks127(name) || IsYak7b36(name) || IsYak3s9(name) ||
+		IsLagg3s29(name) || IsLagg3s4(name) || IsIL2(name) || IsLa5s8(name) || IsLa5fs38(name) || IsLa5fns2(name) || IsLa7s1(name) || IsI16(name) || IsI153(name) || IsMig3(name)
 		|| IsLa5fns2(name) || IsLi2(name))
 	{
 		// A // B
@@ -27,7 +27,7 @@ std::vector<float> GetManifoldLimits(std::string name)
 	}
 
 	// GER
-	if (IsBf109F4(name) || IsJu87D3(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E7(name) ||
+	if (IsBf109F4(name) || IsJu87D3(name) || IsJu87D5(name) || IsBf109G2(name) || IsFW190A3(name) || IsBf109E4(name) || IsBf109E7(name) ||
 		IsBf109F2(name) || IsBf109G4(name) || IsFW190A5(name) || IsFW190A8(name) || IsFW190A6(name))
 	{
 		// A
