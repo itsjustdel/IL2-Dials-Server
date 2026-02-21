@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -156,6 +156,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Altimeter\Altimeter.h" />
     <ClInclude Include="src\CarbMixTemp\CarbMixTemp.h" />
+    <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\CylinderTemp\CylinderHead.h" />
     <ClInclude Include="src\DynamicBody\DynamicBody.h" />
     <ClInclude Include="src\EngineMod\EngineMod.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="src\Altimeter\Altimeter.cpp" />
     <ClCompile Include="src\CarbMixTemp\CarbMixTemp.cpp" />
     <ClCompile Include="src\CarbMixTemp\PlaneSelector.cpp" />
+    <ClCompile Include="src\Config\Config.cpp" />
     <ClCompile Include="src\CylinderTemp\CylinderHead.cpp" />
     <ClCompile Include="src\DynamicBody\DynamicBody.cpp" />
     <ClCompile Include="src\EngineMod\EngineMod.cpp" />

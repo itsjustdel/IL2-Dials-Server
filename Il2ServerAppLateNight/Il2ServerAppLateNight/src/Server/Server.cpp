@@ -15,6 +15,7 @@
 #include "../OilTemp/OilTemp.h"
 #include "../CylinderTemp//CylinderHead.h"
 #include "../CarbMixTemp/CarbMixTemp.h"
+#include "../Config/Config.h"
 
 using namespace System::Diagnostics;
 
@@ -163,6 +164,13 @@ int serverListen() {
 		//planeType
 		std::string planeType = GetPlaneType();
 
+		// Load config if not loaded
+		static bool configLoaded = false;
+		if (!configLoaded) {
+			Config::LoadConfig();
+			configLoaded = true;
+		}
+
 		//send blanks if no game found/injected
 		if (GetInjected() == false)
 		{
@@ -177,7 +185,9 @@ int serverListen() {
 		else
 		{
 			//if we have found the altimeter struct we can read from here, this allows us to get the needle position as it moves so we don't need to calculate that ourselves
-			floatArray[0] = (float)(GetAltitude());
+			std::string altVariant = Config::GetPlaneDialVariant(planeType, "altitude");
+			DialScaling altScale = Config::GetDialScaling("altitude", altVariant);
+			floatArray[0] = (float)(GetAltitude() * altScale.max);
 			//mgh
 			floatArray[1] = (float)(GetMMHg());
 			//airspeed

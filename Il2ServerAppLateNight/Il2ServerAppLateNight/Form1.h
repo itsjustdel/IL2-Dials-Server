@@ -3,6 +3,8 @@
 #include "src/Main/Main.h";
 #include <chrono>;
 #include <string>;
+#include "src/Config/Config.h"
+
 
 namespace Il2Dials
 {
@@ -13,6 +15,8 @@ namespace Il2Dials
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::Net;
+	using namespace System::IO;
 	using namespace System::Resources;
 	
 
@@ -185,6 +189,9 @@ private: System::ComponentModel::BackgroundWorker^ serverWorkerUDP;
 	private: System::Windows::Forms::TextBox^ portTextBox;
 
 	private: System::Windows::Forms::Label^ portLabel;
+private: System::Windows::Forms::Label^ planeNameLabel;
+private: System::Windows::Forms::TextBox^ planeNameBox;
+private: System::Windows::Forms::Button^ updateConfigButton;
 private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 
@@ -218,6 +225,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->portTextBox = (gcnew System::Windows::Forms::TextBox());
 			this->portLabel = (gcnew System::Windows::Forms::Label());
+			this->planeNameLabel = (gcnew System::Windows::Forms::Label());
+			this->updateConfigButton = (gcnew System::Windows::Forms::Button());
 			this->DebugTextBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 			this->LocalClientCheckBox = (gcnew System::Windows::Forms::CheckBox());
@@ -225,6 +234,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->DebugTextBox2 = (gcnew System::Windows::Forms::RichTextBox());
 			this->serverWorkerTCP = (gcnew System::ComponentModel::BackgroundWorker());
+			this->planeNameBox = (gcnew System::Windows::Forms::TextBox());
 			this->contextMenuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -370,6 +380,35 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->portLabel->Text = L"Port:";
 			this->portLabel->Visible = false;
 			// 
+			// planeNameLabel
+			// 
+			this->planeNameLabel->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->planeNameLabel->AutoSize = true;
+			this->planeNameLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->planeNameLabel->ForeColor = System::Drawing::Color::CadetBlue;
+			this->planeNameLabel->Location = System::Drawing::Point(26, 235);
+			this->planeNameLabel->Margin = System::Windows::Forms::Padding(0);
+			this->planeNameLabel->Name = L"planeNameLabel";
+			this->planeNameLabel->Size = System::Drawing::Size(40, 13);
+			this->planeNameLabel->TabIndex = 9;
+			this->planeNameLabel->Text = L"Plane: ";
+			this->planeNameLabel->Visible = false;
+			// 
+			// updateConfigButton
+			// 
+			this->updateConfigButton->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->updateConfigButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->updateConfigButton->ForeColor = System::Drawing::Color::CadetBlue;
+			this->updateConfigButton->Location = System::Drawing::Point(47, 330);
+			this->updateConfigButton->Name = L"updateConfigButton";
+			this->updateConfigButton->Size = System::Drawing::Size(100, 25);
+			this->updateConfigButton->TabIndex = 10;
+			this->updateConfigButton->Text = L"Update Config";
+			this->updateConfigButton->Visible = false;
+			this->updateConfigButton->Click += gcnew System::EventHandler(this, &Form1::updateConfigButton_Click);
+			// 
 			// DebugTextBox
 			// 
 			this->DebugTextBox->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
@@ -382,7 +421,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->DebugTextBox->Location = System::Drawing::Point(29, 212);
 			this->DebugTextBox->Name = L"DebugTextBox";
 			this->DebugTextBox->ReadOnly = true;
-			this->DebugTextBox->Size = System::Drawing::Size(167, 36);
+			this->DebugTextBox->Size = System::Drawing::Size(167, 20);
 			this->DebugTextBox->TabIndex = 9;
 			this->DebugTextBox->Text = L"Initialising...";
 			this->DebugTextBox->Visible = false;
@@ -419,7 +458,7 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->versionBox->ReadOnly = true;
 			this->versionBox->Size = System::Drawing::Size(35, 21);
 			this->versionBox->TabIndex = 11;
-			this->versionBox->Text = L"v0.67";
+			this->versionBox->Text = L"v0.7";
 			this->versionBox->Visible = false;
 			this->versionBox->TextChanged += gcnew System::EventHandler(this, &Form1::versionBox_TextChanged);
 			// 
@@ -447,6 +486,23 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->serverWorkerTCP->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &Form1::ServerWorkerTCP_DoWork);
 			this->serverWorkerTCP->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &Form1::ServerWorkerTCP_ProgressChanged);
 			// 
+			// planeNameBox
+			// 
+			this->planeNameBox->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->planeNameBox->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(21)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
+				static_cast<System::Int32>(static_cast<System::Byte>(24)));
+			this->planeNameBox->BorderStyle = System::Windows::Forms::BorderStyle::None;
+			this->planeNameBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->planeNameBox->ForeColor = System::Drawing::Color::CadetBlue;
+			this->planeNameBox->Location = System::Drawing::Point(29, 235);
+			this->planeNameBox->Name = L"planeNameBox";
+			this->planeNameBox->ReadOnly = true;
+			this->planeNameBox->Size = System::Drawing::Size(167, 13);
+			this->planeNameBox->TabIndex = 9;
+			this->planeNameBox->Text = L"Plane: ";
+			this->planeNameBox->Visible = false;
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -459,6 +515,8 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->Controls->Add(this->LocalClientCheckBox);
 			this->Controls->Add(this->DebugTextBox);
 			this->Controls->Add(this->portLabel);
+			this->Controls->Add(this->planeNameBox);
+			this->Controls->Add(this->updateConfigButton);
 			this->Controls->Add(this->portTextBox);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->label4);
@@ -467,11 +525,13 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			this->Controls->Add(this->label1);
 			this->Cursor = System::Windows::Forms::Cursors::Default;
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+			this->KeyPreview = true;
 			this->MaximizeBox = false;
 			this->Name = L"Form1";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 			this->Text = L"Il-2 Dials";
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &Form1::Form1_FormClosing);
+			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::Form1_KeyDown);
 			this->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseDown);
 			this->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseMove);
 			this->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::Form1_MouseUp);
@@ -545,6 +605,11 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 			DebugTextBox->Text = "Waiting to safely restart...";
 
 			return;
+		}
+
+		// Update plane name box if visible
+		if (planeNameBox != nullptr && planeNameBox->Visible) {
+			planeNameBox->Text = "Plane: " + gcnew System::String(GetPlaneType().c_str());
 		}
 
 		
@@ -728,6 +793,12 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 		DebugTextBox->Visible = !DebugTextBox->Visible;
 		//LocalClientCheckBox->Visible = !LocalClientCheckBox->Visible; //don't need anymore?
 		versionBox->Visible = !versionBox->Visible;
+		// toggle the selectable plane name textbox so users can copy the plane name
+		planeNameBox->Visible = !planeNameBox->Visible;
+		updateConfigButton->Visible = !updateConfigButton->Visible;
+		if (planeNameBox->Visible) {
+			planeNameBox->Text = "Plane: " + gcnew System::String(GetPlaneType().c_str());
+		}
 	}
 
 
@@ -755,6 +826,19 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 
 		}
 
+	}
+
+	private: System::Void Form1_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e)
+	{
+		// F2 will focus and select the DebugTextBox so it can be highlighted without the mouse
+		if (e->KeyCode == Keys::F2)
+		{
+			if (DebugTextBox->Visible)
+			{
+				DebugTextBox->Focus();
+				DebugTextBox->SelectAll();
+			}
+		}
 	}
 
 
@@ -856,6 +940,27 @@ private: System::Windows::Forms::RichTextBox^ DebugTextBox;
 	}
 
 private: System::Void versionBox_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void updateConfigButton_Click(System::Object^ sender, System::EventArgs^ e) {
+	try {
+		System::Net::WebClient^ client = gcnew System::Net::WebClient();
+		System::String^ url = "https://github.com/itsjustdel/IL2-Dials-Server/releases/download/test-config-file/plane-config.json";
+		System::String^ json = client->DownloadString(url);
+		
+		// Save to appdata
+		System::String^ appDataPath = System::Environment::GetFolderPath(System::Environment::SpecialFolder::LocalApplicationData);
+		System::String^ configDir = System::IO::Path::Combine(appDataPath, "IL2Dials");
+		System::IO::Directory::CreateDirectory(configDir);
+		System::String^ configPath = System::IO::Path::Combine(configDir, "plane-config.json");
+		System::IO::File::WriteAllText(configPath, json);
+		
+		// Reload config
+		Config::LoadConfig();
+		
+		System::Windows::Forms::MessageBox::Show("Config updated successfully!", "Update", System::Windows::Forms::MessageBoxButtons::OK, System::Windows::Forms::MessageBoxIcon::Information);
+	} catch (System::Exception^ ex) {
+		System::Windows::Forms::MessageBox::Show("Failed to update config: " + ex->Message, "Error", System::Windows::Forms::MessageBoxButtons::OK, System::Windows::Forms::MessageBoxIcon::Error);
+	}
 }
 };
 
